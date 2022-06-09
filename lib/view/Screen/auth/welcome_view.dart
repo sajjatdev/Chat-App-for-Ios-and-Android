@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutterfire_ui/auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sizer/sizer.dart';
 
@@ -88,34 +89,6 @@ class _welcomeState extends State<welcome> {
                   Navigator.of(context).pushNamed('/auth_phone');
                 },
                 Texts: "LOGIN WITH PHONE",
-                widths: 80,
-              ),
-              SizedBox(
-                height: 2.5.h,
-                child: Text("With"),
-              ),
-              Button(
-                buttonenable: true,
-                // ignore: void_checks
-                onpress: () async {
-                  final GoogleSignInAccount googleUser =
-                      await GoogleSignIn().signIn();
-
-                  final GoogleSignInAuthentication googleAuth =
-                      await googleUser.authentication;
-
-                  final credential = GoogleAuthProvider.credential(
-                    accessToken: googleAuth.accessToken,
-                    idToken: googleAuth.idToken,
-                  );
-
-                  await FirebaseAuth.instance
-                      .signInWithCredential(credential)
-                      .then((value) {
-                    Navigator.of(context).pushNamed('/profile_Setup');
-                  });
-                },
-                Texts: "LOGIN WITH GOOGLE",
                 widths: 80,
               ),
               SizedBox(

@@ -15,6 +15,8 @@ class Routers {
         return Home_view.route();
       case welcome.routeName:
         return welcome.route();
+      case Feed_Home.routeName:
+        return Feed_Home.route();
       case profile_setup.routeName:
         return profile_setup.route();
       case Loading_view.routeName:

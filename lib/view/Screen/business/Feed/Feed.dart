@@ -89,136 +89,215 @@ class _FeedState extends State<Feed> {
                                 Map<String, dynamic> postdata =
                                     snapshot.data.docs[index].data();
                                 final post_id = snapshot.data.docs[index].id;
-                                return Column(
-                                  children: [
-                                    StreamBuilder<
-                                            DocumentSnapshot<
-                                                Map<String, dynamic>>>(
-                                        stream: FirebaseFirestore.instance
-                                            .collection('user')
-                                            .doc(postdata['author_ID'])
-                                            .snapshots(),
-                                        builder: (context,
-                                            AsyncSnapshot<
-                                                    DocumentSnapshot<
-                                                        Map<String, dynamic>>>
-                                                snapshot) {
-                                          if (snapshot.hasData) {
-                                            Map<String, dynamic> profiledata =
-                                                snapshot.data.data();
-                                            return ListTile(
-                                              trailing: IconButton(
-                                                onPressed: () {
-                                                  showModalBottomSheet(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return Wrap(
-                                                          children: [
-                                                            ListTile(
-                                                              onTap: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .push(
-                                                                        MaterialPageRoute(
-                                                                  builder:
-                                                                      (context) =>
-                                                                          Edit_post(
-                                                                    image: postdata[
-                                                                        'Image'],
-                                                                    room_id: widget
-                                                                        .RoomId,
-                                                                    post_id:
-                                                                        post_id,
-                                                                    title: postdata[
-                                                                        'title'],
-                                                                  ),
-                                                                ));
-                                                              },
-                                                              leading: const Icon(
-                                                                  Icons
-                                                                      .edit_note),
-                                                              title: const Text(
-                                                                  'Edit Post'),
-                                                            ),
-                                                            ListTile(
-                                                              leading: Icon(Icons
-                                                                  .hide_image),
-                                                              title: Text(
-                                                                  'Hide Post'),
-                                                            ),
-                                                            ListTile(
-                                                              leading: Icon(
-                                                                  Icons.delete),
-                                                              title: Text(
-                                                                  'Delete Post'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      });
-                                                },
-                                                icon: Icon(Icons.more_vert),
-                                              ),
-                                              leading: CircleAvatar(
-                                                backgroundImage: NetworkImage(
-                                                    profiledata['imageUrl']),
-                                              ),
-                                              title: Text(
-                                                  "${profiledata['first_name']} ${profiledata['last_name']}"),
-                                              subtitle: Text("Developer"),
-                                            );
-                                          } else {
-                                            return const ListTile(
-                                              leading: CircleAvatar(),
-                                              title: Text("...."),
-                                              subtitle: Text("......"),
-                                            );
-                                          }
-                                        }),
-                                    postdata["title"] != null
-                                        ? Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20, vertical: 15),
-                                            child: Container(
-                                              alignment: Alignment.topLeft,
-                                              child: DetectableText(
-                                                text: postdata["title"],
-                                                detectionRegExp:
-                                                    detectionRegExp(),
-                                                detectedStyle: TextStyle(
-                                                  fontSize: 12.sp,
-                                                  color: Theme.of(context)
-                                                      .iconTheme
-                                                      .color,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                basicStyle: TextStyle(
-                                                  fontSize: 10.sp,
-                                                  color: Theme.of(context)
-                                                      .iconTheme
-                                                      .color,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                    postdata["Image"] != null
-                                        ? Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Image.network(
-                                                postdata["Image"],
-                                                height: 60.w,
-                                                width: double.infinity,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                  ],
-                                );
+                                return StreamBuilder<
+                                        DocumentSnapshot<Map<String, dynamic>>>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection("chat")
+                                        .doc(widget.RoomId)
+                                        .collection("Promotional_Post")
+                                        .doc(post_id)
+                                        .snapshots(),
+                                    builder: (context, Visibilitystatus) {
+                                      if (Visibilitystatus.hasData) {
+                                        Map<String, dynamic> Visibility_status =
+                                            Visibilitystatus.data.data();
+                                        return Opacity(
+                                          opacity:
+                                              Visibility_status['Visibility'] ==
+                                                      true
+                                                  ? 1
+                                                  : .25,
+                                          child: Column(
+                                            children: [
+                                              StreamBuilder<
+                                                      DocumentSnapshot<
+                                                          Map<String,
+                                                              dynamic>>>(
+                                                  stream: FirebaseFirestore
+                                                      .instance
+                                                      .collection('user')
+                                                      .doc(
+                                                          postdata['author_ID'])
+                                                      .snapshots(),
+                                                  builder: (context,
+                                                      AsyncSnapshot<
+                                                              DocumentSnapshot<
+                                                                  Map<String,
+                                                                      dynamic>>>
+                                                          snapshot) {
+                                                    if (snapshot.hasData) {
+                                                      Map<String, dynamic>
+                                                          profiledata =
+                                                          snapshot.data.data();
+                                                      return ListTile(
+                                                        trailing: IconButton(
+                                                          onPressed: () {
+                                                            showModalBottomSheet(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (context) {
+                                                                  return Wrap(
+                                                                    children: [
+                                                                      ListTile(
+                                                                        onTap:
+                                                                            () {
+                                                                          Navigator.of(context)
+                                                                              .push(MaterialPageRoute(
+                                                                            builder: (context) =>
+                                                                                Edit_post(
+                                                                              image: postdata['Image'],
+                                                                              room_id: widget.RoomId,
+                                                                              post_id: post_id,
+                                                                              title: postdata['title'],
+                                                                            ),
+                                                                          ));
+                                                                        },
+                                                                        leading:
+                                                                            const Icon(Icons.edit_note),
+                                                                        title: const Text(
+                                                                            'Edit Post'),
+                                                                      ),
+                                                                      StreamBuilder<
+                                                                              DocumentSnapshot<
+                                                                                  Map<String,
+                                                                                      dynamic>>>(
+                                                                          stream: FirebaseFirestore
+                                                                              .instance
+                                                                              .collection("chat")
+                                                                              .doc(widget.RoomId)
+                                                                              .collection("Promotional_Post")
+                                                                              .doc(post_id)
+                                                                              .snapshots(),
+                                                                          builder: (context, snapshot) {
+                                                                            if (snapshot.hasData) {
+                                                                              Map<String, dynamic> Visibility_status = snapshot.data.data();
+                                                                              return ListTile(
+                                                                                onTap: () {
+                                                                                  if (Visibility_status["Visibility"] == true) {
+                                                                                    FirebaseFirestore.instance.collection("chat").doc(widget.RoomId).collection("Promotional_Post").doc(post_id).update({
+                                                                                      "Visibility": false
+                                                                                    });
+                                                                                  } else {
+                                                                                    FirebaseFirestore.instance.collection("chat").doc(widget.RoomId).collection("Promotional_Post").doc(post_id).update({
+                                                                                      "Visibility": true
+                                                                                    });
+                                                                                  }
+                                                                                  Navigator.of(context).pop();
+                                                                                },
+                                                                                leading: Icon(Visibility_status["Visibility"] == false ? Icons.image : Icons.hide_image),
+                                                                                title: Text(Visibility_status["Visibility"] == false ? 'Show Post' : "Hide Post"),
+                                                                              );
+                                                                            } else {
+                                                                              return Container();
+                                                                            }
+                                                                          }),
+                                                                      ListTile(
+                                                                        onTap:
+                                                                            () {
+                                                                          FirebaseFirestore
+                                                                              .instance
+                                                                              .collection("chat")
+                                                                              .doc(widget.RoomId)
+                                                                              .collection("Promotional_Post")
+                                                                              .doc(post_id)
+                                                                              .delete();
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                        },
+                                                                        leading:
+                                                                            Icon(Icons.delete),
+                                                                        title: Text(
+                                                                            'Delete Post'),
+                                                                      ),
+                                                                    ],
+                                                                  );
+                                                                });
+                                                          },
+                                                          icon: Icon(
+                                                              Icons.more_vert),
+                                                        ),
+                                                        leading: CircleAvatar(
+                                                          backgroundImage:
+                                                              NetworkImage(
+                                                                  profiledata[
+                                                                      'imageUrl']),
+                                                        ),
+                                                        title: Text(
+                                                            "${profiledata['first_name']} ${profiledata['last_name']}"),
+                                                        subtitle:
+                                                            Text("Developer"),
+                                                      );
+                                                    } else {
+                                                      return const ListTile(
+                                                        leading: CircleAvatar(),
+                                                        title: Text("...."),
+                                                        subtitle:
+                                                            Text("......"),
+                                                      );
+                                                    }
+                                                  }),
+                                              postdata["title"] != null
+                                                  ? Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 20,
+                                                          vertical: 15),
+                                                      child: Container(
+                                                        alignment:
+                                                            Alignment.topLeft,
+                                                        child: DetectableText(
+                                                          text:
+                                                              postdata["title"],
+                                                          detectionRegExp:
+                                                              detectionRegExp(),
+                                                          detectedStyle:
+                                                              TextStyle(
+                                                            fontSize: 12.sp,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .iconTheme
+                                                                .color,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                          basicStyle: TextStyle(
+                                                            fontSize: 10.sp,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .iconTheme
+                                                                .color,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Container(),
+                                              postdata["Image"] != null
+                                                  ? Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 20),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        child: Image.network(
+                                                          postdata["Image"],
+                                                          height: 60.w,
+                                                          width:
+                                                              double.infinity,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Container(),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        return Container();
+                                      }
+                                    });
                               },
                               childCount: snapshot.data.docs.length,
                             ),
@@ -278,7 +357,12 @@ class _Edit_postState extends State<Edit_post> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Edit Post"),
+        elevation: 0,
+        iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
+        title: Text(
+          "Edit Post",
+          style: TextStyle(color: Theme.of(context).iconTheme.color),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: loading ? false : true,

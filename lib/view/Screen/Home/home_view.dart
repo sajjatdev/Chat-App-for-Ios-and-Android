@@ -28,6 +28,7 @@ class _Home_viewState extends State<Home_view> {
   final screen = [
     chat_view(),
     call_view(),
+    // Feed_Home(),
     Map_view(),
     setting_view(),
   ];
@@ -78,6 +79,21 @@ class _Home_viewState extends State<Home_view> {
                             : Theme.of(context).iconTheme.color,
                         width: currentindex == 1 ? 19.sp : null,
                       )),
+                  // IconButton(
+                  //     onPressed: () {
+                  //       setState(() {
+                  //         currentindex = 2;
+                  //       });
+                  //     },
+                  //     icon: SvgPicture.asset(
+                  //       currentindex == 2
+                  //           ? 'assets/svg/locationsin.svg'
+                  //           : 'assets/svg/Hangout.svg',
+                  //       color: currentindex != 2
+                  //           ? HexColor.fromHex('#8C8C8C')
+                  //           : Theme.of(context).iconTheme.color,
+                  //       width: currentindex == 2 ? 19.sp : null,
+                  //     )),
                   IconButton(
                       onPressed: () {
                         setState(() {
