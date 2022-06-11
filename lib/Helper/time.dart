@@ -8,7 +8,7 @@ class Time_Chat {
       final diff = date2.difference(notification);
 
       if (diff.inDays > 8) {
-        return DateFormat("dd-MM-yyyy HH:mm:ss").format(notification);
+        return DateFormat("dd-MM-yyy").format(notification);
       } else if ((diff.inDays / 7).floor() >= 1) {
         return "Last week";
       } else if (diff.inDays >= 2) {

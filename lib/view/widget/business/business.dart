@@ -1,4 +1,5 @@
 import 'package:chatting/Helper/color.dart';
+import 'package:chatting/Helper/time.dart';
 import 'package:chatting/view/widget/business/receiver.dart';
 import 'package:chatting/view/widget/business/sender.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,10 +45,25 @@ class _business_chatState extends State<business_chat> {
         SliverAppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
-          title: Text(
-            "8:45 AM",
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey),
-          ),
+          title: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('chat')
+                  .doc(widget.Room_Id)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  Map<String, dynamic> data = snapshot.data.data();
+                  return Text(
+                    Time_Chat.readTimestamp(
+                        data['business_date_and_time'] != null
+                            ? data['business_date_and_time']
+                            : null),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  );
+                } else {
+                  return Container();
+                }
+              }),
           backgroundColor: Colors.transparent,
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(32.w),
@@ -56,11 +72,12 @@ class _business_chatState extends State<business_chat> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 115),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.sp, horizontal: 20.w),
                     child: Container(
                       alignment: Alignment.center,
                       height: 8.w,
+                      width: 100.w,
                       decoration: BoxDecoration(
                         color: widget.isDarkMode
                             ? HexColor.fromHex("#1a1a1c")
@@ -71,14 +88,28 @@ class _business_chatState extends State<business_chat> {
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                           ),
-                          child: Text(
-                            'You created a hangout spot',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: Theme.of(context).iconTheme.color,
-                            ),
-                          )),
+                          child: FutureBuilder<
+                                  DocumentSnapshot<Map<String, dynamic>>>(
+                              future: FirebaseFirestore.instance
+                                  .collection('chat')
+                                  .doc(widget.Room_Id)
+                                  .get(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  Map<String, dynamic> data =
+                                      snapshot.data.data();
+                                  return Text(
+                                    'You created a hangout spot ${data["Business_Name"]}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: Theme.of(context).iconTheme.color,
+                                    ),
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              })),
                     ),
                   ),
                   Padding(

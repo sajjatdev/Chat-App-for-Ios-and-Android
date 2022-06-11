@@ -64,81 +64,70 @@ class _create_groupState extends State<create_group> {
     bool isDarkMode = brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        leading: TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text(
-              "Back",
-              style: TextStyle(
-                  color: Theme.of(context).iconTheme.color,
-                  fontWeight: FontWeight.w500),
-            )),
+        iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
         actions: [
-          Material(
-            color: Theme.of(context).iconTheme.color,
-            child: TextButton(
-                onPressed: () async {
-                  if (Group_name.text != null && path != null) {
-                    setState(() {
-                      is_loading = true;
-                    });
-                    context
-                        .read<PhotouploadCubit>()
-                        .updateData(
-                            path, name, Group_name.text.replaceAll(" ", ''))
-                        .then((value) async {
-                      try {
-                        String imagurl = await firebase_storage
-                            .FirebaseStorage.instance
-                            .ref(
-                                'userimage/${Group_name.text.replaceAll(" ", '')}/${name}')
-                            .getDownloadURL();
+          TextButton(
+              style: TextButton.styleFrom(
+                  primary: Theme.of(context).iconTheme.color),
+              onPressed: () async {
+                if (Group_name.text != null && path != null) {
+                  setState(() {
+                    is_loading = true;
+                  });
+                  context
+                      .read<PhotouploadCubit>()
+                      .updateData(
+                          path, name, Group_name.text.replaceAll(" ", ''))
+                      .then((value) async {
+                    try {
+                      String imagurl = await firebase_storage
+                          .FirebaseStorage.instance
+                          .ref(
+                              'userimage/${Group_name.text.replaceAll(" ", '')}/${name}')
+                          .getDownloadURL();
 
-                        context
-                            .read<GroupCreateCubit>()
-                            .create(
-                              admin: admin_list,
-                              group_image: imagurl,
-                              group_name: Group_name.text,
-                              mamber: widget.member_list,
-                              group_username:
-                                  Group_name.text.replaceAll(" ", ''),
-                              group_url: Group_name.text.replaceAll(" ", ''),
-                            )
-                            .then((value) {
-                          Navigator.of(context)
-                              .pushReplacementNamed('/messageing', arguments: {
-                            'otheruid':
-                                Group_name.text.replaceAll(" ", '').toString(),
-                            'type': 'group',
-                            'mamber_list': widget.member_list,
-                          });
+                      context
+                          .read<GroupCreateCubit>()
+                          .create(
+                            admin: admin_list,
+                            group_image: imagurl,
+                            group_name: Group_name.text,
+                            mamber: widget.member_list,
+                            group_username: Group_name.text.replaceAll(" ", ''),
+                            group_url: Group_name.text.replaceAll(" ", ''),
+                          )
+                          .then((value) {
+                        Navigator.of(context)
+                            .pushReplacementNamed('/messageing', arguments: {
+                          'otheruid':
+                              Group_name.text.replaceAll(" ", '').toString(),
+                          'type': 'group',
+                          'mamber_list': widget.member_list,
                         });
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(e.toString())));
-                      }
-                    });
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                      'Enter you Correct Information',
-                    )));
-                  }
-                },
-                child: is_loading
-                    ? Center(
-                        child: CupertinoActivityIndicator(
-                        color: Theme.of(context).iconTheme.color,
-                      ))
-                    : Text(
-                        "Create",
-                        style: TextStyle(
-                            color: Theme.of(context).iconTheme.color,
-                            fontWeight: FontWeight.w500),
-                      )),
-          ),
+                      });
+                    } catch (e) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                    'Enter you Correct Information',
+                  )));
+                }
+              },
+              child: is_loading
+                  ? Center(
+                      child: CupertinoActivityIndicator(
+                      color: Theme.of(context).iconTheme.color,
+                    ))
+                  : Text(
+                      "Create",
+                      style: TextStyle(
+                          color: Theme.of(context).iconTheme.color,
+                          fontWeight: FontWeight.w500),
+                    )),
         ],
         centerTitle: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,

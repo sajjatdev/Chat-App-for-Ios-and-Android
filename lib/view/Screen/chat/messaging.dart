@@ -43,7 +43,7 @@ class Messageing extends StatefulWidget {
 
 class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
   TextEditingController messaage = TextEditingController();
-  final ScrollController scrollController = ScrollController();
+  ScrollController scrollController = ScrollController();
   String lates_message;
 
   Map<String, dynamic> message_list;
@@ -149,27 +149,28 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     }
 
     setState(() {
-      _scrollDown();
       messaage.clear();
     });
   }
 
   void _scrollDown() {
-    scrollController.animateTo(
-      scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.fastOutSlowIn,
-    );
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    }
+
+    // scrollController.animateTo(
+    //   scrollController.position.maxScrollExtent,
+    //   duration: const Duration(milliseconds: 250),
+    //   curve: Curves.fastOutSlowIn,
+    // );
   }
 
   @override
   Widget build(BuildContext context) {
-    @override
-    void dispose() {
-      // TODO: implement dispose
-
-      messaage.dispose();
-      super.dispose();
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollDown());
+    } catch (e) {
+      print(e.toString());
     }
 
     var brightness = MediaQuery.of(context).platformBrightness;
@@ -653,13 +654,13 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                       children: [
                                         Expanded(
                                           flex: 6,
-                                          child: StreamBuilder<QuerySnapshot>(
-                                            stream: get_message
+                                          child: FutureBuilder<QuerySnapshot>(
+                                            future: get_message
                                                 .doc(room_id['Room_ID'])
                                                 .collection('message')
                                                 .orderBy('time',
                                                     descending: false)
-                                                .snapshots(),
+                                                .get(),
                                             builder: (context, snapshot) {
                                               if (snapshot.hasData) {
                                                 return business_chat(
@@ -679,7 +680,14 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             controller: messaage,
                                             onReceiveText: (str) {
                                               setState(() {
-                                                print("Hello Sajjat");
+                                                messagesend(
+                                                    message: str,
+                                                    message_type: "text");
+
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback(
+                                                        (_) => _scrollDown());
+                                                messaage.clear();
                                               });
                                             },
                                             onRecordEnd: (String path) {
@@ -730,19 +738,19 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                     .iconTheme
                                                     .color,
                                             actions: [
+                                              // CupertinoButton(
+                                              //   padding: EdgeInsets.zero,
+                                              //   child: const Icon(
+                                              //     Icons.attach_file_rounded,
+                                              //     size: 25,
+                                              //     color: Colors.grey,
+                                              //   ),
+                                              //   onPressed: () {},
+                                              // ),
                                               CupertinoButton(
                                                 padding: EdgeInsets.zero,
                                                 child: const Icon(
-                                                  Icons.attach_file_rounded,
-                                                  size: 25,
-                                                  color: Colors.grey,
-                                                ),
-                                                onPressed: () {},
-                                              ),
-                                              CupertinoButton(
-                                                padding: EdgeInsets.zero,
-                                                child: const Icon(
-                                                  Icons.camera_alt_rounded,
+                                                  Icons.image,
                                                   size: 25,
                                                   color: Colors.grey,
                                                 ),

@@ -68,6 +68,7 @@ dependencies:
   flutter_dialogs: ^2.1.1
   detectable_text_field: ^2.0.3
   flutterfire_ui: ^0.4.1+2
+  flutter_cache_manager: ^3.3.0
 
 
   
@@ -90,3 +91,4 @@ flutter:
   assets:
     - assets/image/
     - assets/svg/
+    - assets/audio/

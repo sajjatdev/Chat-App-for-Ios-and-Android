@@ -176,6 +176,7 @@ class messageing {
       'group_image': group_image,
       'mamber': mamber,
       "type": "group",
+      "group_time":DateTime.now(),
       'Room_ID': group_username,
       'group_url': 'chatting/' + group_url,
     }).then((value) {

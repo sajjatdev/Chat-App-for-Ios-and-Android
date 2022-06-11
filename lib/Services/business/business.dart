@@ -33,6 +33,7 @@ class Business_Services {
       "Business_Id": Business_Id,
       "imageURl": imageURl,
       "owner": [owner],
+      "business_date_and_time": DateTime.now().millisecondsSinceEpoch,
       "description": description,
       "customer": customer,
       "type": type,

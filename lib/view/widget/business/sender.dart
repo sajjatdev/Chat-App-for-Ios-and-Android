@@ -5,9 +5,11 @@ import 'package:chatting/view/widget/business/widget/voice_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
+import 'package:voice_message_package/voice_message_package.dart';
 
 class sender extends StatefulWidget {
   const sender({
@@ -111,6 +113,14 @@ class _senderState extends State<sender> {
                             isDarkMode: widget.isDarkMode,
                             isreceiver: false,
                           )
+
+                          // VoiceMessage(
+                          //   audioSrc:
+                          //       "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                          //   played: false, // To show played badge or not.
+                          //   me: true, // Set message side.
+                          //   onPlay: () {}, // Do something when voice played.
+                          // )
 
                           // voice Message End
                         ] else ...[

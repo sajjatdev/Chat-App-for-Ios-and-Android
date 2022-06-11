@@ -85,7 +85,7 @@ class Message_user_list extends StatelessWidget {
                     children: [
                       //  Time_Chat.readTimestamp(Room_Data["last_update"])
                       Text(
-                        "12:20",
+                        DateTime.now().millisecondsSinceEpoch.toString(),
                         style: TextStyle(
                           fontSize: 12,
                         ),
@@ -106,6 +106,8 @@ class Message_user_list extends StatelessWidget {
               }
               if (Room_Data['type'] == 'business' &&
                   Room_Data['Business_Name'] != null) {
+                // Add Image Icon and time and title online etc.
+
                 return ListTile(
                   onTap: () {
                     Navigator.of(context).pushNamed('/messageing', arguments: {
