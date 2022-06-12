@@ -142,7 +142,7 @@ class Message_user_list extends StatelessWidget {
                   subtitle: SizedBox(
                     width: 70.w,
                     child: Text(
-                      Room_Data['Last_message'] == null
+                      Room_Data['Last_message'] != null
                           ? ""
                           : Room_Data['Last_message'],
                       maxLines: 1,

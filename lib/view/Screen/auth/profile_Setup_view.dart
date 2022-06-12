@@ -298,7 +298,7 @@ class _profile_setupState extends State<profile_setup> {
                               username: '@' + username,
                               imageURL: imagedata.ImageURL,
                               phone_number: state.user.phoneNumber,
-                              uid: state.user.uid);
+                              uid: state.user.phoneNumber);
                           sharedPreferences.setString(
                               'uid', state.user.phoneNumber);
                           sharedPreferences.setString(
@@ -329,7 +329,7 @@ class _profile_setupState extends State<profile_setup> {
                               username: '@' + username,
                               imageURL: firstname.text,
                               phone_number: state.user.phoneNumber,
-                              uid: state.user.uid);
+                              uid: state.user.phoneNumber);
                           sharedPreferences.setString(
                               'uid', state.user.phoneNumber);
                           sharedPreferences.setString(

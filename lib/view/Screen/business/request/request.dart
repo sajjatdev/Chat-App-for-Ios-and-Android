@@ -3,6 +3,7 @@ import 'package:chatting/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:random_color/random_color.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
@@ -180,7 +181,8 @@ class _requestState extends State<request> {
                                           if (usersnapshot.hasData) {
                                             Map<String, dynamic> userdata =
                                                 usersnapshot.data.data();
-
+                                            String imagecheck =
+                                                userdata['imageUrl'];
                                             return Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -195,13 +197,25 @@ class _requestState extends State<request> {
                                                       // Photo With title and subtitle Section Start
                                                       Row(
                                                         children: [
-                                                          CircleAvatar(
-                                                            radius: 20.sp,
-                                                            backgroundImage:
-                                                                NetworkImage(
-                                                                    userdata[
-                                                                        'imageUrl']),
-                                                          ),
+                                                          if (imagecheck.contains(
+                                                              "https://")) ...[
+                                                            CircleAvatar(
+                                                              radius: 15.sp,
+                                                              backgroundImage:
+                                                                  NetworkImage(
+                                                                      userdata[
+                                                                          'imageUrl']),
+                                                            ),
+                                                          ] else ...[
+                                                            ProfilePicture(
+                                                              name: userdata[
+                                                                      'first_name']
+                                                                  .trim(),
+                                                              radius: 20,
+                                                              fontsize: 12.sp,
+                                                            )
+                                                          ],
+
                                                           // Name and Sub titile Section
                                                           SizedBox(
                                                             width: 5.w,
@@ -614,7 +628,8 @@ class _requestState extends State<request> {
                                           if (usersnapshot.hasData) {
                                             Map<String, dynamic> userdata =
                                                 usersnapshot.data.data();
-
+                                            String imagecheck =
+                                                userdata['imageUrl'];
                                             return Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -629,13 +644,25 @@ class _requestState extends State<request> {
                                                       // Photo With title and subtitle Section Start
                                                       Row(
                                                         children: [
-                                                          CircleAvatar(
-                                                            radius: 20.sp,
-                                                            backgroundImage:
-                                                                NetworkImage(
-                                                                    userdata[
-                                                                        'imageUrl']),
-                                                          ),
+                                                          if (imagecheck.contains(
+                                                              "https://")) ...[
+                                                            CircleAvatar(
+                                                              radius: 15.sp,
+                                                              backgroundImage:
+                                                                  NetworkImage(
+                                                                      userdata[
+                                                                          'imageUrl']),
+                                                            ),
+                                                          ] else ...[
+                                                            ProfilePicture(
+                                                              name: userdata[
+                                                                      'first_name']
+                                                                  .trim(),
+                                                              radius: 20,
+                                                              fontsize: 12.sp,
+                                                            )
+                                                          ],
+
                                                           // Name and Sub titile Section
                                                           SizedBox(
                                                             width: 5.w,

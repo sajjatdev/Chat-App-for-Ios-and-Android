@@ -52,8 +52,8 @@ class _ConversationListState extends State<ConversationList> {
         ] else ...[
           ProfilePicture(
             name: widget.name.trim(),
-            radius: 30,
-            fontsize: 21,
+            radius: 20,
+            fontsize: 12.sp,
           )
         ],
         Positioned(

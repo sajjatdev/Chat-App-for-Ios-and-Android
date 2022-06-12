@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
@@ -929,14 +930,25 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
               ],
             ),
             actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: CircleAvatar(
-                  backgroundImage:
-                      NetworkImage(getdatadate.profile_data.imageUrl),
-                  maxRadius: 15.sp,
+              if (getdatadate.profile_data.imageUrl.contains("https://")) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(getdatadate.profile_data.imageUrl),
+                    maxRadius: 15.sp,
+                  ),
                 ),
-              ),
+              ] else ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ProfilePicture(
+                    name: getdatadate.profile_data.imageUrl.trim(),
+                    radius: 20,
+                    fontsize: 12.sp,
+                  ),
+                )
+              ],
             ],
           ),
           body: SafeArea(

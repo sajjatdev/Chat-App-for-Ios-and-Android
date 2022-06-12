@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
@@ -687,12 +688,25 @@ class _Admin_ProfileState extends State<Admin_Profile> {
                                                           admin_data =
                                                           snapshot.data.data()
                                                               as Map;
+
+                                                      String imagecheck =
+                                                          admin_data[
+                                                              'imageUrl'];
                                                       return ListTile(
-                                                        leading: CircleAvatar(
-                                                            backgroundImage:
-                                                                NetworkImage(
-                                                                    admin_data[
-                                                                        'imageUrl'])),
+                                                        leading: imagecheck
+                                                                .contains(
+                                                                    "https://")
+                                                            ? CircleAvatar(
+                                                                backgroundImage:
+                                                                    NetworkImage(
+                                                                        admin_data[
+                                                                            'imageUrl']))
+                                                            : ProfilePicture(
+                                                                name: imagecheck
+                                                                    .trim(),
+                                                                radius: 20,
+                                                                fontsize: 12.sp,
+                                                              ),
                                                         title: Text(admin_data[
                                                             'first_name']),
                                                         trailing: IconButton(

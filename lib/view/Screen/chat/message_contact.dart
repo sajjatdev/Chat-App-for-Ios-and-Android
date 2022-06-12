@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
 
@@ -304,10 +305,16 @@ class _Message_contactState extends State<Message_contact> {
                                         'type': 'chat',
                                       });
                                 },
-                                leading: CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(state.data[index].imageUrl),
-                                ),
+                                leading: state.data[index].imageUrl
+                                        .contains("https://")
+                                    ? CircleAvatar(
+                                        backgroundImage: NetworkImage(
+                                            state.data[index].imageUrl),
+                                      )
+                                    : ProfilePicture(
+                                        name: state.data[index].imageUrl.trim(),
+                                        radius: 20,
+                                        fontsize: 12.sp),
                                 subtitle: Text(
                                   state.data[index].phoneNumber,
                                   style: TextStyle(color: Colors.grey),
