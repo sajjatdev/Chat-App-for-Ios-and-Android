@@ -1,9 +1,9 @@
-
 import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:sizer/sizer.dart';
 
@@ -44,10 +44,18 @@ class _ConversationListState extends State<ConversationList> {
         style: TextStyle(fontSize: 12.sp),
       ),
       leading: Stack(children: [
-        CircleAvatar(
-          backgroundImage: NetworkImage(widget.imageUrl),
-          maxRadius: 20,
-        ),
+        if (widget.imageUrl.contains("https://")) ...[
+          CircleAvatar(
+            maxRadius: 20,
+            backgroundImage: NetworkImage(widget.imageUrl),
+          )
+        ] else ...[
+          ProfilePicture(
+            name: widget.name.trim(),
+            radius: 30,
+            fontsize: 21,
+          )
+        ],
         Positioned(
             bottom: 0,
             right: 0,

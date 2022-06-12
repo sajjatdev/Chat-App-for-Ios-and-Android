@@ -23,6 +23,7 @@ class UsernameCreate extends StatefulWidget {
 class _UsernameCreateState extends State<UsernameCreate> {
   GlobalKey<FormState> key = GlobalKey<FormState>();
   TextEditingController username = TextEditingController();
+  String usernamecheck = '';
 
   bool isbtn = false;
   bool btnloading = false;
@@ -53,6 +54,11 @@ class _UsernameCreateState extends State<UsernameCreate> {
               Form(
                 key: key,
                 child: TextFormField(
+                  onChanged: ((value) {
+                    setState(() {
+                      usernamecheck = value;
+                    });
+                  }),
                   controller: username,
                   validator: (value) =>
                       value.isEmpty ? "Username can't be blank" : null,
@@ -91,24 +97,27 @@ class _UsernameCreateState extends State<UsernameCreate> {
               Spacer(
                 flex: 2,
               ),
-              Button(
-                buttonenable: true,
-                loadingbtn: btnloading,
-                onpress: () async {
-                  if (key.currentState.validate()) {
-                    setState(() {
-                      isbtn = true;
-                      btnloading = true;
-                    });
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('username', username.text);
-                    Future.delayed(Duration(seconds: 2), () {
-                      Navigator.of(context).pushNamed('/profile_Setup');
-                    });
-                  }
-                },
-                Texts: "SAVE",
-                widths: 80,
+              Align(
+                alignment: Alignment.center,
+                child: Button(
+                  buttonenable: usernamecheck != '' ? true : false,
+                  loadingbtn: btnloading,
+                  onpress: () async {
+                    if (key.currentState.validate()) {
+                      setState(() {
+                        isbtn = true;
+                        btnloading = true;
+                      });
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('username', username.text);
+                      Future.delayed(Duration(seconds: 2), () {
+                        Navigator.of(context).pushNamed('/profile_Setup');
+                      });
+                    }
+                  },
+                  Texts: "SAVE",
+                  widths: 80,
+                ),
               ),
             ],
           ),

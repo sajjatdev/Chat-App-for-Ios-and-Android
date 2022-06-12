@@ -83,17 +83,20 @@ class _setting_viewState extends State<setting_view> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(children: [
-                          getstate.profile_data.imageUrl == null
-                              ? ProfilePicture(
-                                  name: getstate.profile_data.fullName,
-                                  radius: 30,
-                                  fontsize: 21,
-                                )
-                              : CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: NetworkImage(
-                                      getstate.profile_data.imageUrl),
-                                ),
+                          if (getstate.profile_data.imageUrl
+                              .contains("https://")) ...[
+                            // CircleAvatar(
+                            //   radius: 30,
+                            //   backgroundImage:
+                            //       NetworkImage(getstate.profile_data.imageUrl),
+                            // )
+                          ] else ...[
+                            ProfilePicture(
+                              name: getstate.profile_data.fullName.trim(),
+                              radius: 30,
+                              fontsize: 21,
+                            )
+                          ],
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(

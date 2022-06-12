@@ -255,43 +255,20 @@ class _profile_setupState extends State<profile_setup> {
                                         fontWeight: FontWeight.w400,
                                         fontSize: 12.sp),
                                   ),
-                                  Builder(builder: (context) {
-                                    if (imagedata is photouploadss) {
-                                      return IconButton(
-                                          onPressed: () async {
-                                            final prefs =
-                                                await SharedPreferences
-                                                    .getInstance();
-                                            await prefs.setString(
-                                                'name', names);
-                                            await prefs.setString(
-                                                'lastname',
-                                                lastnames == ''
-                                                    ? ''
-                                                    : lastnames);
-                                            Navigator.of(context)
-                                                .pushNamed('/username_crate');
-                                          },
-                                          icon: SvgPicture.asset(
-                                            'assets/svg/Left_Arrow_4_.svg',
-                                            color: HexColor.fromHex('#5F5F62'),
-                                          ));
-                                    }
-                                    return IconButton(
-                                        // onPressed: () async {
-                                        //   final prefs = await SharedPreferences
-                                        //       .getInstance();
-                                        //   await prefs.setString('name', names);
-                                        //   await prefs.setString('lastname',
-                                        //       lastnames == '' ? '' : lastnames);
-                                        //   Navigator.of(context)
-                                        //       .pushNamed('/username_crate');
-                                        // },
-                                        icon: SvgPicture.asset(
-                                      'assets/svg/Left_Arrow_4_.svg',
-                                      color: HexColor.fromHex('#5F5F62'),
-                                    ));
-                                  })
+                                  IconButton(
+                                      onPressed: () async {
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        await prefs.setString('name', names);
+                                        await prefs.setString('lastname',
+                                            lastnames == '' ? '' : lastnames);
+                                        Navigator.of(context)
+                                            .pushNamed('/username_crate');
+                                      },
+                                      icon: SvgPicture.asset(
+                                        'assets/svg/Left_Arrow_4_.svg',
+                                        color: HexColor.fromHex('#5F5F62'),
+                                      ))
                                 ],
                               ),
                             ),
@@ -336,8 +313,32 @@ class _profile_setupState extends State<profile_setup> {
                     );
                   } else {
                     return Button(
-                      buttonenable: false,
-                      onpress: () {},
+                      buttonenable:
+                          firstname != null && username != null ? true : false,
+                      onpress: () async {
+                        final FormState status = _globalKey.currentState;
+
+                        if (status.validate()) {
+                          setState(() {
+                            btnloading = true;
+                          });
+
+                          context.read<ProfileSetupCubit>().set_profile(
+                              Firstname: firstname.text,
+                              lastname: lastnames == null ? '' : lastnames,
+                              username: '@' + username,
+                              imageURL: firstname.text,
+                              phone_number: state.user.phoneNumber,
+                              uid: state.user.uid);
+                          sharedPreferences.setString(
+                              'uid', state.user.phoneNumber);
+                          sharedPreferences.setString(
+                              'number', state.user.phoneNumber);
+                          Future.delayed(Duration(seconds: 5), () {
+                            Navigator.of(context).pushNamed('/');
+                          });
+                        }
+                      },
                       Texts: "DONE",
                       widths: 80,
                     );
