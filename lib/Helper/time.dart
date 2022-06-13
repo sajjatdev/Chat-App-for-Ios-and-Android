@@ -12,21 +12,21 @@ class Time_Chat {
       } else if ((diff.inDays / 7).floor() >= 1) {
         return "Last week";
       } else if (diff.inDays >= 2) {
-        return "${diff.inDays} days ago";
+        return "${diff.inDays}d";
       } else if (diff.inDays >= 1) {
         return "1 days ago";
       } else if (diff.inHours >= 2) {
-        return "${diff.inHours} Hours ago";
+        return "${diff.inHours}h";
       } else if (diff.inDays >= 1) {
         return "1 Hour ago";
       } else if (diff.inMinutes >= 2) {
-        return "${diff.inMinutes} Minute ago";
+        return "${diff.inMinutes}m";
       } else if (diff.inMinutes >= 1) {
         return "1 Minute ago";
       } else if (diff.inSeconds >= 3) {
-        return "${diff.inSeconds} Second ago";
+        return "${diff.inSeconds}s";
       } else {
-        return "Just Now";
+        return "now";
       }
     }
   }

@@ -1,9 +1,10 @@
 import 'package:azlistview/azlistview.dart';
-import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Contact/contact_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/model/Fir_contact.dart';
+import 'package:chatting/model/owner_admin_add.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,22 +13,30 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
 
-class Seleted_list extends StatefulWidget {
-  static const String routeName = '/seleted_members';
+class add extends StatefulWidget {
+  // static const String routeName = '/AddOwnerwithAdmin';
 
-  static Route route() {
-    return MaterialPageRoute(
-        settings: RouteSettings(name: routeName),
-        builder: (_) => Seleted_list());
-  }
+  // static Route route({Map<String, dynamic> Getadd}) {
+  //   return MaterialPageRoute(
+  //       settings: RouteSettings(name: routeName),
+  //       builder: (_) => add(
+  //             Getadd: Getadd,
+  //           ));
+  // }
 
-  const Seleted_list({Key key}) : super(key: key);
+  final String roomid;
+  final bool isadmin;
+  const add({
+    Key key,
+    this.roomid,
+    this.isadmin,
+  }) : super(key: key);
 
   @override
-  State<Seleted_list> createState() => _Seleted_listState();
+  State<add> createState() => _addState();
 }
 
-class _Seleted_listState extends State<Seleted_list> {
+class _addState extends State<add> {
   String myuid;
   int indexs;
   int hight_index = 0;
@@ -65,12 +74,78 @@ class _Seleted_listState extends State<Seleted_list> {
             Theme(
               data: ThemeData(splashColor: Colors.grey),
               child: TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacementNamed('/create_group',
-                        arguments: mamberlist);
-                  },
+                  onPressed: mamberlist.isEmpty
+                      ? null
+                      : () {
+                          if (widget.isadmin) {
+                            FirebaseFirestore.instance
+                                .collection("chat")
+                                .doc(widget.roomid)
+                                .update({
+                              "admin": FieldValue.arrayUnion(mamberlist)
+                            }).then((value) {
+                              print(widget.roomid);
+
+                              for (var item in mamberlist) {
+                                FirebaseFirestore.instance
+                                    .collection('user')
+                                    .doc(item)
+                                    .collection('Friends')
+                                    .doc(widget.roomid)
+                                    .set({
+                                  "Room_ID": widget.roomid,
+                                  "time": DateTime.now(),
+                                  "uid": item
+                                });
+                                FirebaseFirestore.instance
+                                    .collection("chat")
+                                    .doc(widget.roomid)
+                                    .collection('OwnerRequest')
+                                    .doc(item)
+                                    .set({
+                                  "ID": item,
+                                  "Status": true,
+                                }).then((value) => print("done"));
+                              }
+
+                              Navigator.of(context).pop();
+                            });
+                          } else {
+                            FirebaseFirestore.instance
+                                .collection("chat")
+                                .doc(widget.roomid)
+                                .update({
+                              "mamber": FieldValue.arrayUnion(mamberlist)
+                            }).then((value) {
+                              print(widget.roomid);
+                              for (var item in mamberlist) {
+                                FirebaseFirestore.instance
+                                    .collection('user')
+                                    .doc(item)
+                                    .collection('Friends')
+                                    .doc(widget.roomid)
+                                    .set({
+                                  "Room_ID": widget.roomid,
+                                  "time": DateTime.now(),
+                                  "uid": item
+                                });
+                                FirebaseFirestore.instance
+                                    .collection("chat")
+                                    .doc(widget.roomid)
+                                    .collection('AdminRequest')
+                                    .doc(item)
+                                    .set({
+                                  "ID": item,
+                                  "Status": true,
+                                }).then((value) => print("done"));
+                              }
+
+                              Navigator.of(context).pop();
+                            });
+                          }
+                        },
                   child: Text(
-                    "Next",
+                    "Add",
                     style: TextStyle(
                         color: Theme.of(context).iconTheme.color,
                         fontWeight: FontWeight.w500),
@@ -82,7 +157,7 @@ class _Seleted_listState extends State<Seleted_list> {
           elevation: 0,
           title: Column(children: [
             Text(
-              "New Members",
+              widget.isadmin ? "Add Admin" : "Add Member",
               style: TextStyle(
                   color: Theme.of(context).iconTheme.color,
                   fontWeight: FontWeight.w500),
@@ -119,7 +194,9 @@ class _Seleted_listState extends State<Seleted_list> {
                         final offstage = !state.data[index].isShowSuspension;
                         bool is_seleted = mamberlist
                             .contains(state.data[index].phoneNumber.trim());
+
                         hight_index += 1;
+
                         return Column(
                           children: [
                             Offstage(
@@ -172,7 +249,7 @@ class _Seleted_listState extends State<Seleted_list> {
                                             state.data[index].imageUrl),
                                       )
                                     : ProfilePicture(
-                                        name: state.data[index].imageUrl,
+                                        name: state.data[index].imageUrl.trim(),
                                         radius: 20,
                                         fontsize: 15),
                                 subtitle: Text(

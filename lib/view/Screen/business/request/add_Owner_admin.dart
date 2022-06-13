@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
@@ -237,10 +238,16 @@ class _AddOwnerwithAdminState extends State<AddOwnerwithAdmin> {
                                       : mamberlist
                                           .add(state.data[index].phoneNumber));
                                 },
-                                leading: CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(state.data[index].imageUrl),
-                                ),
+                                leading: state.data[index].imageUrl
+                                        .contains("https://")
+                                    ? CircleAvatar(
+                                        backgroundImage: NetworkImage(
+                                            state.data[index].imageUrl),
+                                      )
+                                    : ProfilePicture(
+                                        name: state.data[index].imageUrl.trim(),
+                                        radius: 20,
+                                        fontsize: 15),
                                 subtitle: Text(
                                   state.data[index].phoneNumber,
                                   style: TextStyle(color: Colors.grey),

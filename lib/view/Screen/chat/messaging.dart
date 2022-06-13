@@ -231,12 +231,13 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
         return Container(
           decoration: BoxDecoration(
               image: DecorationImage(
+                  fit: BoxFit.cover,
                   image: isDarkMode
-                      ? AssetImage('assets/svg/White_Background.png')
-                      : AssetImage('assets/svg/White_Background.png'))),
+                      ? const AssetImage('assets/svg/White_Background.png')
+                      : const AssetImage('assets/svg/White_Background.png'))),
           child: Scaffold(
+            backgroundColor: Colors.transparent,
             appBar: AppBar(
-              elevation: 5,
               shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
               automaticallyImplyLeading: false,
               backgroundColor: Theme.of(context).secondaryHeaderColor,
@@ -301,12 +302,12 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                           children: [
                             Expanded(
                                 flex: 6,
-                                child: StreamBuilder<QuerySnapshot>(
-                                    stream: get_message
+                                child: FutureBuilder<QuerySnapshot>(
+                                    future: get_message
                                         .doc(room_id['Room_ID'])
                                         .collection('message')
                                         .orderBy('time', descending: false)
-                                        .snapshots(),
+                                        .get(),
                                     builder: (context, snapshot) {
                                       if (snapshot.hasData) {
                                         return ListView.builder(
@@ -676,7 +677,8 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                           ),
                                         ),
                                         Container(
-                                          margin: EdgeInsets.only(bottom: 10),
+                                          margin:
+                                              const EdgeInsets.only(bottom: 10),
                                           child: ChatComposer(
                                             controller: messaage,
                                             onReceiveText: (str) {
@@ -1000,9 +1002,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                                     dynamic>>>
                                                         chat_user_data) {
                                                   if (chat_user_data.hasError) {
-                                                    return GFShimmer(
-                                                      child: emptyBlock,
-                                                    );
+                                                    return Container();
                                                   } else if (chat_user_data
                                                       .hasData) {
                                                     Map<String, dynamic>
@@ -1018,9 +1018,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                             .profile_data
                                                             .imageUrl);
                                                   } else {
-                                                    return GFShimmer(
-                                                      child: emptyBlock,
-                                                    );
+                                                    return Container();
                                                   }
                                                 },
                                               );

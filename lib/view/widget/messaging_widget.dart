@@ -30,8 +30,6 @@ class messageing_widget extends StatelessWidget {
     String link_check = data['message'];
     bool islink =
         link_check.contains('https://') || link_check.contains('http://');
-
-    print(profile_data["imageUrl"]);
     return ismessage
         ? Container()
         : Padding(

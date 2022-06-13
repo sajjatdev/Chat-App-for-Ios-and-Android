@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 
@@ -271,10 +272,16 @@ class _create_groupState extends State<create_group> {
                                     snapshot) {
                               if (snapshot.hasData) {
                                 final datas = snapshot.data.data();
+                                String Imagecheck = datas['imageUrl'];
                                 return ListTile(
-                                  leading: CircleAvatar(
-                                      backgroundImage:
-                                          NetworkImage(datas['imageUrl'])),
+                                  leading: Imagecheck.contains("https://")
+                                      ? CircleAvatar(
+                                          backgroundImage:
+                                              NetworkImage(datas['imageUrl']))
+                                      : ProfilePicture(
+                                          name: Imagecheck.trim(),
+                                          radius: 20,
+                                          fontsize: 25),
                                   title: Text(datas['first_name'].toString()),
                                 );
                               } else {
