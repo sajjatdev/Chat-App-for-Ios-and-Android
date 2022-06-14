@@ -261,7 +261,7 @@ class _profile_setupState extends State<profile_setup> {
                                             .getInstance();
                                         await prefs.setString('name', names);
                                         await prefs.setString('lastname',
-                                            lastnames == '' ? '' : lastnames);
+                                            lastnames == null ? '' : lastnames);
                                         Navigator.of(context)
                                             .pushNamed('/username_crate');
                                       },
@@ -313,6 +313,7 @@ class _profile_setupState extends State<profile_setup> {
                     );
                   } else {
                     return Button(
+                      loadingbtn: btnloading,
                       buttonenable:
                           firstname != null && username != null ? true : false,
                       onpress: () async {

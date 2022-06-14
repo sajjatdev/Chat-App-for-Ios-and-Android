@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pinput/pin_put/pin_put.dart';
+
 import 'package:sizer/sizer.dart';
 
 import '../../widget/widget.dart';
@@ -136,9 +137,6 @@ class _OTPState extends State<OTP> {
                 Future.delayed(const Duration(seconds: 5), () {
                   print("function inside");
                   Navigator.of(context).pushNamed('/profile_Setup');
-                  setState(() {
-                    buttonloading = false;
-                  });
                 });
               },
               Texts: "VERIFY",

@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -46,31 +49,21 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCTh0czkWaRQQAdOn0kwMZt2jsI63_Y52s',
-    appId: '1:397110478415:web:5958ec75013bb01da08c3a',
-    messagingSenderId: '397110478415',
-    projectId: 'chat-cff54',
-    authDomain: 'chat-cff54.firebaseapp.com',
-    storageBucket: 'chat-cff54.appspot.com',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAa-jh47M4qXrKJNnwounRUSLYE6Uhehm8',
-    appId: '1:397110478415:android:984d42629862c3cfa08c3a',
-    messagingSenderId: '397110478415',
-    projectId: 'chat-cff54',
-    storageBucket: 'chat-cff54.appspot.com',
+    apiKey: 'AIzaSyAJJH0Uj7CvjefCOsbudF4d8RAeJHRZzg8',
+    appId: '1:8456637305:android:c10ef5ffb51a0762167da8',
+    messagingSenderId: '8456637305',
+    projectId: 'chatterapp-8dfbf',
+    storageBucket: 'chatterapp-8dfbf.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC0OdjAHJrf_dCKokmz2E_ePXi979S_OPk',
-    appId: '1:397110478415:ios:6f3fe79f3d63d682a08c3a',
-    messagingSenderId: '397110478415',
-    projectId: 'chat-cff54',
-    storageBucket: 'chat-cff54.appspot.com',
-    androidClientId: '397110478415-425melr1lh8in0l1u681c2fd7c45qv9l.apps.googleusercontent.com',
-    iosClientId: '397110478415-f1dhmch2ijafpfhge6o62g8jjtbcb31n.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAkM9lQkI4TauJY9BuIhATCeRctdn4cb-k',
+    appId: '1:8456637305:ios:ef37affdf836ad86167da8',
+    messagingSenderId: '8456637305',
+    projectId: 'chatterapp-8dfbf',
+    storageBucket: 'chatterapp-8dfbf.appspot.com',
+    iosClientId: '8456637305-un21g1nrmcvgl59itdk8pbbkqasngrbs.apps.googleusercontent.com',
     iosBundleId: 'com.example.chat',
   );
 }

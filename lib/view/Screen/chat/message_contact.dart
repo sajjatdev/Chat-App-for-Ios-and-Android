@@ -97,6 +97,11 @@ class _Message_contactState extends State<Message_contact> {
     return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
+          leading: IconButton(
+              onPressed: () {
+                Navigator.of(context).popAndPushNamed("/");
+              },
+              icon: Icon(Icons.arrow_back_ios)),
           actions: [
             PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
@@ -217,130 +222,139 @@ class _Message_contactState extends State<Message_contact> {
                   itemCount: state.data.length,
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
-                    if (index == 0) return _buildHeader();
-                    if (state.data[index].phoneNumber != null) {
-                      if (get_contact_number_list.contains(state
-                              .data[index].phoneNumber
-                              .split("+88")[1]
-                              .trim()) ||
-                          get_contact_number_list
-                              .contains(state.data[index].phoneNumber)) {
-                        var item_data = state.data[index].getSuspensionTag();
-                        final offstage = !state.data[index].isShowSuspension;
-                        return Column(
-                          children: [
-                            Offstage(
-                              offstage: offstage,
-                              child: Container(
-                                height: 10.w,
-                                margin: EdgeInsets.only(right: 16),
-                                padding: EdgeInsets.only(left: 16),
-                                alignment: Alignment.centerLeft,
-                                // decoration: BoxDecoration(
-                                //   color: isDarkMode
-                                //       ? HexColor.fromHex("#1a1a1c")
-                                //       : Colors.grey.shade300,
-                                //   borderRadius: BorderRadius.circular(5.sp),
-                                // ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "$item_data",
-                                      softWrap: false,
-                                      style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .iconTheme
-                                              .color),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: ListTile(
-                                onTap: () {
-                                  FirebaseFirestore.instance
-                                      .collection('user')
-                                      .doc(myuid.trim())
-                                      .collection("Friends")
-                                      .doc(state.data[index].phoneNumber)
-                                      .set({
-                                    'uid': state.data[index].phoneNumber,
-                                    "first_name": state.data[index].firstName,
-                                    "imageUrl": state.data[index].imageUrl,
-                                    'type': 'chat',
-                                    'username': state.data[index].username,
-                                    'Room_ID': myuid.trim() +
-                                        state.data[index].phoneNumber,
-                                    'time':
-                                        DateTime.now().millisecondsSinceEpoch
-                                  });
-
-                                  String Room_ID = myuid.trim() +
-                                      state.data[index].phoneNumber;
-
-                                  FirebaseFirestore.instance
-                                      .collection('chat')
-                                      .doc(Room_ID)
-                                      .set({
-                                    'last_update':
-                                        DateTime.now().millisecondsSinceEpoch,
-                                    'users': [
-                                      myuid,
-                                      state.data[index].phoneNumber
+                    if (state.data != null && get_contact_number_list != null) {
+                      if (index == 0) return _buildHeader();
+                      if (state.data[index].phoneNumber != null) {
+                        if (get_contact_number_list.contains(state
+                                .data[index].phoneNumber
+                                .split("+88")[0]
+                                .trim()) ||
+                            get_contact_number_list
+                                .contains(state.data[index].phoneNumber)) {
+                          var item_data = state.data[index].getSuspensionTag();
+                          final offstage = !state.data[index].isShowSuspension;
+                          return Column(
+                            children: [
+                              Offstage(
+                                offstage: offstage,
+                                child: Container(
+                                  height: 10.w,
+                                  margin: EdgeInsets.only(right: 16),
+                                  padding: EdgeInsets.only(left: 16),
+                                  alignment: Alignment.centerLeft,
+                                  // decoration: BoxDecoration(
+                                  //   color: isDarkMode
+                                  //       ? HexColor.fromHex("#1a1a1c")
+                                  //       : Colors.grey.shade300,
+                                  //   borderRadius: BorderRadius.circular(5.sp),
+                                  // ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "$item_data",
+                                        softWrap: false,
+                                        style: TextStyle(
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context)
+                                                .iconTheme
+                                                .color),
+                                      ),
                                     ],
-                                    'type': 'chat',
-                                    'message_type': null,
-                                    'Room_ID': Room_ID
-                                  });
-                                  Navigator.of(context).pushReplacementNamed(
-                                      '/messageing',
-                                      arguments: {
-                                        'otheruid':
-                                            state.data[index].phoneNumber,
-                                        'type': 'chat',
-                                      });
-                                },
-                                leading: state.data[index].imageUrl
-                                        .contains("https://")
-                                    ? CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                            state.data[index].imageUrl),
-                                      )
-                                    : ProfilePicture(
-                                        name: state.data[index].imageUrl.trim(),
-                                        radius: 20,
-                                        fontsize: 12.sp),
-                                subtitle: Text(
-                                  state.data[index].phoneNumber,
-                                  style: TextStyle(color: Colors.grey),
+                                  ),
                                 ),
-                                trailing: Text(
-                                  capitalize(state.data[index].userStatus),
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      color: state.data[index].userStatus ==
-                                              'offline'
-                                          ? Colors.grey
-                                          : Colors.green),
-                                ),
-                                title: Text(
-                                    "${capitalize(state.data[index].firstName)} ${state.data[index].lastName}"),
                               ),
-                            ),
-                          ],
-                        );
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: ListTile(
+                                  onTap: () {
+                                    FirebaseFirestore.instance
+                                        .collection('user')
+                                        .doc(myuid.trim())
+                                        .collection("Friends")
+                                        .doc(state.data[index].phoneNumber)
+                                        .set({
+                                      'uid': state.data[index].phoneNumber,
+                                      "first_name": state.data[index].firstName,
+                                      "imageUrl": state.data[index].imageUrl,
+                                      'type': 'chat',
+                                      'username': state.data[index].username,
+                                      'Room_ID': myuid.trim() +
+                                          state.data[index].phoneNumber,
+                                      'time':
+                                          DateTime.now().millisecondsSinceEpoch
+                                    });
+
+                                    String Room_ID = myuid.trim() +
+                                        state.data[index].phoneNumber;
+
+                                    FirebaseFirestore.instance
+                                        .collection('chat')
+                                        .doc(Room_ID)
+                                        .set({
+                                      'last_update':
+                                          DateTime.now().millisecondsSinceEpoch,
+                                      'users': [
+                                        myuid,
+                                        state.data[index].phoneNumber
+                                      ],
+                                      'type': 'chat',
+                                      'message_type': null,
+                                      'Room_ID': Room_ID
+                                    });
+                                    Navigator.of(context).pushReplacementNamed(
+                                        '/messageing',
+                                        arguments: {
+                                          'otheruid':
+                                              state.data[index].phoneNumber,
+                                          'type': 'chat',
+                                        });
+                                  },
+                                  leading: state.data[index].imageUrl
+                                          .contains("https://")
+                                      ? CircleAvatar(
+                                          backgroundImage: NetworkImage(
+                                              state.data[index].imageUrl),
+                                        )
+                                      : ProfilePicture(
+                                          name:
+                                              state.data[index].imageUrl.trim(),
+                                          radius: 20,
+                                          fontsize: 12.sp),
+                                  subtitle: Text(
+                                    state.data[index].phoneNumber,
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  trailing: Text(
+                                    capitalize(state.data[index].userStatus),
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                        color: state.data[index].userStatus ==
+                                                'offline'
+                                            ? Colors.grey
+                                            : Colors.green),
+                                  ),
+                                  title: Text(
+                                      "${capitalize(state.data[index].firstName)} ${state.data[index].lastName}"),
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Container();
+                        }
                       } else {
-                        return Center();
+                        return Container();
                       }
                     } else {
-                      return Center();
+                      return Center(
+                        child: CupertinoActivityIndicator(
+                            color: Theme.of(context).iconTheme.color),
+                      );
                     }
                   },
+
                   // indexHintBuilder: (context, hint) {
                   //   return Container(
                   //     alignment: Alignment.center,
