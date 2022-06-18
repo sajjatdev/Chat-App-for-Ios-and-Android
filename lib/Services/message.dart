@@ -26,9 +26,16 @@ class messageing {
       "sender": sender,
       "message": message,
       'type': type,
+      "read": false,
       "message_type": message_type,
       "time": DateTime.now().millisecondsSinceEpoch
     }).then((value) {
+      FirebaseFirestore.instance
+          .collection("chat")
+          .doc(RoomID)
+          .collection("message_typing")
+          .doc("typing")
+          .set({"typing": false, "typing_user": sender});
       FirebaseFirestore.instance.collection('chat').doc(RoomID).update({
         "Last_message": message,
         'last_update': DateTime.now().millisecondsSinceEpoch,
@@ -76,9 +83,16 @@ class messageing {
       "sender": sender,
       "message": message,
       'type': type,
+      "read": false,
       "message_type": message_type,
       "time": DateTime.now().millisecondsSinceEpoch
     }).then((value) {
+      FirebaseFirestore.instance
+          .collection("chat")
+          .doc(RoomID)
+          .collection("message_typing")
+          .doc("typing")
+          .set({"typing": false, "typing_user": sender});
       FirebaseFirestore.instance.collection('chat').doc(RoomID).update({
         "Last_message": message,
         'last_update': DateTime.now().millisecondsSinceEpoch,
@@ -133,10 +147,17 @@ class messageing {
       "sender": sender,
       "message": message,
       'type': type,
+      "read": false,
       "message_type": message_type,
-      'message_time':DateTime.now(),
+      'message_time': DateTime.now(),
       "time": DateTime.now().millisecondsSinceEpoch
     }).then((value) {
+      FirebaseFirestore.instance
+          .collection("chat")
+          .doc(RoomID)
+          .collection("message_typing")
+          .doc("typing")
+          .set({"typing": false, "typing_user": sender});
       FirebaseFirestore.instance.collection('chat').doc(RoomID).update({
         "Last_message": message,
         'last_update': DateTime.now().millisecondsSinceEpoch,
@@ -177,8 +198,8 @@ class messageing {
       'group_image': group_image,
       'mamber': mamber,
       "type": "group",
-      "description":description,
-      "group_time":DateTime.now(),
+      "description": description,
+      "group_time": DateTime.now(),
       'Room_ID': group_username,
       'group_url': 'chatting/' + group_url,
     }).then((value) {

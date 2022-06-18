@@ -55,6 +55,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
   String frienduid;
   String Type;
   List mamberList;
+  bool message_seen;
 
   @override
   void initState() {
@@ -64,25 +65,23 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) async {
-  //   if (state == AppLifecycleState.resumed) {
-  //     //message Delivery with See
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      //message Delivery with See
+      final query = await FirebaseFirestore.instance
+          .collection("chat")
+          .doc(widget.data['otheruid'])
+          .collection("message")
+          .where("sender", isNotEqualTo: sharedPreferences.getString('uid'))
+          .where("read", isEqualTo: false)
+          .get();
 
-  //     setState(() {
-  //       message_status(status: "see");
-  //     });
-  //   } else {
-  //     message_status(status: "not_see");
-  //   }
-  // }
-
-  // void message_status({String status}) async {
-  //   await FirebaseFirestore.instance
-  //       .collection('chat')
-  //       .doc(frienduid)
-  //       .update({'message_seen': status});
-  // }
+      query.docs.forEach((doc) {
+        doc.reference.update({'read': true});
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -230,152 +229,215 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
               color: Theme.of(context).iconTheme.color),
         );
       } else if (getdatadate is GroupData) {
-        return Container(
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: isDarkMode
-                      ? const AssetImage('assets/svg/Black_Background.png')
-                      : const AssetImage('assets/svg/White_Background.png'))),
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                iconTheme:
-                    IconThemeData(color: Theme.of(context).iconTheme.color),
-                backgroundColor: Theme.of(context).secondaryHeaderColor,
-                centerTitle: true,
-                title: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      getdatadate.group_data_get.groupName,
-                      style: TextStyle(
-                          color: Theme.of(context).iconTheme.color,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      getdatadate.group_data_get.type,
-                      style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+        return Builder(builder: (context) {
+          try {
+            if (messaage.text.isEmpty) {
+              FirebaseFirestore.instance
+                  .collection("chat")
+                  .doc(frienduid)
+                  .collection("message_typing")
+                  .doc("typing")
+                  .set({"typing": true, "typing_user": myUID});
+            }
+          } catch (e) {
+            print(e.toString());
+          }
+
+          return Container(
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: isDarkMode
+                        ? const AssetImage('assets/image/Black_Background.png')
+                        : const AssetImage('assets/svg/White_Background.png'))),
+            child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: AppBar(
+                  iconTheme:
+                      IconThemeData(color: Theme.of(context).iconTheme.color),
+                  backgroundColor: Theme.of(context).secondaryHeaderColor,
+                  centerTitle: true,
+                  title: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        getdatadate.group_data_get.groupName,
+                        style: TextStyle(
+                            color: Theme.of(context).iconTheme.color,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                          stream: FirebaseFirestore.instance
+                              .collection('chat')
+                              .doc(frienduid)
+                              .collection('message_typing')
+                              .doc('typing')
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              Map<String, dynamic> typing_data =
+                                  snapshot.data.data();
+
+                              return typing_data['typing_user'] != myUID &&
+                                      typing_data['typing']
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          "assets/image/typing.gif",
+                                          width: 5.w,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        Text(
+                                          "Typing",
+                                          style: TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 10.sp),
+                                        ),
+                                      ],
+                                    )
+                                  : Text(
+                                      "Group",
+                                      style: TextStyle(
+                                          color: Colors.blue, fontSize: 10.sp),
+                                    );
+                            } else {
+                              return Container();
+                            }
+                          }),
+                    ],
+                  ),
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/group_profile',
+                              arguments: frienduid);
+
+                          print(frienduid);
+                        },
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                              getdatadate.group_data_get.groupImage),
+                          maxRadius: 15.sp,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context)
-                            .pushNamed('/group_profile', arguments: frienduid);
+                body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('user')
+                        .doc(myUID)
+                        .collection("Friends")
+                        .doc(frienduid.trim())
+                        .snapshots(),
+                    builder: (context,
+                        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                            getuserRoomID) {
+                      if (getuserRoomID.hasData) {
+                        final room_id = getuserRoomID.data.data();
+                        return Column(
+                          children: [
+                            Expanded(
+                                flex: 6,
+                                child: StreamBuilder<QuerySnapshot>(
+                                    stream: get_message
+                                        .doc(room_id['Room_ID'])
+                                        .collection('message')
+                                        .orderBy('time', descending: false)
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return SingleChildScrollView(
+                                          child: ListView.builder(
+                                              physics:
+                                                  NeverScrollableScrollPhysics(),
+                                              shrinkWrap: true,
+                                              itemCount:
+                                                  snapshot.data.docs.length,
+                                              itemBuilder: (context, index) {
+                                                DocumentSnapshot data =
+                                                    snapshot.data.docs[index];
 
-                        print(frienduid);
-                      },
-                      child: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(getdatadate.group_data_get.groupImage),
-                        maxRadius: 15.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance
-                      .collection('user')
-                      .doc(myUID)
-                      .collection("Friends")
-                      .doc(frienduid.trim())
-                      .snapshots(),
-                  builder: (context,
-                      AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
-                          getuserRoomID) {
-                    if (getuserRoomID.hasData) {
-                      final room_id = getuserRoomID.data.data();
-                      return Column(
-                        children: [
-                          Expanded(
-                              flex: 6,
-                              child: StreamBuilder<QuerySnapshot>(
-                                  stream: get_message
-                                      .doc(room_id['Room_ID'])
-                                      .collection('message')
-                                      .orderBy('time', descending: false)
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return SingleChildScrollView(
-                                        child: ListView.builder(
-                                            physics:
-                                                NeverScrollableScrollPhysics(),
-                                            shrinkWrap: true,
-                                            itemCount:
-                                                snapshot.data.docs.length,
-                                            itemBuilder: (context, index) {
-                                              DocumentSnapshot data =
-                                                  snapshot.data.docs[index];
-
-                                              if (data['sender'] != null) {
-                                                return StreamBuilder<
-                                                        DocumentSnapshot<
-                                                            Map<String,
-                                                                dynamic>>>(
-                                                    stream: FirebaseFirestore
-                                                        .instance
-                                                        .collection('user')
-                                                        .doc(data['sender'])
-                                                        .snapshots(),
-                                                    builder: (context,
-                                                        AsyncSnapshot<
-                                                                DocumentSnapshot<
-                                                                    Map<String,
-                                                                        dynamic>>>
-                                                            chat_user_data) {
-                                                      if (chat_user_data
-                                                          .hasError) {
-                                                        return GFShimmer(
-                                                          child: emptyBlock,
-                                                        );
-                                                      } else if (chat_user_data
-                                                          .hasData) {
-                                                        Map<String, dynamic>
-                                                            user_info =
-                                                            chat_user_data.data
-                                                                .data();
-                                                        return messageing_widget(
-                                                            data: data,
-                                                            myUID: myUID,
-                                                            profile_data:
-                                                                user_info,
-                                                            image: getdatadate
-                                                                .group_data_get
-                                                                .groupImage);
-                                                      } else {
-                                                        return Container();
-                                                      }
-                                                    });
-                                              } else {
-                                                return Center(
-                                                  child:
-                                                      CupertinoActivityIndicator(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .iconTheme
-                                                                  .color),
-                                                );
-                                              }
-                                            }),
-                                      );
-                                    } else {
-                                      return Container();
-                                    }
-                                  })),
-                          Container(
-                            margin: EdgeInsets.only(bottom: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
+                                                if (data['sender'] != null) {
+                                                  return StreamBuilder<
+                                                          DocumentSnapshot<
+                                                              Map<String,
+                                                                  dynamic>>>(
+                                                      stream: FirebaseFirestore
+                                                          .instance
+                                                          .collection('user')
+                                                          .doc(data['sender'])
+                                                          .snapshots(),
+                                                      builder: (context,
+                                                          AsyncSnapshot<
+                                                                  DocumentSnapshot<
+                                                                      Map<String,
+                                                                          dynamic>>>
+                                                              chat_user_data) {
+                                                        if (chat_user_data
+                                                            .hasError) {
+                                                          return GFShimmer(
+                                                            child: emptyBlock,
+                                                          );
+                                                        } else if (chat_user_data
+                                                            .hasData) {
+                                                          Map<String, dynamic>
+                                                              user_info =
+                                                              chat_user_data
+                                                                  .data
+                                                                  .data();
+                                                          return messageing_widget(
+                                                              data: data,
+                                                              myUID: myUID,
+                                                              RoomID: frienduid
+                                                                  .trim(),
+                                                              profile_data:
+                                                                  user_info,
+                                                              image: getdatadate
+                                                                  .group_data_get
+                                                                  .groupImage);
+                                                        } else {
+                                                          return Container();
+                                                        }
+                                                      });
+                                                } else {
+                                                  return Center(
+                                                    child:
+                                                        CupertinoActivityIndicator(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .iconTheme
+                                                                .color),
+                                                  );
+                                                }
+                                              }),
+                                        );
+                                      } else {
+                                        return Container();
+                                      }
+                                    })),
+                            Container(
+                              height: 15.w,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .scaffoldBackgroundColor),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 25,
+                                      color: Theme.of(context).iconTheme.color,
+                                    ),
                                     onPressed: () async {
                                       final result = await FilePicker.platform
                                           .pickFiles(
@@ -393,111 +455,115 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                         context
                                             .read<PhotouploadCubit>()
                                             .updateData(path, name, name)
-                                            .then((value) async {
-                                          String imagurl = await firebase_storage
-                                              .FirebaseStorage.instance
-                                              .ref('userimage/${name}/${name}')
-                                              .getDownloadURL();
+                                            .then(
+                                          (value) async {
+                                            String imagurl = await firebase_storage
+                                                .FirebaseStorage.instance
+                                                .ref(
+                                                    'userimage/${name}/${name}')
+                                                .getDownloadURL();
 
-                                          if (imagurl != null) {
-                                            setState(() {
-                                              messagesend(
-                                                  message: imagurl,
-                                                  message_type: 'image');
-                                            });
-                                          }
-                                        });
+                                            if (imagurl != null) {
+                                              setState(() {
+                                                messagesend(
+                                                    message: imagurl,
+                                                    message_type: 'image');
+                                              });
+                                            }
+                                          },
+                                        );
                                       }
                                     },
-                                    icon: SvgPicture.asset(
-                                      'assets/svg/gallery.svg',
-                                      color: Theme.of(context).iconTheme.color,
-                                    )),
-
-                                // suffixIcon: IconButton(
-                                //       onPressed: () {},
-                                //       icon: SvgPicture.asset(
-                                //         'assets/svg/smile-3.svg',
-                                //         color: Theme.of(context)
-                                //             .iconTheme
-                                //             .color,
-                                //       )),
-                                //   hintText: "Write a message...",
-                                // style: TextStyle(
-                                //   color:
-                                //       Theme.of(context).iconTheme.color,
-                                //   fontSize: 12.sp),
-                                Container(
-                                    width: 70.w,
-                                    constraints: BoxConstraints(
-                                        minHeight: 5.w, maxHeight: 20.w),
-                                    child: SingleChildScrollView(
-                                      child: DetectableTextField(
+                                  ),
+                                  // Message Text box
+                                  Expanded(
+                                    child: Theme(
+                                      data: ThemeData(
+                                          cursorColor: Theme.of(context)
+                                              .iconTheme
+                                              .color),
+                                      child: ChatComposer(
                                         controller: messaage,
-                                        onChanged: ((value) {
+                                        leading: Container(
+                                          width: 5.w,
+                                          color: Colors.transparent,
+                                        ),
+                                        onRecordStart: () {
                                           setState(() {
-                                            lates_message = value;
+                                            FirebaseFirestore.instance
+                                                .collection("chat")
+                                                .doc(frienduid)
+                                                .collection("message_typing")
+                                                .doc("typing")
+                                                .set({
+                                              "typing": true,
+                                              "typing_user": myUID
+                                            });
                                           });
-                                        }),
-                                        maxLines: null,
-                                        decoration: InputDecoration(
-                                          hintText: "New Message",
-                                          hintStyle: TextStyle(
-                                              color: isDarkMode
-                                                  ? Colors.white
-                                                  : Colors.black),
-                                          fillColor: isDarkMode
-                                              ? HexColor.fromHex("#1a1a1c")
-                                              : Colors.grey.shade200,
-                                          filled: true,
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide.none,
-                                            borderRadius:
-                                                BorderRadius.circular(25.0),
-                                          ),
-                                        ),
-                                        textInputAction:
-                                            TextInputAction.newline,
-                                        detectionRegExp: detectionRegExp(),
-                                        decoratedStyle: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: Theme.of(context)
-                                              .secondaryHeaderColor,
-                                        ),
-                                        basicStyle: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: Theme.of(context)
-                                                .iconTheme
-                                                .color),
+                                        },
+                                        onReceiveText: (str) {
+                                          setState(() {
+                                            messagesend(
+                                                message: str,
+                                                message_type: "text");
+
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback(
+                                                    (_) => _scrollDown());
+                                            messaage.clear();
+                                          });
+                                        },
+                                        onRecordEnd: (String path) {
+                                          String name = path.split('/').last;
+
+                                          context
+                                              .read<PhotouploadCubit>()
+                                              .updateData(path, name, name)
+                                              .then((value) async {
+                                            String voiceurl = await firebase_storage
+                                                .FirebaseStorage.instance
+                                                .ref(
+                                                    'userimage/${name}/${name}')
+                                                .getDownloadURL();
+                                            print(voiceurl);
+                                            if (voiceurl != null) {
+                                              setState(() {
+                                                messagesend(
+                                                    message: voiceurl,
+                                                    message_type: 'voice');
+                                              });
+                                            }
+                                          });
+                                        },
+                                        textPadding:
+                                            EdgeInsets.only(bottom: 5.sp),
+                                            
+                                        recordIconColor:
+                                            Theme.of(context).iconTheme.color,
+                                        sendButtonColor:
+                                            Theme.of(context).iconTheme.color,
+                                        borderRadius:
+                                            BorderRadius.circular(15.sp),
+                                        backgroundColor: Colors.transparent,
+                                        sendButtonBackgroundColor:
+                                            Colors.transparent,
                                       ),
-                                    )),
-                                IconButton(
-                                    onPressed: () {
-                                      if (lates_message != null) {
-                                        setState(() {
-                                          messagesend(
-                                              message: messaage.text,
-                                              message_type: 'text');
-                                        });
-                                      }
-                                    },
-                                    icon: SvgPicture.asset(
-                                      'assets/svg/send.svg',
-                                      color: Theme.of(context).iconTheme.color,
-                                    )),
-                              ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    } else {
-                      return Center(
-                        child: CupertinoActivityIndicator(
-                            color: Theme.of(context).iconTheme.color),
-                      );
-                    }
-                  })),
-        );
+                          ],
+                        );
+                      } else {
+                        return Center(
+                          child: CupertinoActivityIndicator(
+                              color: Theme.of(context).iconTheme.color),
+                        );
+                      }
+                    })),
+          );
+        });
       } else if (getdatadate is BusinessData) {
         var brightness = MediaQuery.of(context).platformBrightness;
         bool isDarkMode = brightness == Brightness.dark;
@@ -1174,4 +1240,3 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 /// business
 ///
 ///
-

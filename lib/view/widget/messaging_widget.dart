@@ -11,6 +11,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'business/widget/voice_message.dart';
+
 class messageing_widget extends StatelessWidget {
   const messageing_widget({
     Key key,
@@ -18,12 +20,14 @@ class messageing_widget extends StatelessWidget {
     @required this.myUID,
     @required this.image,
     @required this.profile_data,
+    @required this.RoomID,
   }) : super(key: key);
 
   final DocumentSnapshot data;
   final Map<String, dynamic> profile_data;
   final String myUID;
   final String image;
+  final String RoomID;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +98,22 @@ class messageing_widget extends StatelessWidget {
                                             children: [
                                               Row(
                                                 children: [
-                                                  if (islink &&
+                                                  if (data['message_type'] ==
+                                                      'voice') ...[
+                                                    voice_message(
+                                                      Room_Data: {
+                                                        "message":
+                                                            data['message']
+                                                      },
+                                                      myUID: myUID,
+                                                      isDarkMode: isDarkMode,
+                                                      isreceiver:
+                                                          data['sender'] ==
+                                                                  myUID
+                                                              ? false
+                                                              : true,
+                                                    )
+                                                  ] else if (islink &&
                                                       data['message_type'] ==
                                                           'text') ...[
                                                     Container(
@@ -126,25 +145,25 @@ class messageing_widget extends StatelessWidget {
                                                               TextOverflow
                                                                   .ellipsis,
                                                           titleStyle: TextStyle(
-                                                            color:
-                                                                data['sender'] ==
-                                                                        myUID
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black,
+                                                            color: data['sender'] ==
+                                                                    myUID
+                                                                ? Colors.white
+                                                                : Theme.of(
+                                                                        context)
+                                                                    .iconTheme
+                                                                    .color,
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             fontSize: 15,
                                                           ),
                                                           bodyStyle: TextStyle(
-                                                              color:
-                                                                  data['sender'] ==
-                                                                          myUID
-                                                                      ? Colors
-                                                                          .white
-                                                                      : Colors
-                                                                          .black,
+                                                              color: data['sender'] ==
+                                                                      myUID
+                                                                  ? Colors.white
+                                                                  : Theme.of(
+                                                                          context)
+                                                                      .iconTheme
+                                                                      .color,
                                                               fontSize: 12),
                                                           errorBody:
                                                               'Show my custom error body',
@@ -188,26 +207,21 @@ class messageing_widget extends StatelessWidget {
                                                   ] else if (data[
                                                           'message_type'] ==
                                                       'image') ...[
-                                                    Opacity(
-                                                      opacity: 0.6,
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    10.sp),
-                                                        child:
-                                                            CachedNetworkImage(
-                                                          width: 50.w,
-                                                          height: 50.w,
-                                                          fit: BoxFit.cover,
-                                                          imageUrl:
-                                                              data['message'],
-                                                          errorWidget: (context,
-                                                                  url, error) =>
-                                                              Icon(Icons.error),
-                                                        ),
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10.sp),
+                                                      child: CachedNetworkImage(
+                                                        width: 50.w,
+                                                        height: 50.w,
+                                                        fit: BoxFit.cover,
+                                                        imageUrl:
+                                                            data['message'],
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Icon(Icons.error),
                                                       ),
-                                                    )
+                                                    ),
                                                   ] else ...[
                                                     Container(
                                                       constraints:
@@ -228,16 +242,12 @@ class messageing_widget extends StatelessWidget {
                                                             : EdgeInsets.only(
                                                                 bottom: 8.sp),
                                                         child: Text(
-                                                          data["message"],
+                                                          data["message"]
+                                                              .toString(),
                                                           style: TextStyle(
                                                               color: data['sender'] ==
                                                                       myUID
-                                                                  ? Color
-                                                                      .fromRGBO(
-                                                                          33,
-                                                                          150,
-                                                                          243,
-                                                                          1)
+                                                                  ? Colors.white
                                                                   : Theme.of(
                                                                           context)
                                                                       .iconTheme
@@ -301,10 +311,12 @@ class messageing_widget extends StatelessWidget {
                                           SizedBox(
                                             width: 5.sp,
                                           ),
-                                          // SvgPicture.asset(
-                                          //   "assets/svg/see.svg",
-                                          //   width: 15.sp,
-                                          // )
+                                          SvgPicture.asset(
+                                            data['read']
+                                                ? "assets/svg/see.svg"
+                                                : "assets/svg/unsee.svg",
+                                            width: 15.sp,
+                                          )
                                         ]
                                       ],
                                     ),
