@@ -4,6 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirebaseContact {
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
+
+Stream<List<String>> Get_My_Contact({String uid}){
+final res = firebaseFirestore.collection('Contact_list');
+
+}
   Stream<List<GetFireContactList>> GetContactList(
       {String Keyword, bool isSearch, bool search_number}) {
     final res = firebaseFirestore.collection('user');

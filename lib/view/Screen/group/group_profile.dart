@@ -45,6 +45,7 @@ class _group_profileState extends State<group_profile> {
   }
 
   void get_group_data({String uid}) {
+    print(widget.UIDuser);
     myuid = sharedPreferences.getString('uid');
     context.read<GroupProfileCubit>().Get_Group_Data(Room_Id: uid);
   }
@@ -57,6 +58,11 @@ class _group_profileState extends State<group_profile> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
           elevation: 0,
+          centerTitle: true,
+          title: Text(
+            "Group Profile",
+            style: TextStyle(color: Theme.of(context).iconTheme.color),
+          ),
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           leading: IconButton(
               onPressed: () {
@@ -68,12 +74,13 @@ class _group_profileState extends State<group_profile> {
               ))),
       body: BlocBuilder<GroupProfileCubit, GroupProfileState>(
         builder: (context, state) {
-          if (state is Group_Data_loading) {
-            return Center(
-              child: CupertinoActivityIndicator(
-                  color: Theme.of(context).iconTheme.color),
-            );
-          } else if (state is Success_Get_Group_Data) {
+          // if (state is Group_Data_loading) {
+          //   return Center(
+          //     child: CupertinoActivityIndicator(
+          //         color: Theme.of(context).iconTheme.color),
+          //   );
+          // } else
+          if (state is Success_Get_Group_Data) {
             return SingleChildScrollView(
               child: Padding(
                 padding:

@@ -8,6 +8,7 @@ import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -303,9 +305,34 @@ class _profile_setupState extends State<profile_setup> {
                               'uid', state.user.phoneNumber);
                           sharedPreferences.setString(
                               'number', state.user.phoneNumber);
-                          Future.delayed(Duration(seconds: 5), () {
-                            Navigator.of(context).pushNamed('/');
-                          });
+                          // profile setup Code Send
+
+                          List contact_number_list = [];
+                          bool isGranted =
+                              await Permission.contacts.status.isGranted;
+                          if (!isGranted) {
+                            isGranted =
+                                await Permission.contacts.request().isGranted;
+                          }
+
+                          if (isGranted) {
+                            await ContactsService.getContacts().then((value) {
+                              for (var item in value) {
+                                if (item.phones.isNotEmpty) {
+                                  contact_number_list.add(item.phones[0].value);
+                                } else {
+                                  print("Null Phone number");
+                                }
+                              }
+
+                              FirebaseFirestore.instance
+                                  .collection("Contact_list")
+                                  .doc(state.user.phoneNumber)
+                                  .set({"list_Contact": contact_number_list});
+                            });
+                          }
+
+                          Navigator.of(context).pushNamed('/');
                         }
                       },
                       Texts: "DONE",
@@ -335,9 +362,33 @@ class _profile_setupState extends State<profile_setup> {
                               'uid', state.user.phoneNumber);
                           sharedPreferences.setString(
                               'number', state.user.phoneNumber);
-                          Future.delayed(Duration(seconds: 5), () {
-                            Navigator.of(context).pushNamed('/');
-                          });
+
+                          List contact_number_list = [];
+                          bool isGranted =
+                              await Permission.contacts.status.isGranted;
+                          if (!isGranted) {
+                            isGranted =
+                                await Permission.contacts.request().isGranted;
+                          }
+
+                          if (isGranted) {
+                            await ContactsService.getContacts().then((value) {
+                              for (var item in value) {
+                                if (item.phones.isNotEmpty) {
+                                  contact_number_list.add(item.phones[0].value);
+                                } else {
+                                  print("null phone number");
+                                }
+                              }
+
+                              FirebaseFirestore.instance
+                                  .collection("Contact_list")
+                                  .doc(state.user.phoneNumber)
+                                  .set({"list_Contact": contact_number_list});
+                            });
+                          }
+
+                          Navigator.of(context).pushNamed('/');
                         }
                       },
                       Texts: "DONE",

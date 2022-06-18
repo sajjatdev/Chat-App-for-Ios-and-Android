@@ -5,6 +5,8 @@ import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/logic/send_message/send_message_cubit.dart';
 
 import 'package:chatting/main.dart';
+import 'package:detectable_text_field/detector/sample_regular_expressions.dart';
+import 'package:detectable_text_field/widgets/detectable_text_field.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -106,7 +108,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
           "Message page UID Data $frienduid With Type ${widget.data['type']}");
       print("------------------------------------------------");
     });
-    // Future.delayed(Duration(milliseconds: 250), () {
+    // stream.delayed(Duration(milliseconds: 250), () {
     //   _scrollDown();
     // });
   }
@@ -233,85 +235,79 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
               image: DecorationImage(
                   fit: BoxFit.cover,
                   image: isDarkMode
-                      ? const AssetImage('assets/svg/White_Background.png')
+                      ? const AssetImage('assets/svg/Black_Background.png')
                       : const AssetImage('assets/svg/White_Background.png'))),
           child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
-              automaticallyImplyLeading: false,
-              backgroundColor: Theme.of(context).secondaryHeaderColor,
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/home');
-                },
-                icon: SvgPicture.asset(
-                  'assets/svg/left-chevron.svg',
-                  color: Theme.of(context).iconTheme.color,
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                iconTheme:
+                    IconThemeData(color: Theme.of(context).iconTheme.color),
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
+                centerTitle: true,
+                title: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      getdatadate.group_data_get.groupName,
+                      style: TextStyle(
+                          color: Theme.of(context).iconTheme.color,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      getdatadate.group_data_get.type,
+                      style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+                    ),
+                  ],
                 ),
-              ),
-              centerTitle: true,
-              title: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    getdatadate.group_data_get.groupName,
-                    style: TextStyle(
-                        color: Theme.of(context).iconTheme.color,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    getdatadate.group_data_get.type,
-                    style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/group_profile', arguments: frienduid);
+
+                        print(frienduid);
+                      },
+                      child: CircleAvatar(
+                        backgroundImage:
+                            NetworkImage(getdatadate.group_data_get.groupImage),
+                        maxRadius: 15.sp,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context)
-                          .pushNamed('/group_profile', arguments: frienduid);
-                    },
-                    child: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(getdatadate.group_data_get.groupImage),
-                      maxRadius: 15.sp,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            body: SafeArea(
-                child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    future: FirebaseFirestore.instance
-                        .collection('user')
-                        .doc(myUID)
-                        .collection("Friends")
-                        .doc(frienduid.trim())
-                        .get(),
-                    builder: (context,
-                        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
-                            getuserRoomID) {
-                      if (getuserRoomID.hasData) {
-                        final room_id = getuserRoomID.data.data();
-                        return Column(
-                          children: [
-                            Expanded(
-                                flex: 6,
-                                child: FutureBuilder<QuerySnapshot>(
-                                    future: get_message
-                                        .doc(room_id['Room_ID'])
-                                        .collection('message')
-                                        .orderBy('time', descending: false)
-                                        .get(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return ListView.builder(
-                                            controller: scrollController,
+              body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
+                      .collection('user')
+                      .doc(myUID)
+                      .collection("Friends")
+                      .doc(frienduid.trim())
+                      .snapshots(),
+                  builder: (context,
+                      AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                          getuserRoomID) {
+                    if (getuserRoomID.hasData) {
+                      final room_id = getuserRoomID.data.data();
+                      return Column(
+                        children: [
+                          Expanded(
+                              flex: 6,
+                              child: StreamBuilder<QuerySnapshot>(
+                                  stream: get_message
+                                      .doc(room_id['Room_ID'])
+                                      .collection('message')
+                                      .orderBy('time', descending: false)
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return SingleChildScrollView(
+                                        child: ListView.builder(
+                                            physics:
+                                                NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
                                             itemCount:
                                                 snapshot.data.docs.length,
@@ -320,15 +316,15 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                   snapshot.data.docs[index];
 
                                               if (data['sender'] != null) {
-                                                return FutureBuilder<
+                                                return StreamBuilder<
                                                         DocumentSnapshot<
                                                             Map<String,
                                                                 dynamic>>>(
-                                                    future: FirebaseFirestore
+                                                    stream: FirebaseFirestore
                                                         .instance
                                                         .collection('user')
                                                         .doc(data['sender'])
-                                                        .get(),
+                                                        .snapshots(),
                                                     builder: (context,
                                                         AsyncSnapshot<
                                                                 DocumentSnapshot<
@@ -355,9 +351,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                                 .group_data_get
                                                                 .groupImage);
                                                       } else {
-                                                        return GFShimmer(
-                                                          child: emptyBlock,
-                                                        );
+                                                        return Container();
                                                       }
                                                     });
                                               } else {
@@ -370,145 +364,139 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                                   .color),
                                                 );
                                               }
+                                            }),
+                                      );
+                                    } else {
+                                      return Container();
+                                    }
+                                  })),
+                          Container(
+                            margin: EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                    onPressed: () async {
+                                      final result = await FilePicker.platform
+                                          .pickFiles(
+                                              allowMultiple: false,
+                                              type: FileType.custom,
+                                              allowedExtensions: [
+                                            'png',
+                                            'jpg',
+                                            'gif'
+                                          ]);
+
+                                      if (result != null) {
+                                        final path = result.files.single.path;
+                                        final name = result.files.single.name;
+                                        context
+                                            .read<PhotouploadCubit>()
+                                            .updateData(path, name, name)
+                                            .then((value) async {
+                                          String imagurl = await firebase_storage
+                                              .FirebaseStorage.instance
+                                              .ref('userimage/${name}/${name}')
+                                              .getDownloadURL();
+
+                                          if (imagurl != null) {
+                                            setState(() {
+                                              messagesend(
+                                                  message: imagurl,
+                                                  message_type: 'image');
                                             });
-                                      } else {
-                                        return Container();
-                                      }
-                                    })),
-                            Container(
-                              margin: EdgeInsets.only(bottom: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                      onPressed: () async {
-                                        final result = await FilePicker.platform
-                                            .pickFiles(
-                                                allowMultiple: false,
-                                                type: FileType.custom,
-                                                allowedExtensions: [
-                                              'png',
-                                              'jpg',
-                                              'gif'
-                                            ]);
-
-                                        if (result != null) {
-                                          final path = result.files.single.path;
-                                          final name = result.files.single.name;
-                                          context
-                                              .read<PhotouploadCubit>()
-                                              .updateData(path, name, name)
-                                              .then((value) async {
-                                            String imagurl = await firebase_storage
-                                                .FirebaseStorage.instance
-                                                .ref(
-                                                    'userimage/${name}/${name}')
-                                                .getDownloadURL();
-
-                                            if (imagurl != null) {
-                                              setState(() {
-                                                messagesend(
-                                                    message: imagurl,
-                                                    message_type: 'image');
-                                              });
-                                            }
-                                          });
-                                        }
-                                      },
-                                      icon: SvgPicture.asset(
-                                        'assets/svg/gallery.svg',
-                                        color:
-                                            Theme.of(context).iconTheme.color,
-                                      )),
-                                  Container(
-                                    width: 70.w,
-                                    child: TextFormField(
-                                      keyboardType: TextInputType.multiline,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          lates_message = value;
+                                          }
                                         });
-                                      },
-                                      controller: messaage,
-                                      autocorrect: true,
-                                      textInputAction: TextInputAction.newline,
-                                      validator: (value) => value.isEmpty
-                                          ? "Enter your Value"
-                                          : null,
-                                      style: TextStyle(
-                                          color:
-                                              Theme.of(context).iconTheme.color,
-                                          fontSize: 12.sp),
-                                      decoration: InputDecoration(
-                                        suffixIcon: IconButton(
-                                            onPressed: () {},
-                                            icon: SvgPicture.asset(
-                                              'assets/svg/smile-3.svg',
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
-                                            )),
-                                        hintText: "Write a message...",
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 10, vertical: 5),
-                                        hintStyle: TextStyle(
+                                      }
+                                    },
+                                    icon: SvgPicture.asset(
+                                      'assets/svg/gallery.svg',
+                                      color: Theme.of(context).iconTheme.color,
+                                    )),
+
+                                // suffixIcon: IconButton(
+                                //       onPressed: () {},
+                                //       icon: SvgPicture.asset(
+                                //         'assets/svg/smile-3.svg',
+                                //         color: Theme.of(context)
+                                //             .iconTheme
+                                //             .color,
+                                //       )),
+                                //   hintText: "Write a message...",
+                                // style: TextStyle(
+                                //   color:
+                                //       Theme.of(context).iconTheme.color,
+                                //   fontSize: 12.sp),
+                                Container(
+                                    width: 70.w,
+                                    constraints: BoxConstraints(
+                                        minHeight: 5.w, maxHeight: 20.w),
+                                    child: SingleChildScrollView(
+                                      child: DetectableTextField(
+                                        controller: messaage,
+                                        onChanged: ((value) {
+                                          setState(() {
+                                            lates_message = value;
+                                          });
+                                        }),
+                                        maxLines: null,
+                                        decoration: InputDecoration(
+                                          hintText: "New Message",
+                                          hintStyle: TextStyle(
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                          fillColor: isDarkMode
+                                              ? HexColor.fromHex("#1a1a1c")
+                                              : Colors.grey.shade200,
+                                          filled: true,
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide.none,
+                                            borderRadius:
+                                                BorderRadius.circular(25.0),
+                                          ),
+                                        ),
+                                        textInputAction:
+                                            TextInputAction.newline,
+                                        detectionRegExp: detectionRegExp(),
+                                        decoratedStyle: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Theme.of(context)
+                                              .secondaryHeaderColor,
+                                        ),
+                                        basicStyle: TextStyle(
+                                            fontSize: 12.sp,
                                             color: Theme.of(context)
                                                 .iconTheme
-                                                .color,
-                                            fontSize: 12.sp),
-                                        fillColor: isDarkMode
-                                            ? HexColor.fromHex("#696969")
-                                            : HexColor.fromHex("#EEEEEF"),
-                                        filled: true,
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedErrorBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                            borderSide: BorderSide.none),
-                                        errorBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                            borderSide: BorderSide.none),
-                                        enabledBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                            borderSide: BorderSide.none),
+                                                .color),
                                       ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                      onPressed: () {
-                                        if (lates_message != null) {
-                                          setState(() {
-                                            messagesend(
-                                                message: messaage.text,
-                                                message_type: 'text');
-                                          });
-                                        }
-                                      },
-                                      icon: SvgPicture.asset(
-                                        'assets/svg/send.svg',
-                                        color:
-                                            Theme.of(context).iconTheme.color,
-                                      )),
-                                ],
-                              ),
+                                    )),
+                                IconButton(
+                                    onPressed: () {
+                                      if (lates_message != null) {
+                                        setState(() {
+                                          messagesend(
+                                              message: messaage.text,
+                                              message_type: 'text');
+                                        });
+                                      }
+                                    },
+                                    icon: SvgPicture.asset(
+                                      'assets/svg/send.svg',
+                                      color: Theme.of(context).iconTheme.color,
+                                    )),
+                              ],
                             ),
-                          ],
-                        );
-                      } else {
-                        return Center(
-                          child: CupertinoActivityIndicator(
-                              color: Theme.of(context).iconTheme.color),
-                        );
-                      }
-                    })),
-          ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Center(
+                        child: CupertinoActivityIndicator(
+                            color: Theme.of(context).iconTheme.color),
+                      );
+                    }
+                  })),
         );
       } else if (getdatadate is BusinessData) {
         var brightness = MediaQuery.of(context).platformBrightness;
@@ -637,14 +625,14 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                               (cls_Hour == curr_Hour
                                   ? cls_min <= curr_min
                                   : true)) {
-                            return FutureBuilder<
+                            return StreamBuilder<
                                     DocumentSnapshot<Map<String, dynamic>>>(
-                                future: FirebaseFirestore.instance
+                                stream: FirebaseFirestore.instance
                                     .collection('user')
                                     .doc(myUID)
                                     .collection("Friends")
                                     .doc(frienduid.trim())
-                                    .get(),
+                                    .snapshots(),
                                 builder: (context,
                                     AsyncSnapshot<
                                             DocumentSnapshot<
@@ -656,13 +644,13 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                       children: [
                                         Expanded(
                                           flex: 6,
-                                          child: FutureBuilder<QuerySnapshot>(
-                                            future: get_message
+                                          child: StreamBuilder<QuerySnapshot>(
+                                            stream: get_message
                                                 .doc(room_id['Room_ID'])
                                                 .collection('message')
                                                 .orderBy('time',
                                                     descending: false)
-                                                .get(),
+                                                .snapshots(),
                                             builder: (context, snapshot) {
                                               if (snapshot.hasData) {
                                                 return business_chat(
@@ -954,13 +942,13 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
             ],
           ),
           body: SafeArea(
-              child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                  future: FirebaseFirestore.instance
+              child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
                       .collection('user')
                       .doc(myUID)
                       .collection("Friends")
                       .doc(frienduid.trim())
-                      .get(),
+                      .snapshots(),
                   builder: (context,
                       AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
                           getuserRoomID) {
@@ -987,14 +975,14 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                 snapshot.data.docs[index];
 
                                             if (data['sender'] != null) {
-                                              return FutureBuilder<
+                                              return StreamBuilder<
                                                   DocumentSnapshot<
                                                       Map<String, dynamic>>>(
-                                                future: FirebaseFirestore
+                                                stream: FirebaseFirestore
                                                     .instance
                                                     .collection('user')
                                                     .doc(data['sender'])
-                                                    .get(),
+                                                    .snapshots(),
                                                 builder: (context,
                                                     AsyncSnapshot<
                                                             DocumentSnapshot<

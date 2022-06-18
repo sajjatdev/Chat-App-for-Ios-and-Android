@@ -13,12 +13,14 @@ class GroupCreateCubit extends Cubit<GroupCreateState> {
       String group_name,
       String group_image,
       List mamber,
+      String description,
       String group_username,
       String group_url}) async {
     await crate_group.create_Group(
         admin: admin,
         group_image: group_image,
         group_name: group_name,
+        description: description,
         mamber: mamber,
         group_url: group_url,
         group_username: group_username);

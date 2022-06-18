@@ -168,6 +168,7 @@ class messageing {
       String group_name,
       String group_image,
       List mamber,
+      String description,
       String group_username,
       String group_url}) async {
     FirebaseFirestore.instance.collection('chat').doc(group_username).set({
@@ -176,6 +177,7 @@ class messageing {
       'group_image': group_image,
       'mamber': mamber,
       "type": "group",
+      "description":description,
       "group_time":DateTime.now(),
       'Room_ID': group_username,
       'group_url': 'chatting/' + group_url,

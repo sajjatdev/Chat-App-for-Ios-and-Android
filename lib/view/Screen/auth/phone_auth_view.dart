@@ -28,6 +28,7 @@ class _Auth_phoneState extends State<Auth_phone> {
   String phone_number;
   String initialCountry = 'CA';
   bool buttonanable = false;
+  TextEditingController phoneNumberController = TextEditingController();
   PhoneNumber number = PhoneNumber(isoCode: 'CA');
 
   @override
@@ -70,8 +71,8 @@ class _Auth_phoneState extends State<Auth_phone> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               child: InternationalPhoneNumberInput(
-                  ignoreBlank: false,
                   initialValue: number,
+                  textFieldController: phoneNumberController,
                   countries: const ['CA', 'US', 'BD'],
                   formatInput: true,
                   selectorConfig: const SelectorConfig(
@@ -98,9 +99,15 @@ class _Auth_phoneState extends State<Auth_phone> {
             Button(
               buttonenable: buttonanable,
               onpress: () async {
-                BlocProvider.of<PhoneauthBloc>(context)
-                    .add(PhoneNumberVerify(phoneNumber: phone_number));
-                Navigator.of(context).pushNamed('/otp');
+                if (phone_number[1] == "1") {
+                  BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
+                      phoneNumber: "+1 ${phoneNumberController.text}"));
+                  Navigator.of(context).pushNamed('/otp');
+                } else {
+                  BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
+                      phoneNumber: "+880 ${phoneNumberController.text}"));
+                  Navigator.of(context).pushNamed('/otp');
+                }
               },
               Texts: "SEND OTP",
               widths: 80,

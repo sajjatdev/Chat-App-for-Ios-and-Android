@@ -10,7 +10,7 @@ class Group_Services {
   Stream<group_profile_model> get_group_data({String Room_ID}) {
     CollectionReference crf = firebaseFirestore.collection('chat');
 
-    return crf.doc("onlineEnglishclass").snapshots().map(
+    return crf.doc("frommylocationtomeet").snapshots().map(
         (DocumentSnapshot snapshot) => group_profile_model(
             admin: snapshot['admin'],
             mamber: snapshot['mamber'],

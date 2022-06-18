@@ -14,9 +14,9 @@ class GroupProfileCubit extends Cubit<GroupProfileState> {
 
   Future<void> Get_Group_Data({String Room_Id}) {
     emit(Group_Data_loading());
-
     streamSubscription =
         group_services.get_group_data(Room_ID: Room_Id).listen((event) {
+      print(event.admin);
       if (event.groupName != null) {
         emit(Success_Get_Group_Data(group_profile: event));
       } else {

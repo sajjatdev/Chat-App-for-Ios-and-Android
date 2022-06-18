@@ -1,3 +1,4 @@
+import 'package:chatting/Helper/Shimmer.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Contact/contact_cubit.dart';
 import 'package:chatting/logic/Get_message_list/get_message_list_cubit.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:getwidget/components/shimmer/gf_shimmer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
@@ -82,51 +84,17 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         actions: [
           IconButton(
               onPressed: () async {
-                try {
-                  if (contact_number_list != null) {
-                    Navigator.of(context).pushNamed('/message_add');
-                    context.read<ContactCubit>().Getallcontactlist(
-                          keyword: "none",
-                          isSearch: false,
-                        );
-                  } else {
-                    contact_number_list = [];
-                    bool isGranted = await Permission.contacts.status.isGranted;
-                    if (!isGranted) {
-                      isGranted = await Permission.contacts.request().isGranted;
-                    }
-
-                    if (isGranted) {
-                      await ContactsService.getContacts().then((value) {
-                        for (var item in value) {
-                          if (item.phones != null) {
-                            contact_number_list.add(item.phones[0].value);
-                          }
-                        }
-
-                        // add Data Loacl Database In future hava any error this
-
-                        sharedPreferences
-                            .setStringList(
-                                "contact_number_list", contact_number_list)
-                            .then((value) {
-                          context.read<ContactCubit>().Getallcontactlist(
-                                keyword: "none",
-                                isSearch: false,
-                              );
-                          Navigator.of(context).pushNamed('/message_add');
-                        });
-                      });
-                    }
-                  }
-                } catch (e) {
-                  print(e.toString());
-                }
+                context.read<ContactCubit>().Getallcontactlist(
+                      keyword: "none",
+                      isSearch: false,
+                    );
+                Navigator.of(context).pushNamed('/message_add');
               },
               icon: SvgPicture.asset(
                 'assets/svg/edit-3.svg',
@@ -225,10 +193,8 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
           child: BlocBuilder<GetMessageListCubit, GetMessageListState>(
             builder: (context, state) {
               if (state is Loadings) {
-                return Center(
-                  child: CupertinoActivityIndicator(
-                    color: Theme.of(context).iconTheme.color,
-                  ),
+                return GFShimmer(
+                  child: emptyBlock(context),
                 );
               }
               if (state is Message_list) {

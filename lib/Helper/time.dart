@@ -10,19 +10,19 @@ class Time_Chat {
       if (diff.inDays > 8) {
         return DateFormat("dd-MM-yyy").format(notification);
       } else if ((diff.inDays / 7).floor() >= 1) {
-        return "Last week";
+        return DateFormat("dd-MM-yyy").format(notification);
       } else if (diff.inDays >= 2) {
         return "${diff.inDays}d";
       } else if (diff.inDays >= 1) {
-        return "1 days ago";
+        return DateFormat("hh:mm a").format(notification);
       } else if (diff.inHours >= 2) {
         return "${diff.inHours}h";
       } else if (diff.inDays >= 1) {
-        return "1 Hour ago";
+        return DateFormat("hh:mm a").format(notification);
       } else if (diff.inMinutes >= 2) {
         return "${diff.inMinutes}m";
       } else if (diff.inMinutes >= 1) {
-        return "1 Minute ago";
+        return "1m";
       } else if (diff.inSeconds >= 3) {
         return "${diff.inSeconds}s";
       } else {

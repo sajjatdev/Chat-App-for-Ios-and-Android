@@ -1,8 +1,10 @@
+import 'package:chatting/Helper/Shimmer.dart';
 import 'package:chatting/Helper/time.dart';
 import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:getwidget/components/shimmer/gf_shimmer.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../model/get_message_list.dart';
@@ -153,10 +155,14 @@ class Message_user_list extends StatelessWidget {
                   ),
                 );
               } else {
-                return Container();
+                return GFShimmer(
+                  child: emptyBlock(context),
+                );
               }
             } else {
-              return Container();
+              return GFShimmer(
+                child: emptyBlock(context),
+              );
             }
           }),
     );

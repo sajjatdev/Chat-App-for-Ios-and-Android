@@ -93,6 +93,7 @@ class _create_groupState extends State<create_group> {
                             admin: admin_list,
                             group_image: imagurl,
                             group_name: Group_name.text,
+                            description: description.text,
                             mamber: widget.member_list,
                             group_username: Group_name.text.replaceAll(" ", ''),
                             group_url: Group_name.text.replaceAll(" ", ''),
