@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_composer/chat_composer.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
@@ -19,8 +21,11 @@ import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:sizer/sizer.dart';
+import 'package:social_media_recorder/audio_encoder_type.dart';
+import 'package:social_media_recorder/screen/social_media_recorder.dart';
 
 class Messageing extends StatefulWidget {
   static const String routeName = '/messageing';
@@ -56,6 +61,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
   String Type;
   List mamberList;
   bool message_seen;
+  bool michide = false, texthide = false;
 
   @override
   void initState() {
@@ -354,7 +360,9 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                     builder: (context, snapshot) {
                                       if (snapshot.hasData) {
                                         return SingleChildScrollView(
+                                          controller: scrollController,
                                           child: ListView.builder(
+                                              reverse: true,
                                               physics:
                                                   NeverScrollableScrollPhysics(),
                                               shrinkWrap: true,
@@ -423,13 +431,9 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                       }
                                     })),
                             Container(
-                              height: 15.w,
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .scaffoldBackgroundColor),
+                              height: 20.w,
+                              color: Theme.of(context).secondaryHeaderColor,
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   CupertinoButton(
                                     padding: EdgeInsets.zero,
@@ -475,32 +479,13 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                       }
                                     },
                                   ),
-                                  // Message Text box
                                   Expanded(
                                     child: Theme(
-                                      data: ThemeData(
-                                          cursorColor: Theme.of(context)
-                                              .iconTheme
-                                              .color),
+                                      data: ThemeData(),
                                       child: ChatComposer(
                                         controller: messaage,
-                                        leading: Container(
-                                          width: 5.w,
-                                          color: Colors.transparent,
-                                        ),
-                                        onRecordStart: () {
-                                          setState(() {
-                                            FirebaseFirestore.instance
-                                                .collection("chat")
-                                                .doc(frienduid)
-                                                .collection("message_typing")
-                                                .doc("typing")
-                                                .set({
-                                              "typing": true,
-                                              "typing_user": myUID
-                                            });
-                                          });
-                                        },
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 10),
                                         onReceiveText: (str) {
                                           setState(() {
                                             messagesend(
@@ -520,6 +505,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                               .read<PhotouploadCubit>()
                                               .updateData(path, name, name)
                                               .then((value) async {
+                                            print("Done");
                                             String voiceurl = await firebase_storage
                                                 .FirebaseStorage.instance
                                                 .ref(
@@ -535,15 +521,10 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             }
                                           });
                                         },
-                                        textPadding:
-                                            EdgeInsets.only(bottom: 5.sp),
-                                            
                                         recordIconColor:
                                             Theme.of(context).iconTheme.color,
                                         sendButtonColor:
                                             Theme.of(context).iconTheme.color,
-                                        borderRadius:
-                                            BorderRadius.circular(15.sp),
                                         backgroundColor: Colors.transparent,
                                         sendButtonBackgroundColor:
                                             Colors.transparent,
@@ -553,6 +534,157 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                 ],
                               ),
                             ),
+//                             Container(
+//                               height: 15.w,
+//                               decoration: BoxDecoration(
+//                                   color: Theme.of(context)
+//                                       .scaffoldBackgroundColor),
+//                               child: Row(
+//                                 mainAxisAlignment:
+//                                     MainAxisAlignment.spaceAround,
+//                                 children: [
+//                                   CupertinoButton(
+//                                     padding:
+//                                         EdgeInsets.only(bottom: 2.w, left: 2.w),
+//                                     child: Icon(
+//                                       Icons.add,
+//                                       size: 25,
+//                                       color: Theme.of(context).iconTheme.color,
+//                                     ),
+//                                     onPressed: () async {
+//                                       final result = await FilePicker.platform
+//                                           .pickFiles(
+//                                               allowMultiple: false,
+//                                               type: FileType.custom,
+//                                               allowedExtensions: [
+//                                             'png',
+//                                             'jpg',
+//                                             'gif'
+//                                           ]);
+
+//                                       if (result != null) {
+//                                         final path = result.files.single.path;
+//                                         final name = result.files.single.name;
+//                                         context
+//                                             .read<PhotouploadCubit>()
+//                                             .updateData(path, name, name)
+//                                             .then(
+//                                           (value) async {
+//                                             String imagurl = await firebase_storage
+//                                                 .FirebaseStorage.instance
+//                                                 .ref(
+//                                                     'userimage/${name}/${name}')
+//                                                 .getDownloadURL();
+
+//                                             if (imagurl != null) {
+//                                               setState(() {
+//                                                 messagesend(
+//                                                     message: imagurl,
+//                                                     message_type: 'image');
+//                                               });
+//                                             }
+//                                           },
+//                                         );
+//                                       }
+//                                     },
+//                                   ),
+// //
+//                                   Expanded(
+//                                       child: Padding(
+//                                     padding: const EdgeInsets.symmetric(
+//                                         horizontal: 5, vertical: 5),
+//                                     child: TextField(
+//                                       maxLines: null,
+//                                       onChanged: (value) {
+//                                         if (value.isNotEmpty) {
+//                                           setState(() {
+//                                             michide = true;
+//                                           });
+//                                         } else {
+//                                           setState(() {
+//                                             michide = false;
+//                                           });
+//                                         }
+//                                       },
+//                                       cursorColor:
+//                                           Theme.of(context).iconTheme.color,
+//                                       decoration: InputDecoration(
+//                                           contentPadding: EdgeInsets.symmetric(
+//                                               horizontal: 8.sp, vertical: 5.sp),
+//                                           filled: true,
+//                                           fillColor: Colors.white,
+//                                           border: OutlineInputBorder(
+//                                               borderSide: BorderSide.none,
+//                                               borderRadius:
+//                                                   BorderRadius.circular(20))),
+//                                     ),
+//                                   )),
+//                                   // Message Text box
+
+//                                   michide
+//                                       ? GestureDetector(
+//                                           child: Padding(
+//                                             padding: const EdgeInsets.all(8.0),
+//                                             child: Icon(
+//                                               Icons.send,
+//                                               color: Theme.of(context)
+//                                                   .iconTheme
+//                                                   .color,
+//                                               size: 20.sp,
+//                                             ),
+//                                           ),
+//                                           onTap: () {})
+//                                       : Padding(
+//                                           padding: EdgeInsets.only(top: 2.w),
+//                                           child: GestureDetector(
+//                                             onLongPressStart:
+//                                                 (LongPressStartDetails) {
+//                                               setState(() {
+//                                                 texthide = true;
+//                                               });
+//                                             },
+//                                             child: SocialMediaRecorder(
+//                                               sendRequestFunction:
+//                                                   (soundFile) async {
+//                                                 FirebaseFirestore.instance
+//                                                     .collection("chat")
+//                                                     .doc(frienduid)
+//                                                     .collection(
+//                                                         "message_typing")
+//                                                     .doc("typing")
+//                                                     .set({
+//                                                   "typing": true,
+//                                                   "typing_user": myUID
+//                                                 });
+//                                                 File p =
+//                                                     await File(soundFile.path)
+//                                                         .create();
+//                                                 String fileName =
+//                                                     p.path.split('/').last;
+//                                                 firebase_storage
+//                                                     .FirebaseStorage.instance
+//                                                     .ref(fileName)
+//                                                     .putFile(p)
+//                                                     .then((p0) async {
+//                                                   final url =
+//                                                       await firebase_storage
+//                                                           .FirebaseStorage
+//                                                           .instance
+//                                                           .ref(fileName)
+//                                                           .getDownloadURL();
+
+//                                                   messagesend(
+//                                                       message: url,
+//                                                       message_type: 'voice');
+//                                                 });
+//                                               },
+//                                               encode: AudioEncoderType.AAC,
+//                                             ),
+//                                           ),
+//                                         ),
+//                                 ],
+//                               ),
+//                             ),
                           ],
                         );
                       } else {
@@ -730,136 +862,136 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             },
                                           ),
                                         ),
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(bottom: 10),
-                                          child: ChatComposer(
-                                            controller: messaage,
-                                            onReceiveText: (str) {
-                                              setState(() {
-                                                messagesend(
-                                                    message: str,
-                                                    message_type: "text");
+                                        // Container(
+                                        //   margin:
+                                        //       const EdgeInsets.only(bottom: 10),
+                                        //   child: ChatComposer(
+                                        //     controller: messaage,
+                                        //     onReceiveText: (str) {
+                                        //       setState(() {
+                                        //         messagesend(
+                                        //             message: str,
+                                        //             message_type: "text");
 
-                                                WidgetsBinding.instance
-                                                    .addPostFrameCallback(
-                                                        (_) => _scrollDown());
-                                                messaage.clear();
-                                              });
-                                            },
-                                            onRecordEnd: (String path) {
-                                              String name =
-                                                  path.split('/').last;
+                                        //         WidgetsBinding.instance
+                                        //             .addPostFrameCallback(
+                                        //                 (_) => _scrollDown());
+                                        //         messaage.clear();
+                                        //       });
+                                        //     },
+                                        //     onRecordEnd: (String path) {
+                                        //       String name =
+                                        //           path.split('/').last;
 
-                                              context
-                                                  .read<PhotouploadCubit>()
-                                                  .updateData(path, name, name)
-                                                  .then((value) async {
-                                                print("Done");
-                                                String voiceurl =
-                                                    await firebase_storage
-                                                        .FirebaseStorage
-                                                        .instance
-                                                        .ref(
-                                                            'userimage/${name}/${name}')
-                                                        .getDownloadURL();
-                                                print(voiceurl);
-                                                if (voiceurl != null) {
-                                                  setState(() {
-                                                    messagesend(
-                                                        message: voiceurl,
-                                                        message_type: 'voice');
-                                                  });
-                                                }
-                                              });
-                                            },
-                                            textPadding: EdgeInsets.zero,
-                                            leading: CupertinoButton(
-                                              padding: EdgeInsets.zero,
-                                              child: const Icon(
-                                                Icons.insert_emoticon_outlined,
-                                                size: 25,
-                                                color: Colors.grey,
-                                              ),
-                                              onPressed: () {},
-                                            ),
-                                            recordIconColor: Theme.of(context)
-                                                .secondaryHeaderColor,
-                                            sendButtonColor: Theme.of(context)
-                                                .secondaryHeaderColor,
-                                            borderRadius:
-                                                BorderRadius.circular(30),
-                                            backgroundColor: Colors.transparent,
-                                            sendButtonBackgroundColor:
-                                                Theme.of(context)
-                                                    .iconTheme
-                                                    .color,
-                                            actions: [
-                                              // CupertinoButton(
-                                              //   padding: EdgeInsets.zero,
-                                              //   child: const Icon(
-                                              //     Icons.attach_file_rounded,
-                                              //     size: 25,
-                                              //     color: Colors.grey,
-                                              //   ),
-                                              //   onPressed: () {},
-                                              // ),
-                                              CupertinoButton(
-                                                padding: EdgeInsets.zero,
-                                                child: const Icon(
-                                                  Icons.image,
-                                                  size: 25,
-                                                  color: Colors.grey,
-                                                ),
-                                                onPressed: () async {
-                                                  final result = await FilePicker
-                                                      .platform
-                                                      .pickFiles(
-                                                          allowMultiple: false,
-                                                          type: FileType.custom,
-                                                          allowedExtensions: [
-                                                        'png',
-                                                        'jpg',
-                                                        'gif'
-                                                      ]);
+                                        //       context
+                                        //           .read<PhotouploadCubit>()
+                                        //           .updateData(path, name, name)
+                                        //           .then((value) async {
+                                        //         print("Done");
+                                        //         String voiceurl =
+                                        //             await firebase_storage
+                                        //                 .FirebaseStorage
+                                        //                 .instance
+                                        //                 .ref(
+                                        //                     'userimage/${name}/${name}')
+                                        //                 .getDownloadURL();
+                                        //         print(voiceurl);
+                                        //         if (voiceurl != null) {
+                                        //           setState(() {
+                                        //             messagesend(
+                                        //                 message: voiceurl,
+                                        //                 message_type: 'voice');
+                                        //           });
+                                        //         }
+                                        //       });
+                                        //     },
+                                        //     textPadding: EdgeInsets.zero,
+                                        //     leading: CupertinoButton(
+                                        //       padding: EdgeInsets.zero,
+                                        //       child: const Icon(
+                                        //         Icons.insert_emoticon_outlined,
+                                        //         size: 25,
+                                        //         color: Colors.grey,
+                                        //       ),
+                                        //       onPressed: () {},
+                                        //     ),
+                                        //     recordIconColor: Theme.of(context)
+                                        //         .secondaryHeaderColor,
+                                        //     sendButtonColor: Theme.of(context)
+                                        //         .secondaryHeaderColor,
+                                        //     borderRadius:
+                                        //         BorderRadius.circular(30),
+                                        //     backgroundColor: Colors.transparent,
+                                        //     sendButtonBackgroundColor:
+                                        //         Theme.of(context)
+                                        //             .iconTheme
+                                        //             .color,
+                                        //     actions: [
+                                        //       // CupertinoButton(
+                                        //       //   padding: EdgeInsets.zero,
+                                        //       //   child: const Icon(
+                                        //       //     Icons.attach_file_rounded,
+                                        //       //     size: 25,
+                                        //       //     color: Colors.grey,
+                                        //       //   ),
+                                        //       //   onPressed: () {},
+                                        //       // ),
+                                        //       CupertinoButton(
+                                        //         padding: EdgeInsets.zero,
+                                        //         child: const Icon(
+                                        //           Icons.image,
+                                        //           size: 25,
+                                        //           color: Colors.grey,
+                                        //         ),
+                                        //         onPressed: () async {
+                                        //           final result = await FilePicker
+                                        //               .platform
+                                        //               .pickFiles(
+                                        //                   allowMultiple: false,
+                                        //                   type: FileType.custom,
+                                        //                   allowedExtensions: [
+                                        //                 'png',
+                                        //                 'jpg',
+                                        //                 'gif'
+                                        //               ]);
 
-                                                  if (result != null) {
-                                                    final path = result
-                                                        .files.single.path;
-                                                    final name = result
-                                                        .files.single.name;
-                                                    context
-                                                        .read<
-                                                            PhotouploadCubit>()
-                                                        .updateData(
-                                                            path, name, name)
-                                                        .then(
-                                                      (value) async {
-                                                        String imagurl =
-                                                            await firebase_storage
-                                                                .FirebaseStorage
-                                                                .instance
-                                                                .ref(
-                                                                    'userimage/${name}/${name}')
-                                                                .getDownloadURL();
+                                        //           if (result != null) {
+                                        //             final path = result
+                                        //                 .files.single.path;
+                                        //             final name = result
+                                        //                 .files.single.name;
+                                        //             context
+                                        //                 .read<
+                                        //                     PhotouploadCubit>()
+                                        //                 .updateData(
+                                        //                     path, name, name)
+                                        //                 .then(
+                                        //               (value) async {
+                                        //                 String imagurl =
+                                        //                     await firebase_storage
+                                        //                         .FirebaseStorage
+                                        //                         .instance
+                                        //                         .ref(
+                                        //                             'userimage/${name}/${name}')
+                                        //                         .getDownloadURL();
 
-                                                        if (imagurl != null) {
-                                                          setState(() {
-                                                            messagesend(
-                                                                message:
-                                                                    imagurl,
-                                                                message_type:
-                                                                    'image');
-                                                          });
-                                                        }
-                                                      },
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        //                 if (imagurl != null) {
+                                        //                   setState(() {
+                                        //                     messagesend(
+                                        //                         message:
+                                        //                             imagurl,
+                                        //                         message_type:
+                                        //                             'image');
+                                        //                   });
+                                        //                 }
+                                        //               },
+                                        //             );
+                                        //           }
+                                        //         },
+                                        //       ),
+                                        //     ],
+                                        //   ),
+                                        // ),
                                       ],
                                     );
                                   } else {
@@ -1226,6 +1358,9 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     });
   }
 }
+
+
+
 
 // Send Message event Code
 
