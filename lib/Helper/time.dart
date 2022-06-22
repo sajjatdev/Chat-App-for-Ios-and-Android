@@ -8,9 +8,9 @@ class Time_Chat {
       final diff = date2.difference(notification);
 
       if (diff.inDays > 8) {
-        return DateFormat("dd-MM-yyy").format(notification);
+        return DateFormat("MMMMd").format(notification);
       } else if ((diff.inDays / 7).floor() >= 1) {
-        return DateFormat("dd-MM-yyy").format(notification);
+        return DateFormat("MMMMd").format(notification);
       } else if (diff.inDays >= 2) {
         return "${diff.inDays}d";
       } else if (diff.inDays >= 1) {

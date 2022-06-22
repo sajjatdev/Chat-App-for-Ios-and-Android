@@ -300,7 +300,7 @@ class messageing_widget extends StatelessWidget {
                                                 data['message_type'] == 'image'
                                                     ? data['sender'] != myUID
                                                         ? Colors.black
-                                                        : Colors.white
+                                                        : Colors.grey
                                                     : data['sender'] != myUID
                                                         ? Colors.black
                                                         : Colors.white,
