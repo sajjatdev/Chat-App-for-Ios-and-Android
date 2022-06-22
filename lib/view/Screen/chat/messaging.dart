@@ -855,6 +855,137 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             },
                                           ),
                                         ),
+                                        Container(
+                                          height: 20.w,
+                                          color: Theme.of(context)
+                                              .secondaryHeaderColor,
+                                          child: Row(
+                                            children: [
+                                              CupertinoButton(
+                                                padding: EdgeInsets.zero,
+                                                child: Icon(
+                                                  Icons.add,
+                                                  size: 25,
+                                                  color: Theme.of(context)
+                                                      .iconTheme
+                                                      .color,
+                                                ),
+                                                onPressed: () async {
+                                                  final result = await FilePicker
+                                                      .platform
+                                                      .pickFiles(
+                                                          allowMultiple: false,
+                                                          type: FileType.custom,
+                                                          allowedExtensions: [
+                                                        'png',
+                                                        'jpg',
+                                                        'gif'
+                                                      ]);
+
+                                                  if (result != null) {
+                                                    final path = result
+                                                        .files.single.path;
+                                                    final name = result
+                                                        .files.single.name;
+                                                    context
+                                                        .read<
+                                                            PhotouploadCubit>()
+                                                        .updateData(
+                                                            path, name, name)
+                                                        .then(
+                                                      (value) async {
+                                                        String imagurl =
+                                                            await firebase_storage
+                                                                .FirebaseStorage
+                                                                .instance
+                                                                .ref(
+                                                                    'userimage/${name}/${name}')
+                                                                .getDownloadURL();
+
+                                                        if (imagurl != null) {
+                                                          setState(() {
+                                                            messagesend(
+                                                                message:
+                                                                    imagurl,
+                                                                message_type:
+                                                                    'image');
+                                                          });
+                                                        }
+                                                      },
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                              Expanded(
+                                                child: Theme(
+                                                  data: ThemeData(),
+                                                  child: ChatComposer(
+                                                    controller: messaage,
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 10),
+                                                    onReceiveText: (str) {
+                                                      setState(() {
+                                                        messagesend(
+                                                            message: str,
+                                                            message_type:
+                                                                "text");
+
+                                                        WidgetsBinding.instance
+                                                            .addPostFrameCallback(
+                                                                (_) =>
+                                                                    _scrollDown());
+                                                        messaage.clear();
+                                                      });
+                                                    },
+                                                    onRecordEnd: (String path) {
+                                                      String name =
+                                                          path.split('/').last;
+
+                                                      context
+                                                          .read<
+                                                              PhotouploadCubit>()
+                                                          .updateData(
+                                                              path, name, name)
+                                                          .then((value) async {
+                                                        print("Done");
+                                                        String voiceurl =
+                                                            await firebase_storage
+                                                                .FirebaseStorage
+                                                                .instance
+                                                                .ref(
+                                                                    'userimage/${name}/${name}')
+                                                                .getDownloadURL();
+                                                        print(voiceurl);
+                                                        if (voiceurl != null) {
+                                                          setState(() {
+                                                            messagesend(
+                                                                message:
+                                                                    voiceurl,
+                                                                message_type:
+                                                                    'voice');
+                                                          });
+                                                        }
+                                                      });
+                                                    },
+                                                    recordIconColor:
+                                                        Theme.of(context)
+                                                            .iconTheme
+                                                            .color,
+                                                    sendButtonColor:
+                                                        Theme.of(context)
+                                                            .iconTheme
+                                                            .color,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    sendButtonBackgroundColor:
+                                                        Colors.transparent,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                         // Container(
                                         //   margin:
                                         //       const EdgeInsets.only(bottom: 10),
