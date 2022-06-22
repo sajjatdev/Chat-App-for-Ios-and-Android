@@ -1,9 +1,14 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:sizer/sizer.dart';
+import 'package:wave_progress_bars/wave_progress_bars.dart';
 
 class voice_message extends StatefulWidget {
   voice_message(
@@ -19,19 +24,52 @@ class voice_message extends StatefulWidget {
 }
 
 class _voice_messageState extends State<voice_message> {
-  AudioPlayer audioPlayer = AudioPlayer();
+  AudioPlayer audioPlayer;
   bool isplay = false;
-  Random random = new Random();
+
+  Duration duration = Duration.zero;
+  Duration positions = Duration.zero;
 
   @override
   void initState() {
-    // TODO: implement initState
+    audioPlayer = AudioPlayer();
+
+    Get_audio_data();
+
+    audioPlayer.onDurationChanged.listen((event) {
+      setState(() {
+        duration = event != null ? event : Duration.zero;
+      });
+    });
+
+    audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        isplay = state == PlayerState.PLAYING;
+        print(isplay);
+      });
+    });
+
+    audioPlayer.onAudioPositionChanged.listen((position) {
+      setState(() {
+        positions = position;
+      });
+    });
     super.initState();
+  }
+
+  void Get_audio_data() async {
+    final file =
+        await DefaultCacheManager().downloadFile(widget.Room_Data['message']);
+
+    if (file.file.path != null) {
+      setState(() {
+        audioPlayer.setUrl(file.file.path, isLocal: true);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    audioPlayer.setUrl(widget.Room_Data['message']);
     return Container(
       child: Align(
         alignment: Alignment.centerRight,
@@ -40,18 +78,17 @@ class _voice_messageState extends State<voice_message> {
             Row(
               children: [
                 Container(
+                  height: 10.w,
+                  width: 10.w,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30)),
                   child: IconButton(
                       onPressed: () {
                         if (isplay) {
                           audioPlayer.pause();
-                          setState(() {
-                            isplay = false;
-                          });
                         } else {
                           audioPlayer.play(widget.Room_Data['message']);
-                          setState(() {
-                            isplay = true;
-                          });
                         }
                         audioPlayer.onPlayerCompletion.listen((event) {
                           setState(() {
@@ -64,50 +101,55 @@ class _voice_messageState extends State<voice_message> {
                               Icons.play_arrow,
                               color: widget.isreceiver == true
                                   ? Theme.of(context).iconTheme.color
-                                  : Colors.white,
+                                  : Colors.black,
                             )
                           : Icon(
                               Icons.pause,
                               color: widget.isreceiver == true
                                   ? Theme.of(context).iconTheme.color
-                                  : Colors.white,
+                                  : Colors.black,
                             )),
                 ),
-                for (var i = 0; i <= 40; i++) ...[
-                  Container(
-                    height: random.nextInt(40).toDouble(),
-                    width: 2,
-                    color: widget.isreceiver == true
-                        ? Theme.of(context).iconTheme.color
-                        : Colors.white,
-                    margin: EdgeInsets.only(right: 1.5),
-                  ),
-                ],
+                Slider(
+                  divisions: 1,
+                  thumbColor: Colors.grey,
+                  activeColor: Colors.white,
+                  inactiveColor: Colors.grey.shade300,
+                  value: positions.inSeconds.toDouble(),
+                  min: 0,
+                  max: duration.inSeconds.toDouble(),
+                  onChanged: (value) async {
+                    final position = Duration(seconds: value.toInt());
+                    await audioPlayer.seek(position);
+                    await audioPlayer.resume();
+                  },
+                ),
                 SizedBox(
                   width: 5.w,
                 ),
-                StreamBuilder<Duration>(
-                    stream: audioPlayer.onDurationChanged,
-                    builder: (context, AsyncSnapshot<Duration> snapshot) {
-                      if (snapshot.hasData) {
-                        var data = snapshot.data;
-                        return Text(
-                          "${data.inMinutes}:${data.inSeconds.toString()}",
-                          style: TextStyle(
-                              color: widget.isreceiver == true
-                                  ? Theme.of(context).iconTheme.color
-                                  : Colors.white),
-                        );
-                      }
-                      return CupertinoActivityIndicator(
-                        color: Theme.of(context).iconTheme.color,
-                      );
-                    }),
+                isplay
+                    ? Text(
+                        formateTime(duration - positions),
+                        style: TextStyle(color: Colors.white),
+                      )
+                    : Text(
+                        formateTime(duration),
+                        style: TextStyle(color: Colors.white),
+                      )
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  String formateTime(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    final hours = twoDigits(duration.inHours);
+    final minute = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+
+    return [if (duration.inHours > 0) hours, minute, seconds].join(':');
   }
 }

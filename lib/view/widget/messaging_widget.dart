@@ -40,7 +40,7 @@ class messageing_widget extends StatelessWidget {
         link_check.contains('http://') && data['message_type'] == 'text';
     String Imagecheck = profile_data["imageUrl"];
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 15.sp),
+      padding: EdgeInsets.zero,
       child: Row(
         mainAxisAlignment: data['sender'] == myUID
             ? MainAxisAlignment.end

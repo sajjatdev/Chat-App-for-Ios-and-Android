@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "8456637305",
+    "project_id": "chatterapp-8dfbf",
+    "storage_bucket": "chatterapp-8dfbf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8456637305:android:6763741b17aace71167da8",
+        "android_client_info": {
+          "package_name": "com.example.chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "8456637305-ubcmjumundmns28o199iek4mabern5fe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJJH0Uj7CvjefCOsbudF4d8RAeJHRZzg8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "8456637305-ubcmjumundmns28o199iek4mabern5fe.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "8456637305-q8rvi9rvfjgpr9kj68256chha6p41hbo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ca.havr.chatterapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

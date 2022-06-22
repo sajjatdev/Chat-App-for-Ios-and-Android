@@ -66,8 +66,10 @@ dependencies:
   flutter_dialogs: ^2.1.1
   detectable_text_field: ^2.0.3
   change_app_package_name: ^1.1.0
-  social_media_recorder: ^0.1.61
   chat_composer: ^1.0.1
+  flutter_sound_lite: ^8.5.0
+  flutter_cache_manager: ^3.3.0
+  wave_progress_bars: ^0.1.0
  
  
 

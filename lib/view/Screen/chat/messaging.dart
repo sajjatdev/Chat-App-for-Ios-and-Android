@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chat_composer/chat_composer.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
@@ -7,8 +5,7 @@ import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/logic/send_message/send_message_cubit.dart';
 
 import 'package:chatting/main.dart';
-import 'package:detectable_text_field/detector/sample_regular_expressions.dart';
-import 'package:detectable_text_field/widgets/detectable_text_field.dart';
+
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,11 +18,8 @@ import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:sizer/sizer.dart';
-import 'package:social_media_recorder/audio_encoder_type.dart';
-import 'package:social_media_recorder/screen/social_media_recorder.dart';
 
 class Messageing extends StatefulWidget {
   static const String routeName = '/messageing';
@@ -362,7 +356,6 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                         return SingleChildScrollView(
                                           controller: scrollController,
                                           child: ListView.builder(
-                                              reverse: true,
                                               physics:
                                                   NeverScrollableScrollPhysics(),
                                               shrinkWrap: true,
