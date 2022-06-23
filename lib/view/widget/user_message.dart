@@ -56,6 +56,7 @@ class Message_user_list extends StatelessWidget {
                               ? Room_Data['Last_message']
                               : '',
                           type: "chat",
+                          MessageType: Room_Data['message_type'],
                           isMessageRead: false,
                         );
                       } else {
@@ -85,13 +86,14 @@ class Message_user_list extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      //  Time_Chat.readTimestamp(Room_Data["last_update"])
-                      Text(
-                        DateTime.now().millisecondsSinceEpoch.toString(),
-                        style: TextStyle(
-                          fontSize: 12,
+                      if (Room_Data["last_update"] != null) ...[
+                        Text(
+                          Time_Chat.readTimestamp(Room_Data["last_update"]),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).iconTheme.color),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   subtitle: SizedBox(

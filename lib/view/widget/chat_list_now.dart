@@ -16,6 +16,7 @@ class ConversationList extends StatefulWidget {
   String uid = '';
   final String status;
   bool isMessageRead;
+  String MessageType;
   ConversationList(
       {@required this.name,
       @required this.uid,
@@ -24,6 +25,7 @@ class ConversationList extends StatefulWidget {
       @required this.time,
       @required this.isMessageRead,
       @required this.type,
+      @required this.MessageType,
       @required this.status});
   @override
   _ConversationListState createState() => _ConversationListState();
@@ -41,6 +43,7 @@ class _ConversationListState extends State<ConversationList> {
       },
       title: Text(
         widget.name,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: 12.sp),
       ),
       leading: Stack(children: [
@@ -69,12 +72,36 @@ class _ConversationListState extends State<ConversationList> {
       ]),
       subtitle: SizedBox(
         width: 70.w,
-        child: Text(
-          widget.messageText,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade400),
-        ),
+        child: widget.MessageType != null
+            ? widget.MessageType == 'text'
+                ? Text(
+                    widget.messageText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        TextStyle(fontSize: 12.sp, color: Colors.grey.shade400),
+                  )
+                : widget.MessageType == 'voice'
+                    ? Align(
+                        alignment: Alignment.centerLeft,
+                        child: Icon(
+                          Icons.mic,
+                          color: Theme.of(context).iconTheme.color,
+                        ))
+                    : widget.MessageType == "image"
+                        ? Align(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.image,
+                              color: Theme.of(context).iconTheme.color,
+                            ))
+                        : Align(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.link,
+                              color: Theme.of(context).iconTheme.color,
+                            ))
+            : Container(),
       ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,

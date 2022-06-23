@@ -111,10 +111,9 @@ class _voice_messageState extends State<voice_message> {
                             )),
                 ),
                 Slider(
-                  divisions: 1,
-                  thumbColor: Colors.grey,
+                  thumbColor: Colors.grey.shade300,
                   activeColor: Colors.white,
-                  inactiveColor: Colors.grey.shade300,
+                  inactiveColor: Colors.white,
                   value: positions.inSeconds.toDouble(),
                   min: 0,
                   max: duration.inSeconds.toDouble(),
@@ -123,9 +122,6 @@ class _voice_messageState extends State<voice_message> {
                     await audioPlayer.seek(position);
                     await audioPlayer.resume();
                   },
-                ),
-                SizedBox(
-                  width: 5.w,
                 ),
                 isplay
                     ? Text(
