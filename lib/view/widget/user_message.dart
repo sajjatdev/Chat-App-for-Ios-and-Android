@@ -24,7 +24,7 @@ class Message_user_list extends StatelessWidget {
       child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           future: FirebaseFirestore.instance
               .collection('chat')
-              .doc(data.Room_Name.trim())
+              .doc(data.Room_Name)
               .get(),
           builder: (context,
               AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
@@ -33,7 +33,6 @@ class Message_user_list extends StatelessWidget {
               final Room_Data = getRoom_data.data.data();
 
               if (Room_Data['type'] == 'chat') {
-                print(Room_Data['type']);
                 return FutureBuilder<DocumentSnapshot>(
                     future: FirebaseFirestore.instance
                         .collection('user')
@@ -50,6 +49,7 @@ class Message_user_list extends StatelessWidget {
                           name: user_data['first_name'],
                           uid: user_data['uid'],
                           status: user_data['userStatus'],
+                          Room_ID: data.Room_Name,
                           time:
                               Time_Chat.readTimestamp(Room_Data['last_update']),
                           messageText: Room_Data['Last_message'] != null

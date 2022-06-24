@@ -70,6 +70,8 @@ dependencies:
   flutter_sound_lite: ^8.5.0
   flutter_cache_manager: ^3.3.0
   wave_progress_bars: ^0.1.0
+  collection: ^1.16.0
+  uuid: ^3.0.6
  
  
 

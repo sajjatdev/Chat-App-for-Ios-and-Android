@@ -15,6 +15,7 @@ class ConversationList extends StatefulWidget {
   String type;
   String uid = '';
   final String status;
+  String Room_ID;
   bool isMessageRead;
   String MessageType;
   ConversationList(
@@ -25,6 +26,7 @@ class ConversationList extends StatefulWidget {
       @required this.time,
       @required this.isMessageRead,
       @required this.type,
+      @required this.Room_ID,
       @required this.MessageType,
       @required this.status});
   @override
@@ -36,9 +38,11 @@ class _ConversationListState extends State<ConversationList> {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
+        print(widget.Room_ID);
         Navigator.of(context).pushNamed('/messageing', arguments: {
           'otheruid': widget.uid,
           'type': widget.type,
+          "Single_Room_ID": widget.Room_ID,
         });
       },
       title: Text(

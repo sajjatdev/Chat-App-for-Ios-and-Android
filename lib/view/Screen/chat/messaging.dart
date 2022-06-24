@@ -72,7 +72,11 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
       bool ischat = widget.data['type'] == 'chat';
       final query = await FirebaseFirestore.instance
           .collection("chat")
-          .doc(ischat ? myUID + frienduid : widget.data['otheruid'])
+          .doc(ischat
+              ? widget.data['Single_Room_ID'] != null
+                  ? widget.data['Single_Room_ID']
+                  : frienduid
+              : widget.data['otheruid'])
           .collection("message")
           .where("sender", isNotEqualTo: sharedPreferences.getString('uid'))
           .where("read", isEqualTo: false)
@@ -94,10 +98,12 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 
   void getUID() async {
     setState(() {
-      frienduid = widget.data['otheruid'];
+      frienduid = widget.data['Single_Room_ID'];
       Type = widget.data['type'];
       mamberList = widget.data['mamber_list'];
-      context.read<ReadDataCubit>().getprofile_data(uid: frienduid, type: Type);
+      context
+          .read<ReadDataCubit>()
+          .getprofile_data(uid: widget.data['otheruid'], type: Type);
     });
 
     setState(() {
@@ -107,6 +113,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
       print(
           "Message page UID Data $frienduid With Type ${widget.data['type']}");
       print("------------------------------------------------");
+      print(widget.data['Single_Room_ID']);
     });
     // stream.delayed(Duration(milliseconds: 250), () {
     //   _scrollDown();
@@ -115,10 +122,9 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 
   void messagesend({String message, String message_type}) async {
     if (Type == 'chat') {
-      String Room_ID = myUID + widget.data['otheruid'];
-      // FocusManager.instance.primaryFocus?.unfocus();
+      FocusManager.instance.primaryFocus?.unfocus();
       context.read<SendMessageCubit>().send_message(
-        RoomID: Room_ID,
+        RoomID: frienduid,
         message: message,
         sender: myUID,
         myuid: myUID,
@@ -127,6 +133,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
         other_uid: widget.data['otheruid'],
         users: [myUID, widget.data['otheruid']],
       );
+      print(frienduid);
     } else if (Type == 'group') {
       print("Room ID $frienduid");
       // FocusManager.instance.primaryFocus?.unfocus();
@@ -1291,7 +1298,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                 flex: 6,
                                 child: StreamBuilder<QuerySnapshot>(
                                     stream: get_message
-                                        .doc(room_id['Room_ID'])
+                                        .doc(frienduid)
                                         .collection('message')
                                         .orderBy('time', descending: false)
                                         .snapshots(),

@@ -5,6 +5,7 @@ import 'package:chatting/logic/Contact/contact_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/model/Fir_contact.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
+import 'package:uuid/uuid.dart';
 
 class Message_contact extends StatefulWidget {
   static const String routeName = '/message_add';
@@ -33,6 +35,7 @@ class Message_contact extends StatefulWidget {
 
 class _Message_contactState extends State<Message_contact> {
   String myuid;
+  var uuid = Uuid();
   List<String> get_contact_number_list = [];
 
   var keyboardtype = TextInputType.text;
@@ -49,6 +52,31 @@ class _Message_contactState extends State<Message_contact> {
       get_contact_number_list =
           sharedPreferences.getStringList("contact_number_list");
     });
+  }
+
+  Future<String> ChatUID({String myUID, String antherUID}) async {
+    List userList = [myUID, antherUID];
+    String Roomdata = '';
+    Function eq = const DeepCollectionEquality.unordered().equals;
+
+    QuerySnapshot Room_Data = await FirebaseFirestore.instance
+        .collection('chat')
+        .where("type", isEqualTo: "chat")
+        .where('users', arrayContainsAny: [myUID, antherUID]).get();
+
+    if (Room_Data.docs.length > 0) {
+      for (var i = 0; i < Room_Data.docs.length; i++) {
+        List check_user = Room_Data.docs[i]['users'];
+        if (eq(check_user, userList)) {
+          Roomdata = Room_Data.docs[i].id;
+        } else {
+          Roomdata = "create";
+        }
+      }
+    } else {
+      Roomdata = "create";
+    }
+    return Roomdata != '' ? Roomdata : null;
   }
 
   Widget _buildHeader() {
@@ -97,7 +125,6 @@ class _Message_contactState extends State<Message_contact> {
 
   @override
   Widget build(BuildContext context) {
-    
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
     return Scaffold(
@@ -304,54 +331,89 @@ class _Message_contactState extends State<Message_contact> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10),
                                         child: ListTile(
-                                          onTap: () {
-                                            FirebaseFirestore.instance
-                                                .collection('user')
-                                                .doc(myuid.trim())
-                                                .collection("Friends")
-                                                .doc(state
-                                                    .data[index].phoneNumber)
-                                                .set({
-                                              'uid':
-                                                  state.data[index].phoneNumber,
-                                              "first_name":
-                                                  state.data[index].firstName,
-                                              "imageUrl":
-                                                  state.data[index].imageUrl,
-                                              'type': 'chat',
-                                              'username':
-                                                  state.data[index].username,
-                                              'Room_ID': myuid.trim() +
-                                                  state.data[index].phoneNumber,
-                                              'time': DateTime.now()
-                                                  .millisecondsSinceEpoch
-                                            });
+                                          onTap: () async {
+                                            try {
+                                              await ChatUID(
+                                                      antherUID: state
+                                                          .data[index]
+                                                          .phoneNumber,
+                                                      myUID: myuid)
+                                                  .then((String Room_data) {
+                                                if (Room_data != null &&
+                                                    Room_data == 'create') {
+                                                  String UID = uuid.v4();
+                                                  FirebaseFirestore.instance
+                                                      .collection('chat')
+                                                      .doc(UID)
+                                                      .set({
+                                                    "Last_message": null,
+                                                    "Room_ID": UID,
+                                                    "message_type": null,
+                                                    "type": "chat",
+                                                    "users": [
+                                                      state.data[index]
+                                                          .phoneNumber,
+                                                      myuid
+                                                    ],
+                                                    "last_update": DateTime
+                                                            .now()
+                                                        .millisecondsSinceEpoch
+                                                  }).then((value) {
+                                                    FirebaseFirestore.instance
+                                                        .collection('user')
+                                                        .doc(state.data[index]
+                                                            .phoneNumber)
+                                                        .collection("Friends")
+                                                        .doc(myuid)
+                                                        .set({
+                                                      "Room_ID": UID,
+                                                      "type": "chat",
+                                                      "time": DateTime.now()
+                                                          .millisecondsSinceEpoch,
+                                                      "uid": myuid
+                                                    });
 
-                                            String Room_ID = myuid.trim() +
-                                                state.data[index].phoneNumber;
+                                                    FirebaseFirestore.instance
+                                                        .collection('user')
+                                                        .doc(myuid)
+                                                        .collection("Friends")
+                                                        .doc(state.data[index]
+                                                            .phoneNumber)
+                                                        .set({
+                                                      "Room_ID": UID,
+                                                      "type": "chat",
+                                                      "time": DateTime.now()
+                                                          .millisecondsSinceEpoch,
+                                                      "uid": state.data[index]
+                                                          .phoneNumber
+                                                    });
 
-                                            FirebaseFirestore.instance
-                                                .collection('chat')
-                                                .doc(Room_ID)
-                                                .set({
-                                              'last_update': DateTime.now()
-                                                  .millisecondsSinceEpoch,
-                                              'users': [
-                                                myuid,
-                                                state.data[index].phoneNumber
-                                              ],
-                                              'type': 'chat',
-                                              'message_type': null,
-                                              'Room_ID': Room_ID
-                                            });
-                                            Navigator.of(context)
-                                                .pushReplacementNamed(
-                                                    '/messageing',
-                                                    arguments: {
-                                                  'otheruid': state
-                                                      .data[index].phoneNumber,
-                                                  'type': 'chat',
-                                                });
+                                                    Navigator.of(context)
+                                                        .pushReplacementNamed(
+                                                            '/messageing',
+                                                            arguments: {
+                                                          'otheruid': UID,
+                                                          'type': 'chat',
+                                                        });
+                                                  });
+                                                } else if (Room_data != null &&
+                                                    Room_data != 'create') {
+                                                  Navigator.of(context)
+                                                      .pushReplacementNamed(
+                                                          '/messageing',
+                                                          arguments: {
+                                                        'otheruid': state
+                                                            .data[index]
+                                                            .phoneNumber,
+                                                        "Single_Room_ID":
+                                                            Room_data,
+                                                        'type': 'chat',
+                                                      });
+                                                }
+                                              });
+                                            } on FirebaseFirestore catch (e) {
+                                              print(e.toString());
+                                            }
                                           },
                                           leading: state.data[index].imageUrl
                                                   .contains("https://")
@@ -425,7 +487,7 @@ class _Message_contactState extends State<Message_contact> {
                                   shape: BoxShape.circle)),
                         );
                       } else {
-                       return GFShimmer(child: emptyBlock(context));
+                        return GFShimmer(child: emptyBlock(context));
                       }
                     },
                   ),
