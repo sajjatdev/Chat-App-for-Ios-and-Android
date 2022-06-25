@@ -1,6 +1,7 @@
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
 import 'package:chatting/main.dart';
+import 'package:chatting/view/Screen/profile/profile_edit.dart';
 import 'package:chatting/view/widget/widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -85,11 +86,11 @@ class _setting_viewState extends State<setting_view> {
                         Row(children: [
                           if (getstate.profile_data.imageUrl
                               .contains("https://")) ...[
-                            // CircleAvatar(
-                            //   radius: 30,
-                            //   backgroundImage:
-                            //       NetworkImage(getstate.profile_data.imageUrl),
-                            // )
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage:
+                                  NetworkImage(getstate.profile_data.imageUrl),
+                            )
                           ] else ...[
                             ProfilePicture(
                               name: getstate.profile_data.fullName.trim(),
@@ -135,7 +136,14 @@ class _setting_viewState extends State<setting_view> {
                           )
                         ]),
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => Profile_edit(
+                                        image: getstate.profile_data.imageUrl,
+                                        name: getstate.profile_data.fullName,
+                                        myuid: uid,
+                                      )));
+                            },
                             icon: SvgPicture.asset(
                               'assets/svg/Left.svg',
                               color: HexColor.fromHex('#5F5F62'),

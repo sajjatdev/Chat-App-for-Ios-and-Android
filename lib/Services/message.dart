@@ -2,6 +2,8 @@ import 'package:chatting/model/get_message_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
+import '../view/widget/SearchKey/search.dart';
+
 class messageing {
   final FirebaseFirestore firebaseFirestore;
 
@@ -30,7 +32,6 @@ class messageing {
       "message_type": message_type,
       "time": DateTime.now().millisecondsSinceEpoch
     }).then((value) {
-      
       FirebaseFirestore.instance
           .collection("chat")
           .doc(RoomID)
@@ -215,13 +216,14 @@ class messageing {
           "type": "group",
           "uid": group_username,
           'time': DateTime.now().millisecondsSinceEpoch,
+          "keyword_name": SearchKeyGenerator(item: group_name),
         });
       }
     });
   }
 
   Stream<List<Get_message_list>> get_message_list(
-      {String myuid, bool ischeck}) {
+      {String myuid, bool ischeck, String namekey}) {
     final ref = FirebaseFirestore.instance
         .collection('user')
         .doc(myuid)
@@ -237,14 +239,29 @@ class messageing {
                   uid: snapshot['uid']))
               .toList());
     } else {
-      return ref.snapshots().map((QuerySnapshot querySnapshot) => querySnapshot
-          .docs
-          .map((DocumentSnapshot snapshot) => Get_message_list(
-              Room_Name: snapshot['Room_ID'],
-              time: snapshot['time'].toString(),
-              type: snapshot['type'],
-              uid: snapshot['uid']))
-          .toList());
+      if (namekey.contains("+")) {
+        return ref
+            .where("Phone_keyword", arrayContainsAny: [namekey])
+            .snapshots()
+            .map((QuerySnapshot querySnapshot) => querySnapshot.docs
+                .map((DocumentSnapshot snapshot) => Get_message_list(
+                    Room_Name: snapshot['Room_ID'],
+                    time: snapshot['time'].toString(),
+                    type: snapshot['type'],
+                    uid: snapshot['uid']))
+                .toList());
+      } else {
+        return ref
+            .where("keyword_name", arrayContainsAny: [namekey])
+            .snapshots()
+            .map((QuerySnapshot querySnapshot) => querySnapshot.docs
+                .map((DocumentSnapshot snapshot) => Get_message_list(
+                    Room_Name: snapshot['Room_ID'],
+                    time: snapshot['time'].toString(),
+                    type: snapshot['type'],
+                    uid: snapshot['uid']))
+                .toList());
+      }
     }
   }
 }

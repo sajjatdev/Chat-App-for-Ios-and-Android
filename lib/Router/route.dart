@@ -60,7 +60,7 @@ class Routers {
       case Auth_phone.routeName:
         return Auth_phone.route();
       case OTP.routeName:
-        return OTP.route();
+        return OTP.route(number: settings.arguments as String);
       case Message_contact.routeName:
         return Message_contact.route();
       default:

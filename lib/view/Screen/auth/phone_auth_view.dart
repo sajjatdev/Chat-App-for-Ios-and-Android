@@ -102,11 +102,13 @@ class _Auth_phoneState extends State<Auth_phone> {
                 if (phone_number[1] == "1") {
                   BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
                       phoneNumber: "+1 ${phoneNumberController.text}"));
-                  Navigator.of(context).pushNamed('/otp');
+                  Navigator.of(context).pushNamed('/otp',
+                      arguments: "+1 ${phoneNumberController.text}");
                 } else {
                   BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
                       phoneNumber: "+880 ${phoneNumberController.text}"));
-                  Navigator.of(context).pushNamed('/otp');
+                  Navigator.of(context).pushNamed('/otp',
+                      arguments: "+880 ${phoneNumberController.text}");
                 }
               },
               Texts: "SEND OTP",

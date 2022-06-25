@@ -342,6 +342,9 @@ class _group_profileState extends State<group_profile> {
                                                   builder: (context) => add(
                                                         isadmin: true,
                                                         roomid: widget.UIDuser,
+                                                        RoomName: state
+                                                            .group_profile
+                                                            .groupName,
                                                       )));
                                         },
                                         leading: CircleAvatar(
@@ -529,6 +532,9 @@ class _group_profileState extends State<group_profile> {
                                                   builder: (context) => add(
                                                         isadmin: false,
                                                         roomid: widget.UIDuser,
+                                                        RoomName: state
+                                                            .group_profile
+                                                            .groupName,
                                                       )));
                                         },
                                         leading: CircleAvatar(

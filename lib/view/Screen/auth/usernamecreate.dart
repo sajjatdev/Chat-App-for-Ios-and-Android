@@ -1,6 +1,8 @@
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/view/widget/widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -23,7 +25,6 @@ class UsernameCreate extends StatefulWidget {
 class _UsernameCreateState extends State<UsernameCreate> {
   GlobalKey<FormState> key = GlobalKey<FormState>();
   TextEditingController username = TextEditingController();
-  String usernamecheck = '';
 
   bool isbtn = false;
   bool btnloading = false;
@@ -57,15 +58,33 @@ class _UsernameCreateState extends State<UsernameCreate> {
               ),
               Form(
                 key: key,
+                autovalidateMode: AutovalidateMode.always,
                 child: TextFormField(
-                  onChanged: ((value) {
-                    setState(() {
-                      usernamecheck = value;
-                    });
+                  maxLength: 10,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp("[a-z A-Z á-ú Á-Ú 0-9]"))
+                  ],
+                  validator: (value) {
+                    return value.isEmpty
+                        ? "Username can't be blank"
+                        : value.length >= 5
+                            ? null
+                            : 'Username must have 5 characters';
+                  },
+                  autofocus: true,
+                  onChanged: ((value) async {
+                    if (value.length >= 5) {
+                      setState(() {
+                        isbtn = true;
+                      });
+                    } else {
+                      setState(() {
+                        isbtn = false;
+                      });
+                    }
                   }),
                   controller: username,
-                  validator: (value) =>
-                      value.isEmpty ? "Username can't be blank" : null,
                   style: TextStyle(color: Theme.of(context).iconTheme.color),
                   decoration: InputDecoration(
                     suffixIcon: Padding(
@@ -74,8 +93,7 @@ class _UsernameCreateState extends State<UsernameCreate> {
                         'assets/svg/check-2.svg',
                         width: 5.w,
                         height: 5.w,
-                        color:
-                            isbtn ? Colors.green : HexColor.fromHex('#5F5F62'),
+                        color: isbtn ? Colors.green : Colors.red,
                       ),
                     ),
                     hintText: "Username (Required)",
@@ -104,18 +122,27 @@ class _UsernameCreateState extends State<UsernameCreate> {
               Align(
                 alignment: Alignment.center,
                 child: Button(
-                  buttonenable: usernamecheck != '' ? true : false,
+                  buttonenable: isbtn == true ? true : false,
                   loadingbtn: btnloading,
                   onpress: () async {
-                    if (key.currentState.validate()) {
+                    setState(() {
+                      btnloading = true;
+                    });
+                    final usernamechecker =
+                        await usernamecheckerwithfun(username: username.text);
+                    if (key.currentState.validate() && usernamechecker) {
                       setState(() {
                         isbtn = true;
-                        btnloading = true;
                       });
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setString('username', username.text);
                       Future.delayed(Duration(seconds: 2), () {
                         Navigator.of(context).pushNamed('/profile_Setup');
+                      });
+                    } else {
+                      setState(() {
+                        isbtn = false;
+                        btnloading = false;
                       });
                     }
                   },
@@ -128,5 +155,14 @@ class _UsernameCreateState extends State<UsernameCreate> {
         ),
       ),
     );
+  }
+
+  Future<bool> usernamecheckerwithfun({String username}) async {
+    final result = await FirebaseFirestore.instance
+        .collection('user')
+        .where("username", isEqualTo: username)
+        .get();
+
+    return result.docs.isEmpty;
   }
 }

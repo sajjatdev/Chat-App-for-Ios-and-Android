@@ -44,7 +44,7 @@ class Messageing extends StatefulWidget {
 }
 
 class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
-  TextEditingController messaage = TextEditingController();
+  TextEditingController messaage;
   ScrollController scrollController = ScrollController();
   String lates_message;
 
@@ -59,7 +59,21 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    // TODO: implement initState
+    messaage = TextEditingController();
+    messaage.addListener(() {
+      try {
+        print(messaage.value.text);
+
+        FirebaseFirestore.instance
+            .collection("chat")
+            .doc(frienduid)
+            .collection("message_typing")
+            .doc("typing")
+            .set({"typing": true, "typing_user": myUID});
+      } catch (e) {
+        print(e.toString());
+      }
+    });
     super.initState();
     getUID();
     WidgetsBinding.instance.addObserver(this);
@@ -72,10 +86,8 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
       bool ischat = widget.data['type'] == 'chat';
       final query = await FirebaseFirestore.instance
           .collection("chat")
-          .doc(ischat
-              ? widget.data['Single_Room_ID'] != null
-                  ? widget.data['Single_Room_ID']
-                  : frienduid
+          .doc(ischat == true
+              ? widget.data['Single_Room_ID']
               : widget.data['otheruid'])
           .collection("message")
           .where("sender", isNotEqualTo: sharedPreferences.getString('uid'))
@@ -92,13 +104,17 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
   void dispose() {
     // TODO: implement dispose
 
-    messaage.dispose();
+    try {
+      messaage.dispose();
+    } catch (e) {}
     super.dispose();
   }
 
   void getUID() async {
     setState(() {
-      frienduid = widget.data['Single_Room_ID'];
+      frienduid = widget.data['Single_Room_ID'] != null
+          ? widget.data['Single_Room_ID']
+          : widget.data['otheruid'];
       Type = widget.data['type'];
       mamberList = widget.data['mamber_list'];
       context
@@ -237,466 +253,324 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
               color: Theme.of(context).iconTheme.color),
         );
       } else if (getdatadate is GroupData) {
-        return Builder(builder: (context) {
-          try {
-            if (messaage.text.isEmpty) {
-              FirebaseFirestore.instance
-                  .collection("chat")
-                  .doc(frienduid)
-                  .collection("message_typing")
-                  .doc("typing")
-                  .set({"typing": true, "typing_user": myUID});
-            }
-          } catch (e) {
-            print(e.toString());
-          }
-
-          return Container(
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: isDarkMode
-                        ? const AssetImage('assets/image/Black_Background.png')
-                        : const AssetImage('assets/svg/White_Background.png'))),
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                appBar: AppBar(
-                  iconTheme:
-                      IconThemeData(color: Theme.of(context).iconTheme.color),
-                  backgroundColor: Theme.of(context).secondaryHeaderColor,
-                  centerTitle: true,
-                  title: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        getdatadate.group_data_get.groupName,
-                        style: TextStyle(
-                            color: Theme.of(context).iconTheme.color,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                          stream: FirebaseFirestore.instance
-                              .collection('chat')
-                              .doc(frienduid)
-                              .collection('message_typing')
-                              .doc('typing')
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              Map<String, dynamic> typing_data =
-                                  snapshot.data.data();
-
-                              return typing_data['typing_user'] != myUID &&
-                                      typing_data['typing']
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Image.asset(
-                                          "assets/image/typing.gif",
-                                          width: 5.w,
-                                          fit: BoxFit.cover,
-                                        ),
-                                        Text(
-                                          "Typing",
-                                          style: TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 10.sp),
-                                        ),
-                                      ],
-                                    )
-                                  : Text(
-                                      "Group",
-                                      style: TextStyle(
-                                          color: Colors.blue, fontSize: 10.sp),
-                                    );
-                            } else {
-                              return Container();
-                            }
-                          }),
-                    ],
-                  ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).pushNamed('/group_profile',
-                              arguments: frienduid);
-
-                          print(frienduid);
-                        },
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                              getdatadate.group_data_get.groupImage),
-                          maxRadius: 15.sp,
-                        ),
-                      ),
+        return Container(
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: isDarkMode
+                      ? const AssetImage('assets/image/Black_Background.png')
+                      : const AssetImage('assets/svg/White_Background.png'))),
+          child: Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                iconTheme:
+                    IconThemeData(color: Theme.of(context).iconTheme.color),
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
+                centerTitle: true,
+                title: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      getdatadate.group_data_get.groupName,
+                      style: TextStyle(
+                          color: Theme.of(context).iconTheme.color,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600),
                     ),
+                    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                        stream: FirebaseFirestore.instance
+                            .collection('chat')
+                            .doc(frienduid)
+                            .collection('message_typing')
+                            .doc('typing')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            Map<String, dynamic> typing_data =
+                                snapshot.data.data();
+
+                            return typing_data['typing_user'] != myUID &&
+                                    typing_data['typing']
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "assets/image/typing.gif",
+                                        width: 5.w,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Text(
+                                        "Typing",
+                                        style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 10.sp),
+                                      ),
+                                    ],
+                                  )
+                                : Text(
+                                    "Group",
+                                    style: TextStyle(
+                                        color: Colors.blue, fontSize: 10.sp),
+                                  );
+                          } else {
+                            return Container();
+                          }
+                        }),
                   ],
                 ),
-                body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('user')
-                        .doc(myUID)
-                        .collection("Friends")
-                        .doc(frienduid.trim())
-                        .snapshots(),
-                    builder: (context,
-                        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
-                            getuserRoomID) {
-                      if (getuserRoomID.hasData) {
-                        final room_id = getuserRoomID.data.data();
-                        return Column(
-                          children: [
-                            Expanded(
-                                flex: 6,
-                                child: StreamBuilder<QuerySnapshot>(
-                                    stream: get_message
-                                        .doc(room_id['Room_ID'])
-                                        .collection('message')
-                                        .orderBy('time', descending: false)
-                                        .snapshots(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return SingleChildScrollView(
-                                          controller: scrollController,
-                                          child: ListView.builder(
-                                              physics:
-                                                  NeverScrollableScrollPhysics(),
-                                              shrinkWrap: true,
-                                              itemCount:
-                                                  snapshot.data.docs.length,
-                                              itemBuilder: (context, index) {
-                                                DocumentSnapshot data =
-                                                    snapshot.data.docs[index];
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/group_profile', arguments: frienduid);
 
-                                                if (data['sender'] != null) {
-                                                  return StreamBuilder<
-                                                          DocumentSnapshot<
-                                                              Map<String,
-                                                                  dynamic>>>(
-                                                      stream: FirebaseFirestore
-                                                          .instance
-                                                          .collection('user')
-                                                          .doc(data['sender'])
-                                                          .snapshots(),
-                                                      builder: (context,
-                                                          AsyncSnapshot<
-                                                                  DocumentSnapshot<
-                                                                      Map<String,
-                                                                          dynamic>>>
-                                                              chat_user_data) {
-                                                        if (chat_user_data
-                                                            .hasError) {
-                                                          return GFShimmer(
-                                                            child: emptyBlock,
-                                                          );
-                                                        } else if (chat_user_data
-                                                            .hasData) {
-                                                          Map<String, dynamic>
-                                                              user_info =
-                                                              chat_user_data
-                                                                  .data
-                                                                  .data();
-                                                          return messageing_widget(
-                                                              data: data,
-                                                              myUID: myUID,
-                                                              RoomID: frienduid
-                                                                  .trim(),
-                                                              profile_data:
-                                                                  user_info,
-                                                              image: getdatadate
-                                                                  .group_data_get
-                                                                  .groupImage);
-                                                        } else {
-                                                          return Container();
-                                                        }
-                                                      });
-                                                } else {
-                                                  return Center(
-                                                    child:
-                                                        CupertinoActivityIndicator(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .iconTheme
-                                                                .color),
-                                                  );
-                                                }
-                                              }),
-                                        );
-                                      } else {
-                                        return Container();
-                                      }
-                                    })),
-                            Container(
-                              height: 20.w,
-                              color: Theme.of(context).secondaryHeaderColor,
-                              child: Row(
-                                children: [
-                                  CupertinoButton(
-                                    padding: EdgeInsets.zero,
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 25,
-                                      color: Theme.of(context).iconTheme.color,
-                                    ),
-                                    onPressed: () async {
-                                      final result = await FilePicker.platform
-                                          .pickFiles(
-                                              allowMultiple: false,
-                                              type: FileType.custom,
-                                              allowedExtensions: [
-                                            'png',
-                                            'jpg',
-                                            'gif'
-                                          ]);
+                        print(frienduid);
+                      },
+                      child: CircleAvatar(
+                        backgroundImage:
+                            NetworkImage(getdatadate.group_data_get.groupImage),
+                        maxRadius: 15.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
+                      .collection('user')
+                      .doc(myUID)
+                      .collection("Friends")
+                      .doc(frienduid)
+                      .snapshots(),
+                  builder: (context,
+                      AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                          getuserRoomID) {
+                    if (getuserRoomID.hasData) {
+                      final room_id = getuserRoomID.data.data();
+                      return Column(
+                        children: [
+                          Expanded(
+                              flex: 6,
+                              child: StreamBuilder<QuerySnapshot>(
+                                  stream: get_message
+                                      .doc(room_id['Room_ID'])
+                                      .collection('message')
+                                      .orderBy('time', descending: false)
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return SingleChildScrollView(
+                                        controller: scrollController,
+                                        child: ListView.builder(
+                                            physics:
+                                                NeverScrollableScrollPhysics(),
+                                            shrinkWrap: true,
+                                            itemCount:
+                                                snapshot.data.docs.length,
+                                            itemBuilder: (context, index) {
+                                              DocumentSnapshot data =
+                                                  snapshot.data.docs[index];
 
-                                      if (result != null) {
-                                        final path = result.files.single.path;
-                                        final name = result.files.single.name;
-                                        context
-                                            .read<PhotouploadCubit>()
-                                            .updateData(path, name, name)
-                                            .then(
-                                          (value) async {
-                                            String imagurl = await firebase_storage
-                                                .FirebaseStorage.instance
-                                                .ref(
-                                                    'userimage/${name}/${name}')
-                                                .getDownloadURL();
-
-                                            if (imagurl != null) {
-                                              setState(() {
-                                                messagesend(
-                                                    message: imagurl,
-                                                    message_type: 'image');
-                                              });
-                                            }
-                                          },
-                                        );
-                                      }
-                                    },
+                                              if (data['sender'] != null) {
+                                                return StreamBuilder<
+                                                        DocumentSnapshot<
+                                                            Map<String,
+                                                                dynamic>>>(
+                                                    stream: FirebaseFirestore
+                                                        .instance
+                                                        .collection('user')
+                                                        .doc(data['sender'])
+                                                        .snapshots(),
+                                                    builder: (context,
+                                                        AsyncSnapshot<
+                                                                DocumentSnapshot<
+                                                                    Map<String,
+                                                                        dynamic>>>
+                                                            chat_user_data) {
+                                                      if (chat_user_data
+                                                          .hasError) {
+                                                        return GFShimmer(
+                                                          child: emptyBlock,
+                                                        );
+                                                      } else if (chat_user_data
+                                                          .hasData) {
+                                                        Map<String, dynamic>
+                                                            user_info =
+                                                            chat_user_data.data
+                                                                .data();
+                                                        return messageing_widget(
+                                                            data: data,
+                                                            myUID: myUID,
+                                                            RoomID: frienduid
+                                                                .trim(),
+                                                            profile_data:
+                                                                user_info,
+                                                            image: getdatadate
+                                                                .group_data_get
+                                                                .groupImage);
+                                                      } else {
+                                                        return Container();
+                                                      }
+                                                    });
+                                              } else {
+                                                return Center(
+                                                  child:
+                                                      CupertinoActivityIndicator(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color),
+                                                );
+                                              }
+                                            }),
+                                      );
+                                    } else {
+                                      return Container();
+                                    }
+                                  })),
+                          Container(
+                            height: 20.w,
+                            color: Theme.of(context).secondaryHeaderColor,
+                            child: Row(
+                              children: [
+                                CupertinoButton(
+                                  padding: EdgeInsets.zero,
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 25,
+                                    color: Theme.of(context).iconTheme.color,
                                   ),
-                                  Expanded(
-                                    child: Theme(
-                                      data: ThemeData(),
-                                      child: ChatComposer(
-                                        controller: messaage,
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 10),
-                                        onReceiveText: (str) {
-                                          setState(() {
-                                            messagesend(
-                                                message: str,
-                                                message_type: "text");
+                                  onPressed: () async {
+                                    final result = await FilePicker.platform
+                                        .pickFiles(
+                                            allowMultiple: false,
+                                            type: FileType.custom,
+                                            allowedExtensions: [
+                                          'png',
+                                          'jpg',
+                                          'gif'
+                                        ]);
 
-                                            WidgetsBinding.instance
-                                                .addPostFrameCallback(
-                                                    (_) => _scrollDown());
-                                            messaage.clear();
-                                          });
-                                        },
-                                        onRecordEnd: (String path) {
-                                          String name = path.split('/').last;
+                                    if (result != null) {
+                                      final path = result.files.single.path;
+                                      final name = result.files.single.name;
+                                      context
+                                          .read<PhotouploadCubit>()
+                                          .updateData(path, name, name)
+                                          .then(
+                                        (value) async {
+                                          String imagurl = await firebase_storage
+                                              .FirebaseStorage.instance
+                                              .ref('userimage/${name}/${name}')
+                                              .getDownloadURL();
 
-                                          context
-                                              .read<PhotouploadCubit>()
-                                              .updateData(path, name, name)
-                                              .then((value) async {
-                                            print("Done");
-                                            String voiceurl = await firebase_storage
-                                                .FirebaseStorage.instance
-                                                .ref(
-                                                    'userimage/${name}/${name}')
-                                                .getDownloadURL();
-                                            print(voiceurl);
-                                            if (voiceurl != null) {
-                                              setState(() {
-                                                messagesend(
-                                                    message: voiceurl,
-                                                    message_type: 'voice');
-                                              });
-                                            }
-                                          });
+                                          if (imagurl != null) {
+                                            setState(() {
+                                              messagesend(
+                                                  message: imagurl,
+                                                  message_type: 'image');
+                                            });
+                                          }
                                         },
-                                        recordIconColor:
-                                            Theme.of(context).iconTheme.color,
-                                        sendButtonColor:
-                                            Theme.of(context).iconTheme.color,
-                                        backgroundColor: Colors.transparent,
-                                        sendButtonBackgroundColor:
-                                            Colors.transparent,
+                                      );
+                                    }
+                                  },
+                                ),
+                                Expanded(
+                                  child: Theme(
+                                    data: ThemeData(),
+                                    child: FocusScope(
+                                      child: Focus(
+                                        onFocusChange: (focus) =>
+                                            print("focus: $focus"),
+                                        child: ChatComposer(
+                                          controller: messaage,
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          onReceiveText: (str) {
+                                            setState(() {
+                                              messagesend(
+                                                  message: str,
+                                                  message_type: "text");
+
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback(
+                                                      (_) => _scrollDown());
+                                              messaage.clear();
+                                            });
+                                          },
+                                          onRecordStart: () {
+                                            FirebaseFirestore.instance
+                                                .collection("chat")
+                                                .doc(frienduid)
+                                                .collection("message_typing")
+                                                .doc("typing")
+                                                .set({
+                                              "typing": true,
+                                              "typing_user": myUID
+                                            });
+                                          },
+                                          onRecordEnd: (String path) {
+                                            String name = path.split('/').last;
+
+                                            context
+                                                .read<PhotouploadCubit>()
+                                                .updateData(path, name, name)
+                                                .then((value) async {
+                                              print("Done");
+                                              String voiceurl =
+                                                  await firebase_storage
+                                                      .FirebaseStorage.instance
+                                                      .ref(
+                                                          'userimage/${name}/${name}')
+                                                      .getDownloadURL();
+                                              print(voiceurl);
+                                              if (voiceurl != null) {
+                                                setState(() {
+                                                  messagesend(
+                                                      message: voiceurl,
+                                                      message_type: 'voice');
+                                                });
+                                              }
+                                            });
+                                            FirebaseFirestore.instance
+                                                .collection("chat")
+                                                .doc(frienduid)
+                                                .collection("message_typing")
+                                                .doc("typing")
+                                                .set({
+                                              "typing": false,
+                                              "typing_user": myUID
+                                            });
+                                          },
+                                          recordIconColor:
+                                              Theme.of(context).iconTheme.color,
+                                          sendButtonColor:
+                                              Theme.of(context).iconTheme.color,
+                                          backgroundColor: Colors.transparent,
+                                          sendButtonBackgroundColor:
+                                              Colors.transparent,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                )
+                              ],
                             ),
-//                             Container(
-//                               height: 15.w,
-//                               decoration: BoxDecoration(
-//                                   color: Theme.of(context)
-//                                       .scaffoldBackgroundColor),
-//                               child: Row(
-//                                 mainAxisAlignment:
-//                                     MainAxisAlignment.spaceAround,
-//                                 children: [
-//                                   CupertinoButton(
-//                                     padding:
-//                                         EdgeInsets.only(bottom: 2.w, left: 2.w),
-//                                     child: Icon(
-//                                       Icons.add,
-//                                       size: 25,
-//                                       color: Theme.of(context).iconTheme.color,
-//                                     ),
-//                                     onPressed: () async {
-//                                       final result = await FilePicker.platform
-//                                           .pickFiles(
-//                                               allowMultiple: false,
-//                                               type: FileType.custom,
-//                                               allowedExtensions: [
-//                                             'png',
-//                                             'jpg',
-//                                             'gif'
-//                                           ]);
-
-//                                       if (result != null) {
-//                                         final path = result.files.single.path;
-//                                         final name = result.files.single.name;
-//                                         context
-//                                             .read<PhotouploadCubit>()
-//                                             .updateData(path, name, name)
-//                                             .then(
-//                                           (value) async {
-//                                             String imagurl = await firebase_storage
-//                                                 .FirebaseStorage.instance
-//                                                 .ref(
-//                                                     'userimage/${name}/${name}')
-//                                                 .getDownloadURL();
-
-//                                             if (imagurl != null) {
-//                                               setState(() {
-//                                                 messagesend(
-//                                                     message: imagurl,
-//                                                     message_type: 'image');
-//                                               });
-//                                             }
-//                                           },
-//                                         );
-//                                       }
-//                                     },
-//                                   ),
-// //
-//                                   Expanded(
-//                                       child: Padding(
-//                                     padding: const EdgeInsets.symmetric(
-//                                         horizontal: 5, vertical: 5),
-//                                     child: TextField(
-//                                       maxLines: null,
-//                                       onChanged: (value) {
-//                                         if (value.isNotEmpty) {
-//                                           setState(() {
-//                                             michide = true;
-//                                           });
-//                                         } else {
-//                                           setState(() {
-//                                             michide = false;
-//                                           });
-//                                         }
-//                                       },
-//                                       cursorColor:
-//                                           Theme.of(context).iconTheme.color,
-//                                       decoration: InputDecoration(
-//                                           contentPadding: EdgeInsets.symmetric(
-//                                               horizontal: 8.sp, vertical: 5.sp),
-//                                           filled: true,
-//                                           fillColor: Colors.white,
-//                                           border: OutlineInputBorder(
-//                                               borderSide: BorderSide.none,
-//                                               borderRadius:
-//                                                   BorderRadius.circular(20))),
-//                                     ),
-//                                   )),
-//                                   // Message Text box
-
-//                                   michide
-//                                       ? GestureDetector(
-//                                           child: Padding(
-//                                             padding: const EdgeInsets.all(8.0),
-//                                             child: Icon(
-//                                               Icons.send,
-//                                               color: Theme.of(context)
-//                                                   .iconTheme
-//                                                   .color,
-//                                               size: 20.sp,
-//                                             ),
-//                                           ),
-//                                           onTap: () {})
-//                                       : Padding(
-//                                           padding: EdgeInsets.only(top: 2.w),
-//                                           child: GestureDetector(
-//                                             onLongPressStart:
-//                                                 (LongPressStartDetails) {
-//                                               setState(() {
-//                                                 texthide = true;
-//                                               });
-//                                             },
-//                                             child: SocialMediaRecorder(
-//                                               sendRequestFunction:
-//                                                   (soundFile) async {
-//                                                 FirebaseFirestore.instance
-//                                                     .collection("chat")
-//                                                     .doc(frienduid)
-//                                                     .collection(
-//                                                         "message_typing")
-//                                                     .doc("typing")
-//                                                     .set({
-//                                                   "typing": true,
-//                                                   "typing_user": myUID
-//                                                 });
-//                                                 File p =
-//                                                     await File(soundFile.path)
-//                                                         .create();
-//                                                 String fileName =
-//                                                     p.path.split('/').last;
-//                                                 firebase_storage
-//                                                     .FirebaseStorage.instance
-//                                                     .ref(fileName)
-//                                                     .putFile(p)
-//                                                     .then((p0) async {
-//                                                   final url =
-//                                                       await firebase_storage
-//                                                           .FirebaseStorage
-//                                                           .instance
-//                                                           .ref(fileName)
-//                                                           .getDownloadURL();
-
-//                                                   messagesend(
-//                                                       message: url,
-//                                                       message_type: 'voice');
-//                                                 });
-//                                               },
-//                                               encode: AudioEncoderType.AAC,
-//                                             ),
-//                                           ),
-//                                         ),
-//                                 ],
-//                               ),
-//                             ),
-                          ],
-                        );
-                      } else {
-                        return Center(
-                          child: CupertinoActivityIndicator(
-                              color: Theme.of(context).iconTheme.color),
-                        );
-                      }
-                    })),
-          );
-        });
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Center(
+                        child: CupertinoActivityIndicator(
+                            color: Theme.of(context).iconTheme.color),
+                      );
+                    }
+                  })),
+        );
       } else if (getdatadate is BusinessData) {
         var brightness = MediaQuery.of(context).platformBrightness;
         bool isDarkMode = brightness == Brightness.dark;

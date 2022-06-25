@@ -4,6 +4,7 @@ import 'package:chatting/logic/Contact/contact_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/model/Fir_contact.dart';
 import 'package:chatting/model/owner_admin_add.dart';
+import 'package:chatting/view/widget/SearchKey/search.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,10 +29,11 @@ class add extends StatefulWidget {
 
   final String roomid;
   final bool isadmin;
+  final String RoomName;
   const add({
     Key key,
     this.roomid,
-    this.isadmin,
+    this.isadmin, this.RoomName,
   }) : super(key: key);
 
   @override
@@ -97,7 +99,9 @@ class _addState extends State<add> {
                                     .set({
                                   "Room_ID": widget.roomid,
                                   "time": DateTime.now(),
-                                  "uid": item
+                                  "uid": widget.roomid,
+                                  "keyword_name":
+                                      SearchKeyGenerator(item: widget.roomid),
                                 });
                                 FirebaseFirestore.instance
                                     .collection("chat")

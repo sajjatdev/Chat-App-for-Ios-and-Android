@@ -4,6 +4,8 @@ import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Contact/contact_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/model/Fir_contact.dart';
+import 'package:chatting/view/widget/Full%20Name/Fullname.dart';
+import 'package:chatting/view/widget/SearchKey/search.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:contacts_service/contacts_service.dart';
@@ -370,7 +372,7 @@ class _Message_contactState extends State<Message_contact> {
                                                       "type": "chat",
                                                       "time": DateTime.now()
                                                           .millisecondsSinceEpoch,
-                                                      "uid": myuid
+                                                      "uid": myuid,
                                                     });
 
                                                     FirebaseFirestore.instance
@@ -385,7 +387,23 @@ class _Message_contactState extends State<Message_contact> {
                                                       "time": DateTime.now()
                                                           .millisecondsSinceEpoch,
                                                       "uid": state.data[index]
-                                                          .phoneNumber
+                                                          .phoneNumber,
+                                                      "keyword_name":
+                                                          SearchKeyGenerator(
+                                                              item: Fullname(
+                                                                  firstname: state
+                                                                      .data[
+                                                                          index]
+                                                                      .firstName,
+                                                                  lastname: state
+                                                                      .data[
+                                                                          index]
+                                                                      .lastName)),
+                                                      "Phone_keyword":
+                                                          SearchKeyGenerator(
+                                                              item: state
+                                                                  .data[index]
+                                                                  .phoneNumber),
                                                     });
 
                                                     Navigator.of(context)
@@ -398,6 +416,29 @@ class _Message_contactState extends State<Message_contact> {
                                                   });
                                                 } else if (Room_data != null &&
                                                     Room_data != 'create') {
+                                                  FirebaseFirestore.instance
+                                                      .collection('user')
+                                                      .doc(myuid)
+                                                      .collection("Friends")
+                                                      .doc(state.data[index]
+                                                          .phoneNumber)
+                                                      .update({
+                                                    "keyword_name":
+                                                        SearchKeyGenerator(
+                                                            item: Fullname(
+                                                                firstname: state
+                                                                    .data[index]
+                                                                    .firstName,
+                                                                lastname: state
+                                                                    .data[index]
+                                                                    .lastName)),
+                                                    "Phone_keyword":
+                                                        SearchKeyGenerator(
+                                                            item: state
+                                                                .data[index]
+                                                                .phoneNumber),
+                                                  });
+
                                                   Navigator.of(context)
                                                       .pushReplacementNamed(
                                                           '/messageing',

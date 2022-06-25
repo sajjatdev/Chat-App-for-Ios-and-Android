@@ -1,24 +1,32 @@
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Phone_number_auth/phoneauth_bloc.dart';
 import 'package:chatting/logic/current_user/cunrrent_user_bloc.dart';
+import 'package:chatting/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
 import 'package:sizer/sizer.dart';
+import 'package:strings/strings.dart';
 
 import '../../widget/widget.dart';
 
 class OTP extends StatefulWidget {
-  const OTP({Key key}) : super(key: key);
+  const OTP({Key key, this.number}) : super(key: key);
 
   static const String routeName = '/otp';
 
-  static Route route() {
+  static Route route({String number}) {
     return MaterialPageRoute(
-        settings: RouteSettings(name: routeName), builder: (_) => OTP());
+        settings: RouteSettings(name: routeName),
+        builder: (_) => OTP(
+              number: number,
+            ));
   }
+
+  final String number;
 
   @override
   _OTPState createState() => _OTPState();
@@ -40,11 +48,13 @@ class _OTPState extends State<OTP> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            height: 100.h,
-            width: 100.w,
+      body: SingleChildScrollView(
+        child: Container(
+          height: 100.h,
+          width: 100.w,
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(
               children: [
                 Padding(
@@ -134,23 +144,26 @@ class _OTPState extends State<OTP> {
                 Button(
                   buttonenable: buttonEnable,
                   loadingbtn: buttonloading,
-                  onpress: () {
+                  onpress: () async {
                     setState(() {
                       buttonloading = true;
                     });
                     BlocProvider.of<PhoneauthBloc>(context)
                         .add(VerifySMSCode(smscode: _pinPutController.text));
-
-                    Future.delayed(const Duration(seconds: 5), () {
-                      print("function inside");
-                      Navigator.of(context).pushNamed('/profile_Setup');
+                    print(widget.number);
+                    await profile_checkwithfun(number: widget.number)
+                        .then((value) {
+                      if (value == true) {
+                        sharedPreferences.setString('uid', widget.number);
+                        sharedPreferences.setString('number', widget.number);
+                        Navigator.of(context).pushNamed('/');
+                      } else {
+                        Navigator.of(context).pushNamed('/profile_Setup');
+                      }
                     });
                   },
                   Texts: "VERIFY",
                   widths: 80,
-                ),
-                SizedBox(
-                  height: 2.h,
                 ),
               ],
             ),
@@ -158,5 +171,14 @@ class _OTPState extends State<OTP> {
         ),
       ),
     );
+  }
+
+  Future<bool> profile_checkwithfun({String number}) async {
+    final Result = await FirebaseFirestore.instance
+        .collection('user')
+        .where("Phone_number", isEqualTo: number)
+        .get();
+
+    return Result.docs != null;
   }
 }

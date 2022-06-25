@@ -119,6 +119,15 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: TextFormField(
+                  onChanged: (value) {
+                    if (value.length > 0) {
+                      context.read<GetMessageListCubit>().get_message_list(
+                          myuid: myuid, ischeck: false, namekeyword: value);
+                    } else {
+                      context.read<GetMessageListCubit>().get_message_list(
+                          myuid: myuid, ischeck: true, namekeyword: value);
+                    }
+                  },
                   onFieldSubmitted: (_) {
                     setState(() {
                       context
@@ -139,8 +148,11 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
                           setState(() {
                             search.clear();
                             context
-                                .read<SearchCubit>()
-                                .getcontact_list(search: "NONE");
+                                .read<GetMessageListCubit>()
+                                .get_message_list(
+                                  myuid: myuid,
+                                  ischeck: true,
+                                );
                           });
                         },
                         icon: Icon(
@@ -189,7 +201,7 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
       ),
       body: Padding(
           padding:
-              const EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 0),
+              EdgeInsets.only(top: 8.sp, left: 5.sp, right: 5.sp, bottom: 0.sp),
           child: BlocBuilder<GetMessageListCubit, GetMessageListState>(
             builder: (context, state) {
               if (state is Loadings) {
