@@ -3,6 +3,7 @@ import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/view/Screen/profile/profile_edit.dart';
 import 'package:chatting/view/widget/widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -193,7 +194,7 @@ class _setting_viewState extends State<setting_view> {
                           height: 10.0,
                           child: Center(
                             child: Container(
-                              margin: EdgeInsetsDirectional.only(
+                              margin: const EdgeInsetsDirectional.only(
                                   start: 1.0, end: 1.0),
                               height: 0.5,
                               color: Colors.grey.withOpacity(0.2),
@@ -228,7 +229,7 @@ class _setting_viewState extends State<setting_view> {
                           height: 10.0,
                           child: Center(
                             child: Container(
-                              margin: EdgeInsetsDirectional.only(
+                              margin: const EdgeInsetsDirectional.only(
                                   start: 1.0, end: 1.0),
                               height: 0.5,
                               color: Colors.grey.withOpacity(0.2),
@@ -298,7 +299,10 @@ class _setting_viewState extends State<setting_view> {
                 Spacer(),
                 Button(
                   buttonenable: true,
-                  onpress: () {},
+                  onpress: () async {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushNamed("/");
+                  },
                   Texts: "Logout",
                   widths: 80,
                 ),

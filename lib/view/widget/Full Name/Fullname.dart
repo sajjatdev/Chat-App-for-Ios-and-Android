@@ -1,3 +1,5 @@
 String Fullname({String firstname, String lastname}) {
-  return firstname + " " + lastname != null ? lastname : '';
+  String fullname = firstname + " " + lastname;
+  print(fullname);
+  return fullname.toLowerCase();
 }

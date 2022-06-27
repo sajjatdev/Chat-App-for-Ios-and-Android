@@ -76,7 +76,7 @@ class Message_user_list extends StatelessWidget {
                   },
                   title: Text(
                     Room_Data['Group_name'],
-                    style: TextStyle(fontSize: 12.sp),
+                    style: TextStyle(fontSize: 15.sp),
                   ),
                   leading: CircleAvatar(
                     backgroundImage: NetworkImage(Room_Data['group_image']),
@@ -122,19 +122,16 @@ class Message_user_list extends StatelessWidget {
                   },
                   title: Text(
                     Room_Data['Business_Name'],
-                    style: TextStyle(fontSize: 12.sp),
+                    style: TextStyle(fontSize: 15.sp),
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        Time_Chat.readTimestamp(Room_Data["last_update"]) ==
-                                null
-                            ? ""
-                            : Time_Chat.readTimestamp(Room_Data["last_update"]),
+                        Time_Chat.readTimestamp(Room_Data["last_update"]) ?? "",
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],

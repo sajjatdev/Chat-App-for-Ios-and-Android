@@ -74,10 +74,14 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
   }
 
   void setStatus({String status}) async {
-    await FirebaseFirestore.instance
-        .collection('user')
-        .doc(myuid)
-        .update({'userStatus': status});
+    try {
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(myuid)
+          .update({'userStatus': status});
+    } on FirebaseFirestore catch (e) {
+      print(e.toString());
+    }
   }
 
   @override

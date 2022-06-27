@@ -82,7 +82,11 @@ class messageing_widget extends StatelessWidget {
                                     child: Padding(
                                       padding: data['message_type'] == 'image'
                                           ? EdgeInsets.all(0.0.sp)
-                                          : EdgeInsets.all(10.0.sp),
+                                          : EdgeInsets.only(
+                                              top: 15.sp,
+                                              left: 8.sp,
+                                              right: 8.sp,
+                                              bottom: 15.sp),
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -252,7 +256,7 @@ class messageing_widget extends StatelessWidget {
                                                                           context)
                                                                       .iconTheme
                                                                       .color,
-                                                              fontSize: 12.sp),
+                                                              fontSize: 15.sp),
                                                         ),
                                                       ),
                                                     )

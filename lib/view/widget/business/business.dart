@@ -38,10 +38,9 @@ class _business_chatState extends State<business_chat> {
       );
     });
     return CustomScrollView(
-      controller: scrollController,
+      reverse: true,
       slivers: [
         // Sliver App in Chat List View Start
-
         SliverAppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
@@ -55,9 +54,7 @@ class _business_chatState extends State<business_chat> {
                   Map<String, dynamic> data = snapshot.data.data();
                   return Text(
                     Time_Chat.readTimestamp(
-                        data['business_date_and_time'] != null
-                            ? data['business_date_and_time']
-                            : null),
+                        data['business_date_and_time']),
                     style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                   );
                 } else {
@@ -161,7 +158,7 @@ class _business_chatState extends State<business_chat> {
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: widget.snapshot.data.docs.length,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     Map<String, dynamic> Room_Data =
                         widget.snapshot.data.docs[index].data();

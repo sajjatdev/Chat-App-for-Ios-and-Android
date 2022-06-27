@@ -94,16 +94,15 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
           .where("read", isEqualTo: false)
           .get();
 
-      query.docs.forEach((doc) {
+      for (var doc in query.docs) {
         doc.reference.update({'read': true});
-      });
+      }
     }
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
-
     try {
       messaage.dispose();
     } catch (e) {}
@@ -112,9 +111,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 
   void getUID() async {
     setState(() {
-      frienduid = widget.data['Single_Room_ID'] != null
-          ? widget.data['Single_Room_ID']
-          : widget.data['otheruid'];
+      frienduid = widget.data['Single_Room_ID'] ?? widget.data['otheruid'];
       Type = widget.data['type'];
       mamberList = widget.data['mamber_list'];
       context
@@ -193,11 +190,11 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollDown());
-    } catch (e) {
-      print(e.toString());
-    }
+    // try {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) => _scrollDown());
+    // } catch (e) {
+    //   print(e.toString());
+    // }
 
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
@@ -363,10 +360,10 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData) {
                                       return SingleChildScrollView(
-                                        controller: scrollController,
+                                        reverse: true,
                                         child: ListView.builder(
                                             physics:
-                                                NeverScrollableScrollPhysics(),
+                                                const NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
                                             itemCount:
                                                 snapshot.data.docs.length,
@@ -868,136 +865,6 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             ],
                                           ),
                                         ),
-                                        // Container(
-                                        //   margin:
-                                        //       const EdgeInsets.only(bottom: 10),
-                                        //   child: ChatComposer(
-                                        //     controller: messaage,
-                                        //     onReceiveText: (str) {
-                                        //       setState(() {
-                                        //         messagesend(
-                                        //             message: str,
-                                        //             message_type: "text");
-
-                                        //         WidgetsBinding.instance
-                                        //             .addPostFrameCallback(
-                                        //                 (_) => _scrollDown());
-                                        //         messaage.clear();
-                                        //       });
-                                        //     },
-                                        //     onRecordEnd: (String path) {
-                                        //       String name =
-                                        //           path.split('/').last;
-
-                                        //       context
-                                        //           .read<PhotouploadCubit>()
-                                        //           .updateData(path, name, name)
-                                        //           .then((value) async {
-                                        //         print("Done");
-                                        //         String voiceurl =
-                                        //             await firebase_storage
-                                        //                 .FirebaseStorage
-                                        //                 .instance
-                                        //                 .ref(
-                                        //                     'userimage/${name}/${name}')
-                                        //                 .getDownloadURL();
-                                        //         print(voiceurl);
-                                        //         if (voiceurl != null) {
-                                        //           setState(() {
-                                        //             messagesend(
-                                        //                 message: voiceurl,
-                                        //                 message_type: 'voice');
-                                        //           });
-                                        //         }
-                                        //       });
-                                        //     },
-                                        //     textPadding: EdgeInsets.zero,
-                                        //     leading: CupertinoButton(
-                                        //       padding: EdgeInsets.zero,
-                                        //       child: const Icon(
-                                        //         Icons.insert_emoticon_outlined,
-                                        //         size: 25,
-                                        //         color: Colors.grey,
-                                        //       ),
-                                        //       onPressed: () {},
-                                        //     ),
-                                        //     recordIconColor: Theme.of(context)
-                                        //         .secondaryHeaderColor,
-                                        //     sendButtonColor: Theme.of(context)
-                                        //         .secondaryHeaderColor,
-                                        //     borderRadius:
-                                        //         BorderRadius.circular(30),
-                                        //     backgroundColor: Colors.transparent,
-                                        //     sendButtonBackgroundColor:
-                                        //         Theme.of(context)
-                                        //             .iconTheme
-                                        //             .color,
-                                        //     actions: [
-                                        //       // CupertinoButton(
-                                        //       //   padding: EdgeInsets.zero,
-                                        //       //   child: const Icon(
-                                        //       //     Icons.attach_file_rounded,
-                                        //       //     size: 25,
-                                        //       //     color: Colors.grey,
-                                        //       //   ),
-                                        //       //   onPressed: () {},
-                                        //       // ),
-                                        //       CupertinoButton(
-                                        //         padding: EdgeInsets.zero,
-                                        //         child: const Icon(
-                                        //           Icons.image,
-                                        //           size: 25,
-                                        //           color: Colors.grey,
-                                        //         ),
-                                        //         onPressed: () async {
-                                        //           final result = await FilePicker
-                                        //               .platform
-                                        //               .pickFiles(
-                                        //                   allowMultiple: false,
-                                        //                   type: FileType.custom,
-                                        //                   allowedExtensions: [
-                                        //                 'png',
-                                        //                 'jpg',
-                                        //                 'gif'
-                                        //               ]);
-
-                                        //           if (result != null) {
-                                        //             final path = result
-                                        //                 .files.single.path;
-                                        //             final name = result
-                                        //                 .files.single.name;
-                                        //             context
-                                        //                 .read<
-                                        //                     PhotouploadCubit>()
-                                        //                 .updateData(
-                                        //                     path, name, name)
-                                        //                 .then(
-                                        //               (value) async {
-                                        //                 String imagurl =
-                                        //                     await firebase_storage
-                                        //                         .FirebaseStorage
-                                        //                         .instance
-                                        //                         .ref(
-                                        //                             'userimage/${name}/${name}')
-                                        //                         .getDownloadURL();
-
-                                        //                 if (imagurl != null) {
-                                        //                   setState(() {
-                                        //                     messagesend(
-                                        //                         message:
-                                        //                             imagurl,
-                                        //                         message_type:
-                                        //                             'image');
-                                        //                   });
-                                        //                 }
-                                        //               },
-                                        //             );
-                                        //           }
-                                        //         },
-                                        //       ),
-                                        //     ],
-                                        //   ),
-                                        // ),
                                       ],
                                     );
                                   } else {
@@ -1087,272 +954,269 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
               )),
         );
       } else if (getdatadate is getprofileData) {
-        return Container(
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: isDarkMode
-                      ? const AssetImage('assets/image/Black_Background.png')
-                      : const AssetImage('assets/svg/White_Background.png'))),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              backgroundColor: Theme.of(context).secondaryHeaderColor,
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/home');
-                },
-                icon: SvgPicture.asset(
-                  'assets/svg/left-chevron.svg',
-                  color: Theme.of(context).iconTheme.color,
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            backgroundColor: Theme.of(context).secondaryHeaderColor,
+            leading: IconButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed('/home');
+              },
+              icon: SvgPicture.asset(
+                'assets/svg/left-chevron.svg',
+                color: Theme.of(context).iconTheme.color,
+              ),
+            ),
+            centerTitle: true,
+            title: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  getdatadate.profile_data.fullName,
+                  style: TextStyle(
+                      color: Theme.of(context).iconTheme.color,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600),
                 ),
-              ),
-              centerTitle: true,
-              title: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    getdatadate.profile_data.fullName,
-                    style: TextStyle(
-                        color: Theme.of(context).iconTheme.color,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    getdatadate.profile_data.userStatus,
-                    style: TextStyle(
-                        color: getdatadate.profile_data.userStatus == 'online'
-                            ? Colors.green
-                            : Colors.grey,
-                        fontSize: 10.sp),
-                  ),
-                ],
-              ),
-              actions: [
-                if (getdatadate.profile_data.imageUrl.contains("https://")) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(getdatadate.profile_data.imageUrl),
-                      maxRadius: 15.sp,
-                    ),
-                  ),
-                ] else ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: ProfilePicture(
-                      name: getdatadate.profile_data.imageUrl.trim(),
-                      radius: 20,
-                      fontsize: 12.sp,
-                    ),
-                  )
-                ],
+                Text(
+                  getdatadate.profile_data.userStatus,
+                  style: TextStyle(
+                      color: getdatadate.profile_data.userStatus == 'online'
+                          ? Colors.green
+                          : Colors.grey,
+                      fontSize: 10.sp),
+                ),
               ],
             ),
-            body: SafeArea(
-                child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('user')
-                        .doc(myUID)
-                        .collection("Friends")
-                        .doc(frienduid.trim())
-                        .snapshots(),
-                    builder: (context,
-                        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
-                            getuserRoomID) {
-                      if (getuserRoomID.hasData) {
-                        final room_id = getuserRoomID.data.data();
-                        return Column(
-                          children: [
-                            Expanded(
-                                flex: 6,
-                                child: StreamBuilder<QuerySnapshot>(
-                                    stream: get_message
-                                        .doc(frienduid)
-                                        .collection('message')
-                                        .orderBy('time', descending: false)
-                                        .snapshots(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return ListView.builder(
-                                            controller: scrollController,
-                                            shrinkWrap: true,
-                                            itemCount:
-                                                snapshot.data.docs.length,
-                                            itemBuilder: (context, index) {
-                                              DocumentSnapshot data =
-                                                  snapshot.data.docs[index];
+            actions: [
+              if (getdatadate.profile_data.imageUrl.contains("https://")) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(getdatadate.profile_data.imageUrl),
+                    maxRadius: 15.sp,
+                  ),
+                ),
+              ] else ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ProfilePicture(
+                    name: getdatadate.profile_data.imageUrl.trim(),
+                    radius: 20,
+                    fontsize: 12.sp,
+                  ),
+                )
+              ],
+            ],
+          ),
+          body: SafeArea(
+              child: Container(
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: isDarkMode
+                        ? const AssetImage('assets/image/Black_Background.png')
+                        : const AssetImage('assets/svg/White_Background.png'),
+                    fit: BoxFit.cover)),
+            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('user')
+                    .doc(myUID)
+                    .collection("Friends")
+                    .doc(frienduid.trim())
+                    .snapshots(),
+                builder: (context,
+                    AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                        getuserRoomID) {
+                  if (getuserRoomID.hasData) {
+                    final room_id = getuserRoomID.data.data();
+                    return Column(
+                      children: [
+                        Expanded(
+                            flex: 6,
+                            child: StreamBuilder<QuerySnapshot>(
+                                stream: get_message
+                                    .doc(frienduid)
+                                    .collection('message')
+                                    .orderBy('time', descending: false)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return SingleChildScrollView(
+                                      // controller: scrollController,
+                                      reverse: true,
+                                      child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
+                                          itemCount: snapshot.data.docs.length,
+                                          itemBuilder: (context, index) {
+                                            DocumentSnapshot data =
+                                                snapshot.data.docs[index];
 
-                                              if (data['sender'] != null) {
-                                                return StreamBuilder<
-                                                    DocumentSnapshot<
-                                                        Map<String, dynamic>>>(
-                                                  stream: FirebaseFirestore
-                                                      .instance
-                                                      .collection('user')
-                                                      .doc(data['sender'])
-                                                      .snapshots(),
-                                                  builder: (context,
-                                                      AsyncSnapshot<
-                                                              DocumentSnapshot<
-                                                                  Map<String,
-                                                                      dynamic>>>
-                                                          chat_user_data) {
-                                                    if (chat_user_data
-                                                        .hasError) {
-                                                      return Container();
-                                                    } else if (chat_user_data
-                                                        .hasData) {
-                                                      Map<String, dynamic>
-                                                          user_info =
-                                                          chat_user_data.data
-                                                              .data();
+                                            if (data['sender'] != null) {
+                                              return StreamBuilder<
+                                                  DocumentSnapshot<
+                                                      Map<String, dynamic>>>(
+                                                stream: FirebaseFirestore
+                                                    .instance
+                                                    .collection('user')
+                                                    .doc(data['sender'])
+                                                    .snapshots(),
+                                                builder: (context,
+                                                    AsyncSnapshot<
+                                                            DocumentSnapshot<
+                                                                Map<String,
+                                                                    dynamic>>>
+                                                        chat_user_data) {
+                                                  if (chat_user_data.hasError) {
+                                                    return Container();
+                                                  } else if (chat_user_data
+                                                      .hasData) {
+                                                    Map<String, dynamic>
+                                                        user_info =
+                                                        chat_user_data.data
+                                                            .data();
 
-                                                      return messageing_widget(
-                                                        data: data,
-                                                        myUID: myUID,
-                                                        RoomID:
-                                                            frienduid.trim(),
-                                                        profile_data: user_info,
-                                                      );
-                                                    } else {
-                                                      return Container();
-                                                    }
-                                                  },
-                                                );
-                                              } else {
-                                                return Center(
-                                                  child:
-                                                      CupertinoActivityIndicator(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .iconTheme
-                                                                  .color),
-                                                );
-                                              }
-                                            });
-                                      } else {
-                                        return Container();
-                                      }
-                                    })),
-                            Container(
-                              height: 20.w,
-                              color: Theme.of(context).secondaryHeaderColor,
-                              child: Row(
-                                children: [
-                                  CupertinoButton(
-                                    padding: EdgeInsets.zero,
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 25,
-                                      color: Theme.of(context).iconTheme.color,
-                                    ),
-                                    onPressed: () async {
-                                      final result = await FilePicker.platform
-                                          .pickFiles(
-                                              allowMultiple: false,
-                                              type: FileType.custom,
-                                              allowedExtensions: [
-                                            'png',
-                                            'jpg',
-                                            'gif'
-                                          ]);
-
-                                      if (result != null) {
-                                        final path = result.files.single.path;
-                                        final name = result.files.single.name;
-                                        context
-                                            .read<PhotouploadCubit>()
-                                            .updateData(path, name, name)
-                                            .then(
-                                          (value) async {
-                                            String imagurl = await firebase_storage
-                                                .FirebaseStorage.instance
-                                                .ref(
-                                                    'userimage/${name}/${name}')
-                                                .getDownloadURL();
-
-                                            if (imagurl != null) {
-                                              setState(() {
-                                                messagesend(
-                                                    message: imagurl,
-                                                    message_type: 'image');
-                                              });
+                                                    return messageing_widget(
+                                                      data: data,
+                                                      myUID: myUID,
+                                                      RoomID: frienduid.trim(),
+                                                      profile_data: user_info,
+                                                    );
+                                                  } else {
+                                                    return Container();
+                                                  }
+                                                },
+                                              );
+                                            } else {
+                                              return Center(
+                                                child:
+                                                    CupertinoActivityIndicator(
+                                                        color: Theme.of(context)
+                                                            .iconTheme
+                                                            .color),
+                                              );
                                             }
-                                          },
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  Expanded(
-                                    child: Theme(
-                                      data: ThemeData(),
-                                      child: ChatComposer(
-                                        controller: messaage,
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 10),
-                                        onReceiveText: (str) {
+                                          }),
+                                    );
+                                  } else {
+                                    return Container();
+                                  }
+                                })),
+                        Container(
+                          height: 20.w,
+                          color: Theme.of(context).secondaryHeaderColor,
+                          child: Row(
+                            children: [
+                              CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                child: Icon(
+                                  Icons.add,
+                                  size: 25,
+                                  color: Theme.of(context).iconTheme.color,
+                                ),
+                                onPressed: () async {
+                                  final result = await FilePicker.platform
+                                      .pickFiles(
+                                          allowMultiple: false,
+                                          type: FileType.custom,
+                                          allowedExtensions: [
+                                        'png',
+                                        'jpg',
+                                        'gif'
+                                      ]);
+
+                                  if (result != null) {
+                                    final path = result.files.single.path;
+                                    final name = result.files.single.name;
+                                    context
+                                        .read<PhotouploadCubit>()
+                                        .updateData(path, name, name)
+                                        .then(
+                                      (value) async {
+                                        String imagurl = await firebase_storage
+                                            .FirebaseStorage.instance
+                                            .ref('userimage/${name}/${name}')
+                                            .getDownloadURL();
+
+                                        if (imagurl != null) {
                                           setState(() {
                                             messagesend(
-                                                message: str,
-                                                message_type: "text");
-
-                                            WidgetsBinding.instance
-                                                .addPostFrameCallback(
-                                                    (_) => _scrollDown());
-                                            messaage.clear();
+                                                message: imagurl,
+                                                message_type: 'image');
                                           });
-                                        },
-                                        onRecordEnd: (String path) {
-                                          String name = path.split('/').last;
-
-                                          context
-                                              .read<PhotouploadCubit>()
-                                              .updateData(path, name, name)
-                                              .then((value) async {
-                                            print("Done");
-                                            String voiceurl = await firebase_storage
-                                                .FirebaseStorage.instance
-                                                .ref(
-                                                    'userimage/${name}/${name}')
-                                                .getDownloadURL();
-                                            print(voiceurl);
-                                            if (voiceurl != null) {
-                                              setState(() {
-                                                messagesend(
-                                                    message: voiceurl,
-                                                    message_type: 'voice');
-                                              });
-                                            }
-                                          });
-                                        },
-                                        recordIconColor:
-                                            Theme.of(context).iconTheme.color,
-                                        sendButtonColor:
-                                            Theme.of(context).iconTheme.color,
-                                        backgroundColor: Colors.transparent,
-                                        sendButtonBackgroundColor:
-                                            Colors.transparent,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                        }
+                                      },
+                                    );
+                                  }
+                                },
                               ),
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Center(
-                          child: CupertinoActivityIndicator(
-                              color: Theme.of(context).iconTheme.color),
-                        );
-                      }
-                    })),
-          ),
+                              Expanded(
+                                child: Theme(
+                                  data: ThemeData(),
+                                  child: ChatComposer(
+                                    controller: messaage,
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    onReceiveText: (str) {
+                                      setState(() {
+                                        messagesend(
+                                            message: str, message_type: "text");
+
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback(
+                                                (_) => _scrollDown());
+                                        messaage.clear();
+                                      });
+                                    },
+                                    onRecordEnd: (String path) {
+                                      String name = path.split('/').last;
+
+                                      context
+                                          .read<PhotouploadCubit>()
+                                          .updateData(path, name, name)
+                                          .then((value) async {
+                                        print("Done");
+                                        String voiceurl = await firebase_storage
+                                            .FirebaseStorage.instance
+                                            .ref('userimage/${name}/${name}')
+                                            .getDownloadURL();
+                                        print(voiceurl);
+                                        if (voiceurl != null) {
+                                          setState(() {
+                                            messagesend(
+                                                message: voiceurl,
+                                                message_type: 'voice');
+                                          });
+                                        }
+                                      });
+                                    },
+                                    recordIconColor:
+                                        Theme.of(context).iconTheme.color,
+                                    sendButtonColor:
+                                        Theme.of(context).iconTheme.color,
+                                    backgroundColor: Colors.transparent,
+                                    sendButtonBackgroundColor:
+                                        Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Center(
+                      child: CupertinoActivityIndicator(
+                          color: Theme.of(context).iconTheme.color),
+                    );
+                  }
+                }),
+          )),
         );
       } else {
         return Container();
@@ -1360,20 +1224,3 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     });
   }
 }
-
-
-
-
-// Send Message event Code
-
-//if (lates_message != null) {
-//setState(() {
-//messagesend(
-//message: messaage.text,
-//message_type: 'text');
-//});
-//}
-
-/// business
-///
-///

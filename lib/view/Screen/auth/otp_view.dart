@@ -147,20 +147,11 @@ class _OTPState extends State<OTP> {
                   onpress: () async {
                     setState(() {
                       buttonloading = true;
+                      buttonEnable = false;
                     });
                     BlocProvider.of<PhoneauthBloc>(context)
                         .add(VerifySMSCode(smscode: _pinPutController.text));
-                    print(widget.number);
-                    await profile_checkwithfun(number: widget.number)
-                        .then((value) {
-                      if (value == true) {
-                        sharedPreferences.setString('uid', widget.number);
-                        sharedPreferences.setString('number', widget.number);
-                        Navigator.of(context).pushNamed('/');
-                      } else {
-                        Navigator.of(context).pushNamed('/profile_Setup');
-                      }
-                    });
+                    Navigator.of(context).pushNamed('/profile_Setup');
                   },
                   Texts: "VERIFY",
                   widths: 80,
@@ -171,14 +162,5 @@ class _OTPState extends State<OTP> {
         ),
       ),
     );
-  }
-
-  Future<bool> profile_checkwithfun({String number}) async {
-    final Result = await FirebaseFirestore.instance
-        .collection('user')
-        .where("Phone_number", isEqualTo: number)
-        .get();
-
-    return Result.docs != null;
   }
 }

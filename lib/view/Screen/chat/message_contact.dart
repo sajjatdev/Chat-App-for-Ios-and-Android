@@ -56,6 +56,61 @@ class _Message_contactState extends State<Message_contact> {
     });
   }
 
+  void myinformation_setup(
+      {String myuid, String client, String RoomUID, bool isme}) async {
+    if (isme) {
+      Map<String, dynamic> data = await FirebaseFirestore.instance
+          .collection("user")
+          .doc(client)
+          .get()
+          .then((DocumentSnapshot snapshot) => snapshot.data());
+      if (data != null) {
+        FirebaseFirestore.instance
+            .collection('user')
+            .doc(myuid)
+            .collection("Friends")
+            .doc(client)
+            .set({
+          "Room_ID": RoomUID,
+          "type": "chat",
+          "time": DateTime.now().millisecondsSinceEpoch,
+          "uid": client,
+          "keyword_name": SearchKeyGenerator(
+              item: Fullname(
+                  firstname: data["first_name"], lastname: data["last_name"])),
+          "Phone_keyword": SearchKeyGenerator(item: data['Phone_number']),
+        }).then((value) {
+          print("Done");
+        });
+      }
+    } else {
+      Map<String, dynamic> data = await FirebaseFirestore.instance
+          .collection("user")
+          .doc(myuid)
+          .get()
+          .then((DocumentSnapshot snapshot) => snapshot.data());
+      if (data != null) {
+        FirebaseFirestore.instance
+            .collection('user')
+            .doc(client)
+            .collection("Friends")
+            .doc(myuid)
+            .set({
+          "Room_ID": RoomUID,
+          "type": "chat",
+          "time": DateTime.now().millisecondsSinceEpoch,
+          "uid": myuid,
+          "keyword_name": SearchKeyGenerator(
+              item: Fullname(
+                  firstname: data["first_name"], lastname: data["last_name"])),
+          "Phone_keyword": SearchKeyGenerator(item: data['Phone_number']),
+        }).then((value) {
+          print("Client done");
+        });
+      }
+    }
+  }
+
   Future<String> ChatUID({String myUID, String antherUID}) async {
     List userList = [myUID, antherUID];
     String Roomdata = '';
@@ -361,50 +416,25 @@ class _Message_contactState extends State<Message_contact> {
                                                             .now()
                                                         .millisecondsSinceEpoch
                                                   }).then((value) {
-                                                    FirebaseFirestore.instance
-                                                        .collection('user')
-                                                        .doc(state.data[index]
-                                                            .phoneNumber)
-                                                        .collection("Friends")
-                                                        .doc(myuid)
-                                                        .set({
-                                                      "Room_ID": UID,
-                                                      "type": "chat",
-                                                      "time": DateTime.now()
-                                                          .millisecondsSinceEpoch,
-                                                      "uid": myuid,
-                                                    });
-
-                                                    FirebaseFirestore.instance
-                                                        .collection('user')
-                                                        .doc(myuid)
-                                                        .collection("Friends")
-                                                        .doc(state.data[index]
-                                                            .phoneNumber)
-                                                        .set({
-                                                      "Room_ID": UID,
-                                                      "type": "chat",
-                                                      "time": DateTime.now()
-                                                          .millisecondsSinceEpoch,
-                                                      "uid": state.data[index]
+                                                    // My Keyword Set
+                                                    myinformation_setup(
+                                                      RoomUID: UID,
+                                                      myuid: myuid,
+                                                      client: state.data[index]
                                                           .phoneNumber,
-                                                      "keyword_name":
-                                                          SearchKeyGenerator(
-                                                              item: Fullname(
-                                                                  firstname: state
-                                                                      .data[
-                                                                          index]
-                                                                      .firstName,
-                                                                  lastname: state
-                                                                      .data[
-                                                                          index]
-                                                                      .lastName)),
-                                                      "Phone_keyword":
-                                                          SearchKeyGenerator(
-                                                              item: state
-                                                                  .data[index]
-                                                                  .phoneNumber),
-                                                    });
+                                                      isme: true,
+                                                    );
+                                                    // End
+
+                                                    // client Keyword Set
+
+                                                    myinformation_setup(
+                                                      RoomUID: UID,
+                                                      myuid: myuid,
+                                                      client: state.data[index]
+                                                          .phoneNumber,
+                                                      isme: false,
+                                                    );
 
                                                     Navigator.of(context)
                                                         .pushReplacementNamed(
@@ -416,29 +446,25 @@ class _Message_contactState extends State<Message_contact> {
                                                   });
                                                 } else if (Room_data != null &&
                                                     Room_data != 'create') {
-                                                  FirebaseFirestore.instance
-                                                      .collection('user')
-                                                      .doc(myuid)
-                                                      .collection("Friends")
-                                                      .doc(state.data[index]
-                                                          .phoneNumber)
-                                                      .update({
-                                                    "keyword_name":
-                                                        SearchKeyGenerator(
-                                                            item: Fullname(
-                                                                firstname: state
-                                                                    .data[index]
-                                                                    .firstName,
-                                                                lastname: state
-                                                                    .data[index]
-                                                                    .lastName)),
-                                                    "Phone_keyword":
-                                                        SearchKeyGenerator(
-                                                            item: state
-                                                                .data[index]
-                                                                .phoneNumber),
-                                                  });
+                                                  // My Keyword Set
+                                                  myinformation_setup(
+                                                    RoomUID: Room_data,
+                                                    myuid: myuid,
+                                                    client: state.data[index]
+                                                        .phoneNumber,
+                                                    isme: true,
+                                                  );
+                                                  // End
 
+                                                  // client Keyword Set
+
+                                                  myinformation_setup(
+                                                    RoomUID: Room_data,
+                                                    myuid: myuid,
+                                                    client: state.data[index]
+                                                        .phoneNumber,
+                                                    isme: false,
+                                                  );
                                                   Navigator.of(context)
                                                       .pushReplacementNamed(
                                                           '/messageing',

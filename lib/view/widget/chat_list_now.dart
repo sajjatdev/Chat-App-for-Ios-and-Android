@@ -48,7 +48,7 @@ class _ConversationListState extends State<ConversationList> {
       title: Text(
         widget.name,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 12.sp),
+        style: TextStyle(fontSize: 15.sp),
       ),
       leading: Stack(children: [
         if (widget.imageUrl.contains("https://")) ...[
