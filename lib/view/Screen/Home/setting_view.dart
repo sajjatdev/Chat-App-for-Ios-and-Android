@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
 
@@ -300,6 +301,8 @@ class _setting_viewState extends State<setting_view> {
                 Button(
                   buttonenable: true,
                   onpress: () async {
+                    await _deleteCacheDir();
+                    await _deleteAppDir();
                     FirebaseAuth.instance.signOut();
                     Navigator.of(context).pushNamed("/");
                   },
@@ -314,5 +317,23 @@ class _setting_viewState extends State<setting_view> {
         }
       }),
     );
+  }
+
+  /// this will delete cache
+  Future<void> _deleteCacheDir() async {
+    final cacheDir = await getTemporaryDirectory();
+
+    if (cacheDir.existsSync()) {
+      cacheDir.deleteSync(recursive: true);
+    }
+  }
+
+  /// this will delete app's storage
+  Future<void> _deleteAppDir() async {
+    final appDir = await getApplicationSupportDirectory();
+
+    if (appDir.existsSync()) {
+      appDir.deleteSync(recursive: true);
+    }
   }
 }
