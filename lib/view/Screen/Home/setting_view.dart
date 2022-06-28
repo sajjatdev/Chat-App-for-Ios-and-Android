@@ -301,9 +301,10 @@ class _setting_viewState extends State<setting_view> {
                 Button(
                   buttonenable: true,
                   onpress: () async {
+                    FirebaseAuth.instance.signOut();
                     await _deleteCacheDir();
                     await _deleteAppDir();
-                    FirebaseAuth.instance.signOut();
+
                     Navigator.of(context).pushNamed("/");
                   },
                   Texts: "Logout",

@@ -84,7 +84,11 @@
 <string>photos</string>
 <key>NSRemindersUsageDescription</key>
 <string>reminders</string>
-
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+</dict>
 
 
 

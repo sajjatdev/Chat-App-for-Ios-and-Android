@@ -1,14 +1,9 @@
-import 'dart:io';
-import 'dart:math';
-import 'dart:async';
-
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:sizer/sizer.dart';
-import 'package:wave_progress_bars/wave_progress_bars.dart';
 
 class voice_message extends StatefulWidget {
   voice_message(

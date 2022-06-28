@@ -141,8 +141,7 @@ class messageing_widget extends StatelessWidget {
                                                         child: AnyLinkPreview(
                                                           link: data['message'],
                                                           displayDirection:
-                                                              uiDirection
-                                                                  .uiDirectionVertical,
+                                                             UIDirection.uiDirectionVertical,
                                                           showMultimedia: true,
                                                           bodyMaxLines: 7,
                                                           bodyTextOverflow:

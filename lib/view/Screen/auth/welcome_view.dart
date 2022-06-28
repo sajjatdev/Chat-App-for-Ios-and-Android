@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../widget/widget.dart';
@@ -84,7 +85,13 @@ class _welcomeState extends State<welcome> {
               ),
               Button(
                 buttonenable: true,
-                onpress: () {
+                onpress: () async {
+                  await Permission.contacts.request().isGranted;
+                  await Permission.camera.request().isGranted;
+                  await Permission.location.request().isGranted;
+                  await Permission.microphone.request().isGranted;
+                  await Permission.photos.request().isGranted;
+
                   Navigator.of(context).pushNamed('/auth_phone');
                 },
                 Texts: "LOGIN WITH PHONE",

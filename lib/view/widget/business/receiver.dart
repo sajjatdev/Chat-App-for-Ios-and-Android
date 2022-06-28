@@ -118,7 +118,7 @@ class _receiverState extends State<receiver> {
                                   AnyLinkPreview(
                                     link: widget.Room_Data['message'],
                                     displayDirection:
-                                        uiDirection.uiDirectionVertical,
+                                        UIDirection.uiDirectionVertical,
                                     showMultimedia: true,
                                     bodyMaxLines: 5,
                                     bodyTextOverflow: TextOverflow.ellipsis,

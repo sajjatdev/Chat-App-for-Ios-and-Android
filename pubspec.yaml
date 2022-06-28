@@ -56,8 +56,6 @@ dependencies:
   strings: ^0.2.2
   latlong2: ^0.8.1
   dio: ^4.0.6
-  audioplayers: ^0.20.1
-  just_audio: ^0.9.20
   intl: ^0.17.0
   like_button: ^2.0.4
   image_picker: ^0.8.5
@@ -73,6 +71,10 @@ dependencies:
   collection: ^1.16.0
   uuid: ^3.0.6
   loading_overlay: ^0.3.0
+  http: ^0.13.4
+  just_audio: ^0.9.27
+  rxdart: ^0.27.4
+  audio_session: ^0.1.8
  
  
 

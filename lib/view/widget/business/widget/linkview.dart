@@ -23,7 +23,7 @@ class link_view extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnyLinkPreview(
       link: Room_Data['message'],
-      displayDirection: uiDirection.uiDirectionVertical,
+      displayDirection: UIDirection.uiDirectionVertical,
       showMultimedia: true,
       bodyMaxLines: 5,
       bodyTextOverflow: TextOverflow.ellipsis,

@@ -241,55 +241,52 @@ class _profile_setupState extends State<profile_setup> {
                               SizedBox(
                                 height: 5.w,
                               ),
-                              Container(
-                                height: 15.w,
-                                width: 80.w,
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                  color: HexColor.fromHex("#D8D8D8"),
-                                ))),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        username == null
-                                            ? "Username (Required)"
-                                            : "$username",
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                            color: username == null
-                                                ? HexColor.fromHex("#C9C9CB")
-                                                : Theme.of(context)
-                                                    .iconTheme
-                                                    .color,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 12.sp),
-                                      ),
-                                      IconButton(
-                                          onPressed: () async {
-                                            final prefs =
-                                                await SharedPreferences
-                                                    .getInstance();
-                                            await prefs.setString(
-                                                'name', names);
-                                            await prefs.setString(
-                                                'lastname',
-                                                lastnames == null
-                                                    ? ''
-                                                    : lastnames);
-                                            Navigator.of(context)
-                                                .pushNamed('/username_crate');
-                                          },
-                                          icon: SvgPicture.asset(
-                                            'assets/svg/Left_Arrow_4_.svg',
-                                            color: HexColor.fromHex('#5F5F62'),
-                                          ))
-                                    ],
+                              GestureDetector(
+                                onTap: () async {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setString('name', names);
+                                  await prefs.setString(
+                                      'lastname', lastnames ?? '');
+                                  Navigator.of(context)
+                                      .pushNamed('/username_crate');
+                                },
+                                child: Container(
+                                  height: 15.w,
+                                  width: 80.w,
+                                  decoration: BoxDecoration(
+                                      border: Border(
+                                          bottom: BorderSide(
+                                    color: HexColor.fromHex("#D8D8D8"),
+                                  ))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          username == null
+                                              ? "Username (Required)"
+                                              : "$username",
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                              color: username == null
+                                                  ? HexColor.fromHex("#C9C9CB")
+                                                  : Theme.of(context)
+                                                      .iconTheme
+                                                      .color,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 12.sp),
+                                        ),
+                                        IconButton(
+                                            icon: SvgPicture.asset(
+                                          'assets/svg/Left_Arrow_4_.svg',
+                                          color: HexColor.fromHex('#5F5F62'),
+                                        ))
+                                      ],
+                                    ),
                                   ),
                                 ),
                               )
@@ -301,41 +298,31 @@ class _profile_setupState extends State<profile_setup> {
                       if (imagedata is photouploadss) {
                         return Button(
                           buttonenable: true,
-                          loadingbtn: btnloading,
+                          loadingbtn: false,
                           onpress: () async {
                             final FormState status = _globalKey.currentState;
-
+                            List contact_number_list = [];
                             if (status.validate()) {
                               setState(() {
                                 btnloading = true;
                               });
 
-                              context.read<ProfileSetupCubit>().set_profile(
-                                  Firstname: firstname.text,
-                                  lastname: lastnames == null ? '' : lastnames,
-                                  username: '@' + username,
-                                  imageURL: imagedata.ImageURL,
-                                  phone_number: state.user.phoneNumber,
-                                  uid: state.user.phoneNumber);
-                              sharedPreferences.setString(
-                                  'uid', state.user.phoneNumber);
-                              sharedPreferences.setString(
-                                  'number', state.user.phoneNumber);
                               // profile setup Code Send
 
-                              List contact_number_list = [];
                               bool isGranted =
                                   await Permission.contacts.status.isGranted;
                               if (!isGranted) {
-                                isGranted = await Permission.contacts
-                                    .request()
-                                    .isGranted;
+                                setState(() async {
+                                  isGranted = await Permission.contacts
+                                      .request()
+                                      .isGranted;
+                                });
                               }
-
                               if (isGranted) {
                                 await ContactsService.getContacts()
                                     .then((value) {
                                   for (var item in value) {
+                                    print("done");
                                     if (item.phones.isNotEmpty) {
                                       contact_number_list
                                           .add(item.phones[0].value);
@@ -350,10 +337,28 @@ class _profile_setupState extends State<profile_setup> {
                                       .set({
                                     "list_Contact": contact_number_list
                                   });
+
+                                  print("Update Contact");
+
+                                  context.read<ProfileSetupCubit>().set_profile(
+                                      Firstname: firstname.text,
+                                      lastname: lastnames ?? '',
+                                      username: username,
+                                      imageURL: imagedata.ImageURL,
+                                      phone_number: state.user.phoneNumber,
+                                      uid: state.user.phoneNumber);
+
+                                  sharedPreferences.setString(
+                                      'uid', state.user.phoneNumber);
+                                  sharedPreferences.setString(
+                                      'number', state.user.phoneNumber);
+                                  Navigator.of(context).pushNamed('/');
+                                });
+                              } else {
+                                setState(() {
+                                  btnloading = false;
                                 });
                               }
-
-                              Navigator.of(context).pushNamed('/');
                             }
                           },
                           Texts: "DONE",
@@ -361,7 +366,7 @@ class _profile_setupState extends State<profile_setup> {
                         );
                       } else {
                         return Button(
-                          loadingbtn: btnloading,
+                          loadingbtn: false,
                           buttonenable: firstname != null && username != null
                               ? true
                               : false,
@@ -373,49 +378,38 @@ class _profile_setupState extends State<profile_setup> {
                                 btnloading = true;
                               });
 
-                              context.read<ProfileSetupCubit>().set_profile(
-                                  Firstname: firstname.text,
-                                  lastname: lastnames == null ? '' : lastnames,
-                                  username: '@' + username,
-                                  imageURL: firstname.text,
-                                  phone_number: state.user.phoneNumber,
-                                  uid: state.user.phoneNumber);
-                              sharedPreferences.setString(
-                                  'uid', state.user.phoneNumber);
-                              sharedPreferences.setString(
-                                  'number', state.user.phoneNumber);
-
                               List contact_number_list = [];
-                              bool isGranted =
-                                  await Permission.contacts.status.isGranted;
-                              if (!isGranted) {
-                                isGranted = await Permission.contacts
-                                    .request()
-                                    .isGranted;
-                              }
 
-                              if (isGranted) {
-                                await ContactsService.getContacts()
-                                    .then((value) {
-                                  for (var item in value) {
-                                    if (item.phones.isNotEmpty) {
-                                      contact_number_list
-                                          .add(item.phones[0].value);
-                                    } else {
-                                      print("null phone number");
-                                    }
+                              await ContactsService.getContacts().then((value) {
+                                for (var item in value) {
+                                  if (item.phones.isNotEmpty) {
+                                    contact_number_list
+                                        .add(item.phones[0].value);
+                                  } else {
+                                    print("null phone number");
                                   }
+                                }
 
-                                  FirebaseFirestore.instance
-                                      .collection("Contact_list")
-                                      .doc(state.user.phoneNumber)
-                                      .set({
-                                    "list_Contact": contact_number_list
-                                  });
+                                FirebaseFirestore.instance
+                                    .collection("Contact_list")
+                                    .doc(state.user.phoneNumber)
+                                    .set({
+                                  "list_Contact": contact_number_list ?? []
+                                }).then((value) {
+                                  context.read<ProfileSetupCubit>().set_profile(
+                                      Firstname: firstname.text,
+                                      lastname: lastnames ?? '',
+                                      username: '@' + username,
+                                      imageURL: firstname.text,
+                                      phone_number: state.user.phoneNumber,
+                                      uid: state.user.phoneNumber);
+                                  sharedPreferences.setString(
+                                      'uid', state.user.phoneNumber);
+                                  sharedPreferences.setString(
+                                      'number', state.user.phoneNumber);
+                                  Navigator.of(context).pushNamed('/');
                                 });
-                              }
-
-                              Navigator.of(context).pushNamed('/');
+                              });
                             }
                           },
                           Texts: "DONE",

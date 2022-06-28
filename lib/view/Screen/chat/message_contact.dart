@@ -114,6 +114,7 @@ class _Message_contactState extends State<Message_contact> {
   Future<String> ChatUID({String myUID, String antherUID}) async {
     List userList = [myUID, antherUID];
     String Roomdata = '';
+    bool checkStatus = false;
     Function eq = const DeepCollectionEquality.unordered().equals;
 
     QuerySnapshot Room_Data = await FirebaseFirestore.instance
@@ -124,11 +125,22 @@ class _Message_contactState extends State<Message_contact> {
     if (Room_Data.docs.length > 0) {
       for (var i = 0; i < Room_Data.docs.length; i++) {
         List check_user = Room_Data.docs[i]['users'];
+
         if (eq(check_user, userList)) {
+          setState(() {
+            checkStatus = false;
+          });
           Roomdata = Room_Data.docs[i].id;
+          break;
         } else {
-          Roomdata = "create";
+          setState(() {
+            checkStatus = true;
+          });
         }
+      }
+
+      if (checkStatus) {
+        Roomdata = "create";
       }
     } else {
       Roomdata = "create";
@@ -223,27 +235,22 @@ class _Message_contactState extends State<Message_contact> {
                 onSelected: (int value) async {
                   if (value == 1) {
                     List contact_number_list = [];
-                    bool isGranted = await Permission.contacts.status.isGranted;
-                    if (!isGranted) {
-                      isGranted = await Permission.contacts.request().isGranted;
-                    }
 
-                    if (isGranted) {
-                      await ContactsService.getContacts().then((value) {
-                        for (var item in value) {
-                          if (item.phones.isNotEmpty) {
-                            contact_number_list.add(item.phones[0].value);
-                          } else {
-                            print("null phone number");
-                          }
+                    await ContactsService.getContacts().then((value) {
+                      for (var item in value) {
+                        if (item.phones.isNotEmpty) {
+                          contact_number_list.add(item.phones[0].value);
+                        } else {
+                          print("null phone number");
                         }
+                      }
 
-                        FirebaseFirestore.instance
-                            .collection("Contact_list")
-                            .doc(myuid)
-                            .set({"list_Contact": contact_number_list});
-                      });
-                    }
+                      FirebaseFirestore.instance
+                          .collection("Contact_list")
+                          .doc(myuid)
+                          .set({"list_Contact": contact_number_list});
+                    });
+
                     context.read<ContactCubit>().Getallcontactlist(
                           keyword: "none",
                           isSearch: false,
@@ -319,11 +326,11 @@ class _Message_contactState extends State<Message_contact> {
                 ),
               )),
         ),
-        body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            future: FirebaseFirestore.instance
+        body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance
                 .collection("Contact_list")
                 .doc(myuid)
-                .get(),
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 Map<String, dynamic> contact_data = snapshot.data.data();
@@ -440,7 +447,10 @@ class _Message_contactState extends State<Message_contact> {
                                                         .pushReplacementNamed(
                                                             '/messageing',
                                                             arguments: {
-                                                          'otheruid': UID,
+                                                          'otheruid': state
+                                                              .data[index]
+                                                              .phoneNumber,
+                                                          'Single_Room_ID': UID,
                                                           'type': 'chat',
                                                         });
                                                   });

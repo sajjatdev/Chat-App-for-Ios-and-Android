@@ -42,6 +42,7 @@ class messageing {
         "Last_message": message,
         'last_update': DateTime.now().millisecondsSinceEpoch,
         'users': users,
+        "message_type": message_type,
         'type': type,
         'Room_ID': RoomID
       });
