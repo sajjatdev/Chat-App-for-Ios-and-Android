@@ -4,15 +4,17 @@ class profile_model {
   String fullName;
   String username;
   String imageUrl;
+  String lastname;
   String userStatus;
-  profile_model({
-    this.fullName,
-    this.username,
-    this.imageUrl,
-    this.userStatus,
-  });
+  profile_model(
+      {this.fullName,
+      this.username,
+      this.imageUrl,
+      this.userStatus,
+      this.lastname});
 
   profile_model.fromJson(Map<String, dynamic> json) {
+    lastname = json["last_name"];
     fullName = json['first_name'];
     username = json['username'];
     userStatus = json['userStatus'];

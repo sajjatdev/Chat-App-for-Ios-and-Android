@@ -18,9 +18,12 @@ class ConversationList extends StatefulWidget {
   String Room_ID;
   bool isMessageRead;
   String MessageType;
+  String last_name;
+
   ConversationList(
       {@required this.name,
       @required this.uid,
+      @required this.last_name,
       @required this.messageText,
       @required this.imageUrl,
       @required this.time,
@@ -46,7 +49,7 @@ class _ConversationListState extends State<ConversationList> {
         });
       },
       title: Text(
-        widget.name,
+        widget.name + " " + widget.last_name ?? "",
         overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: 15.sp),
       ),

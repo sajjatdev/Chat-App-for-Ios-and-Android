@@ -15,18 +15,16 @@ class GetMessageListCubit extends Cubit<GetMessageListState> {
   Future<void> get_message_list(
       {String myuid, bool ischeck, String namekeyword}) {
     emit(Loadings());
-    Future.delayed(Duration(milliseconds: 500), () {
-      streamSubscription = _message
-          .get_message_list(
-              myuid: myuid, ischeck: ischeck, namekey: namekeyword)
-          .listen((data) {
-        if (data.isNotEmpty) {
-          print("Welcome");
-          emit(Message_list(contact_list: data));
-        } else {
-          emit(Contact_error_message(Message: "Not found any Data "));
-        }
-      });
+
+    streamSubscription = _message
+        .get_message_list(myuid: myuid, ischeck: ischeck, namekey: namekeyword)
+        .listen((data) {
+      if (data.isNotEmpty) {
+        print("Welcome");
+        emit(Message_list(contact_list: data));
+      } else {
+        emit(Contact_error_message(Message: "Not found any Data "));
+      }
     });
   }
 }

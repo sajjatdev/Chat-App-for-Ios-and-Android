@@ -68,7 +68,7 @@ class _setting_viewState extends State<setting_view> {
                     ),
                   ],
                 ),
-                Spacer(
+                const Spacer(
                   flex: 1,
                 ),
                 Container(
@@ -100,40 +100,57 @@ class _setting_viewState extends State<setting_view> {
                               fontsize: 21,
                             )
                           ],
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  capitalize(getstate.profile_data.fullName),
-                                  style: TextStyle(
-                                      color: Theme.of(context).iconTheme.color,
-                                      fontSize: 16.sp),
-                                ),
-                                Text(
-                                  capitalize(getstate.profile_data.username),
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .iconTheme
-                                          .color
-                                          .withOpacity(0.5),
-                                      fontSize: 12.sp),
-                                ),
-                                SizedBox(
-                                  height: 1.5.w,
-                                ),
-                                // Text(
-                                //   number,
-                                //   style: TextStyle(
-                                //       color: Theme.of(context)
-                                //           .iconTheme
-                                //           .color
-                                //           .withOpacity(0.5),
-                                //       fontSize: 12.sp),
-                                // )
-                              ],
+                          SizedBox(
+                            width: 50.w,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 50.w,
+                                    child: Text(
+                                      " ${capitalize(getstate.profile_data.fullName)} ${getstate.profile_data.lastname ?? ""}",
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: TextStyle(
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                          fontSize: 16.sp),
+                                    ),
+                                  ),
+
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 5.sp),
+                                    child: Text(
+                                      capitalize(
+                                          getstate.profile_data.username),
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .iconTheme
+                                              .color
+                                              .withOpacity(0.5),
+                                          fontSize: 12.sp),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 1.5.w,
+                                  ),
+                                  // Text(
+                                  //   number,
+                                  //   style: TextStyle(
+                                  //       color: Theme.of(context)
+                                  //           .iconTheme
+                                  //           .color
+                                  //           .withOpacity(0.5),
+                                  //       fontSize: 12.sp),
+                                  // )
+                                ],
+                              ),
                             ),
                           )
                         ]),
@@ -141,6 +158,8 @@ class _setting_viewState extends State<setting_view> {
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => Profile_edit(
+                                        lastname:
+                                            getstate.profile_data.lastname,
                                         image: getstate.profile_data.imageUrl,
                                         name: getstate.profile_data.fullName,
                                         myuid: uid,

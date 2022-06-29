@@ -59,6 +59,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     messaage = TextEditingController();
     messaage.addListener(() {
       try {
@@ -76,27 +77,37 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     });
     super.initState();
     getUID();
-    WidgetsBinding.instance.addObserver(this);
+    message_status();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.resumed) {
-      //message Delivery with See
-      bool ischat = widget.data['type'] == 'chat';
-      final query = await FirebaseFirestore.instance
+  void message_status() async {
+    bool ischat = widget.data['type'] == 'chat';
+    try {
+      await FirebaseFirestore.instance
           .collection("chat")
-          .doc(ischat == true
-              ? widget.data['Single_Room_ID']
-              : widget.data['otheruid'])
+          .doc("soccerfanclub")
           .collection("message")
-          .where("sender", isNotEqualTo: sharedPreferences.getString('uid'))
-          .where("read", isEqualTo: false)
-          .get();
-
-      for (var doc in query.docs) {
-        doc.reference.update({'read': true});
-      }
+          .where("sender", isNotEqualTo: myUID)
+          .get()
+          .then((QuerySnapshot snapshot) {
+        setState(() {
+          for (var element in snapshot.docs) {
+            bool read_dara = element['read'];
+            if (read_dara == false) {
+              FirebaseFirestore.instance
+                  .collection("chat")
+                  .doc("soccerfanclub")
+                  .collection("message")
+                  .doc(element.id)
+                  .update({"read": true});
+            }
+          }
+        });
+      });
+    } on FirebaseFirestore catch (e) {
+      setState(() {
+        print(e.toString());
+      });
     }
   }
 
@@ -126,7 +137,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
       print(
           "Message page UID Data $frienduid With Type ${widget.data['type']}");
       print("------------------------------------------------");
-      print(widget.data['Single_Room_ID']);
+      print(widget.data['Single_Room_ID'] ?? "Is Group");
     });
     // stream.delayed(Duration(milliseconds: 250), () {
     //   _scrollDown();
@@ -180,22 +191,11 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     if (scrollController.hasClients) {
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
     }
-
-    // scrollController.animateTo(
-    //   scrollController.position.maxScrollExtent,
-    //   duration: const Duration(milliseconds: 250),
-    //   curve: Curves.fastOutSlowIn,
-    // );
   }
 
   @override
   Widget build(BuildContext context) {
-    // try {
-    //   WidgetsBinding.instance.addPostFrameCallback((_) => _scrollDown());
-    // } catch (e) {
-    //   print(e.toString());
-    // }
-
+    message_status();
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
     final Widget emptyBlock = Padding(

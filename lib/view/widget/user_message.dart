@@ -21,11 +21,11 @@ class Message_user_list extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       // get user profile data
-      child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          future: FirebaseFirestore.instance
+      child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
               .collection('chat')
               .doc(data.Room_Name)
-              .get(),
+              .snapshots(),
           builder: (context,
               AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
                   getRoom_data) {
@@ -47,6 +47,7 @@ class Message_user_list extends StatelessWidget {
                         return ConversationList(
                           imageUrl: user_data['imageUrl'],
                           name: user_data['first_name'],
+                          last_name: user_data["last_name"],
                           uid: user_data['uid'],
                           status: user_data['userStatus'],
                           Room_ID: data.Room_Name,

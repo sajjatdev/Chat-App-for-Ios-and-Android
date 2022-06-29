@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:chatting/Helper/color.dart';
+import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
@@ -15,18 +14,20 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:sizer/sizer.dart';
 
 class Profile_edit extends StatefulWidget {
-  const Profile_edit({Key key, this.image, this.name, this.myuid})
+  const Profile_edit(
+      {Key key, this.image, this.name, this.myuid, this.lastname})
       : super(key: key);
   final String image;
   final String name;
   final String myuid;
+  final String lastname;
 
   @override
   State<Profile_edit> createState() => _Profile_editState();
 }
 
 class _Profile_editState extends State<Profile_edit> {
-  TextEditingController name;
+  TextEditingController name, lastname;
   File path;
   bool loader = false;
 
@@ -35,6 +36,7 @@ class _Profile_editState extends State<Profile_edit> {
     // TODO: implement initState
 
     name = TextEditingController(text: widget.name);
+    lastname = TextEditingController(text: widget.lastname);
     super.initState();
   }
 
@@ -80,7 +82,8 @@ class _Profile_editState extends State<Profile_edit> {
                             .doc(widget.myuid)
                             .update({
                           'imageUrl': imagurl,
-                          "first_name": name.value.text
+                          "first_name": name.value.text,
+                          "last_name": lastname.text ?? "",
                         }).then((value) {
                           Navigator.of(context).pop();
                         });
@@ -90,10 +93,17 @@ class _Profile_editState extends State<Profile_edit> {
                     FirebaseFirestore.instance
                         .collection('user')
                         .doc(widget.myuid)
-                        .update({"first_name": name.value.text}).then((value) {
+                        .update({
+                      "first_name": name.value.text,
+                      "last_name": lastname.text ?? "",
+                    }).then((value) {
                       Navigator.of(context).pop();
                     });
                   }
+
+                  context
+                      .read<ReadDataCubit>()
+                      .getprofile_data(type: "profile", uid: widget.myuid);
                 },
                 child: Text(
                   "SAVE",
@@ -143,7 +153,11 @@ class _Profile_editState extends State<Profile_edit> {
                         });
                       }
                     },
-                    child: Text("Set New  Display Image "),
+                    child: Text(
+                      "Set New  Display Image ",
+                      style:
+                          TextStyle(color: Theme.of(context).iconTheme.color),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -151,6 +165,22 @@ class _Profile_editState extends State<Profile_edit> {
                     child: TextField(
                       controller: name,
                       decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDarkMode
+                              ? HexColor.fromHex("#1a1a1c")
+                              : HexColor.fromHex("#ffffff"),
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(20))),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    child: TextField(
+                      controller: lastname,
+                      decoration: InputDecoration(
+                          hintText: "Last Name",
                           filled: true,
                           fillColor: isDarkMode
                               ? HexColor.fromHex("#1a1a1c")
