@@ -86,11 +86,7 @@ class _welcomeState extends State<welcome> {
               Button(
                 buttonenable: true,
                 onpress: () async {
-                  await Permission.contacts.request().isGranted;
-                  await Permission.camera.request().isGranted;
-                  await Permission.location.request().isGranted;
-                  await Permission.microphone.request().isGranted;
-                  await Permission.photos.request().isGranted;
+                
 
                   Navigator.of(context).pushNamed('/auth_phone');
                 },

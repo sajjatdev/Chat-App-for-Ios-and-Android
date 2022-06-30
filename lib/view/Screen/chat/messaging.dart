@@ -585,8 +585,8 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
           decoration: BoxDecoration(
               image: DecorationImage(
                   image: isDarkMode
-                      ? AssetImage('assets/image/Black_Background.png')
-                      : AssetImage('assets/image/White_Background.png'),
+                      ? const AssetImage('assets/image/Black_Background.png')
+                      : const AssetImage('assets/image/White_Background.png'),
                   fit: BoxFit.cover)),
           child: Scaffold(
               backgroundColor: Colors.transparent,

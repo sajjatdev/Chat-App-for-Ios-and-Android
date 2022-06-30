@@ -67,14 +67,17 @@ class _OTPState extends State<OTP> {
                     padding: const EdgeInsets.only(top: 0, left: 5, bottom: 5),
                     child: Align(
                       alignment: Alignment.topLeft,
-                      child: IconButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: SvgPicture.asset(
-                            'assets/svg/left-arrow-4.svg',
-                            color: HexColor.fromHex('#5F5F62'),
-                          )),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 2.w),
+                        child: IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: SvgPicture.asset(
+                              'assets/svg/left-arrow-4.svg',
+                              color: HexColor.fromHex('#5F5F62'),
+                            )),
+                      ),
                     ),
                   ),
                   Padding(
@@ -196,9 +199,11 @@ class _OTPState extends State<OTP> {
         .where("Phone_number", isEqualTo: number)
         .get()
         .then((QuerySnapshot snapshot) {
-      setState(() {
-        status = true;
-      });
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          status = true;
+        });
+      }
     });
     return status;
   }

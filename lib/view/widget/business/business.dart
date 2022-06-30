@@ -38,7 +38,7 @@ class _business_chatState extends State<business_chat> {
       );
     });
     return CustomScrollView(
-      reverse: true,
+      reverse: false,
       slivers: [
         // Sliver App in Chat List View Start
         SliverAppBar(
@@ -53,8 +53,7 @@ class _business_chatState extends State<business_chat> {
                 if (snapshot.hasData) {
                   Map<String, dynamic> data = snapshot.data.data();
                   return Text(
-                    Time_Chat.readTimestamp(
-                        data['business_date_and_time']),
+                    Time_Chat.readTimestamp(data['business_date_and_time']),
                     style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                   );
                 } else {

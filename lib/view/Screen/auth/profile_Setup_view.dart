@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:chatting/Helper/color.dart';
-import 'package:chatting/Services/Auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+
 import 'package:chatting/logic/Profile_setup/profile_setup_cubit.dart';
 import 'package:chatting/logic/current_user/cunrrent_user_bloc.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
@@ -10,16 +11,15 @@ import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
@@ -45,7 +45,10 @@ class _profile_setupState extends State<profile_setup> {
   bool btnloading = false;
   String username;
   String names;
+  File result;
   String lastnames;
+
+  PermissionStatus _permissionStatus = PermissionStatus.denied;
 
   GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
   TextEditingController firstname;
@@ -91,7 +94,6 @@ class _profile_setupState extends State<profile_setup> {
       child: Scaffold(
         body: BlocBuilder<CunrrentUserBloc, CunrrentUserState>(
             builder: (context, state) {
-          final imagedata = context.watch<PhotouploadCubit>().state;
           if (state is hasdata) {
             return SingleChildScrollView(
               child: Container(
@@ -115,56 +117,33 @@ class _profile_setupState extends State<profile_setup> {
                     SizedBox(
                       height: 10.w,
                     ),
-                    Builder(builder: (context) {
-                      if (imagedata is loadingimage) {
-                        return CircleAvatar(
-                          radius: 30.0.sp,
-                          child: CupertinoActivityIndicator(),
-                        );
-                      }
-                      if (imagedata is photouploadss) {
-                        return CircleAvatar(
-                          radius: 30.0.sp,
-                          backgroundImage: NetworkImage(imagedata.ImageURL),
-                        );
-                      } else {
-                        return Container(
-                          width: 15.w,
-                          height: 15.w,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                              color: HexColor.fromHex("#3A9EEE"),
-                              borderRadius: BorderRadius.circular(50)),
-                          child: IconButton(
-                              onPressed: () async {
-                                final result = await FilePicker.platform
-                                    .pickFiles(
-                                        allowMultiple: false,
-                                        type: FileType.image,
-                                        allowCompression: false);
+                    Container(
+                      width: 15.w,
+                      height: 15.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: HexColor.fromHex("#3A9EEE"),
+                          borderRadius: BorderRadius.circular(50)),
+                      child: IconButton(
+                          onPressed: () async {
+                            final paths = await FilePicker.platform.pickFiles(
+                                allowMultiple: false,
+                                type: FileType.image,
+                                allowCompression: false);
 
-                                print(result.files.single.path);
-                                FirebaseFirestore.instance
-                                    .collection(result.files.single.path);
-                                if (result != null) {
-                                  final path = result.files.single.path;
-                                  final name = result.files.single.name;
-                                  context
-                                      .read<PhotouploadCubit>()
-                                      .updateData(path, name, state.user.uid);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('No Image Selected')));
-                                }
-                              },
-                              icon: SvgPicture.asset(
-                                'assets/svg/add-friend.svg',
-                                color: Theme.of(context).iconTheme.color,
-                              )),
-                        );
-                      }
-                    }),
+                            if (paths != null) {
+                              result = File(paths.files.single.path);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('No Image Selected')));
+                            }
+                          },
+                          icon: SvgPicture.asset(
+                            'assets/svg/add-friend.svg',
+                            color: Theme.of(context).iconTheme.color,
+                          )),
+                    ),
                     SizedBox(
                       height: 10.w,
                     ),
@@ -294,129 +273,71 @@ class _profile_setupState extends State<profile_setup> {
                           ),
                         )),
                     Spacer(),
-                    Builder(builder: (context) {
-                      if (imagedata is photouploadss) {
-                        return Button(
-                          buttonenable: true,
-                          loadingbtn: false,
-                          onpress: () async {
-                            final FormState status = _globalKey.currentState;
-                            List contact_number_list = [];
-                            if (status.validate()) {
-                              setState(() {
-                                btnloading = true;
-                              });
+                    Button(
+                      buttonenable: true,
+                      loadingbtn: false,
+                      onpress: () async {
+                        await _askStoragePermission();
+                        if (_permissionStatus.isGranted) {
+                          final FormState status = _globalKey.currentState;
+                          List contact_number_list = [];
+                          if (status.validate()) {
+                            setState(() {
+                              btnloading = true;
+                            });
+                            final path = result.path;
+                            final name = result.path;
+                            context
+                                .read<PhotouploadCubit>()
+                                .updateData(path, name, state.user.uid);
 
-                              // profile setup Code Send
+                            String imagurl = await firebase_storage
+                                .FirebaseStorage.instance
+                                .ref('userimage/${state.user.uid}/${name}')
+                                .getDownloadURL();
+                            // profile setup Code Send
 
-                              bool isGranted =
-                                  await Permission.contacts.status.isGranted;
-                              if (!isGranted) {
-                                setState(() async {
-                                  isGranted = await Permission.contacts
-                                      .request()
-                                      .isGranted;
-                                });
-                              }
-                              if (isGranted) {
-                                await ContactsService.getContacts()
-                                    .then((value) {
-                                  for (var item in value) {
-                                    print("done");
-                                    if (item.phones.isNotEmpty) {
-                                      contact_number_list
-                                          .add(item.phones[0].value);
-                                    } else {
-                                      print("Null Phone number");
-                                    }
-                                  }
-
-                                  FirebaseFirestore.instance
-                                      .collection("Contact_list")
-                                      .doc(state.user.phoneNumber)
-                                      .set({
-                                    "list_Contact": contact_number_list
-                                  });
-
-                                  print("Update Contact");
-
-                                  context.read<ProfileSetupCubit>().set_profile(
-                                      Firstname: firstname.text,
-                                      lastname: lastnames ?? '',
-                                      username: username,
-                                      imageURL: imagedata.ImageURL,
-                                      phone_number: state.user.phoneNumber,
-                                      uid: state.user.phoneNumber);
-
-                                  sharedPreferences.setString(
-                                      'uid', state.user.phoneNumber);
-                                  sharedPreferences.setString(
-                                      'number', state.user.phoneNumber);
-                                  Navigator.of(context).pushNamed('/');
-                                });
-                              } else {
-                                setState(() {
-                                  btnloading = false;
-                                });
-                              }
-                            }
-                          },
-                          Texts: "DONE",
-                          widths: 80,
-                        );
-                      } else {
-                        return Button(
-                          loadingbtn: false,
-                          buttonenable: firstname != null && username != null
-                              ? true
-                              : false,
-                          onpress: () async {
-                            final FormState status = _globalKey.currentState;
-
-                            if (status.validate()) {
-                              setState(() {
-                                btnloading = true;
-                              });
-
-                              List contact_number_list = [];
-
-                              await ContactsService.getContacts().then((value) {
-                                for (var item in value) {
-                                  if (item.phones.isNotEmpty) {
-                                    contact_number_list
-                                        .add(item.phones[0].value);
-                                  } else {
-                                    print("null phone number");
-                                  }
+                            ContactsService.getContacts().then((value) {
+                              for (var item in value) {
+                                print("done");
+                                if (item.phones.isNotEmpty) {
+                                  contact_number_list.add(item.phones[0].value);
+                                } else {
+                                  print("Null Phone number");
                                 }
+                              }
 
-                                FirebaseFirestore.instance
-                                    .collection("Contact_list")
-                                    .doc(state.user.phoneNumber)
-                                    .set({
-                                  "list_Contact": contact_number_list ?? []
-                                }).then((value) {
-                                  context.read<ProfileSetupCubit>().set_profile(
-                                      Firstname: firstname.text,
-                                      lastname: lastnames ?? '',
-                                      username: '@' + username,
-                                      imageURL: firstname.text,
-                                      phone_number: state.user.phoneNumber,
-                                      uid: state.user.phoneNumber);
-                                  sharedPreferences.setString(
-                                      'uid', state.user.phoneNumber);
-                                  sharedPreferences.setString(
-                                      'number', state.user.phoneNumber);
-                                  Navigator.of(context).pushNamed('/');
-                                });
-                              });
-                            }
-                          },
-                          Texts: "DONE",
-                          widths: 80,
-                        );
-                      }
-                    }),
+                              FirebaseFirestore.instance
+                                  .collection("Contact_list")
+                                  .doc(state.user.phoneNumber)
+                                  .set({"list_Contact": contact_number_list});
+
+                              print("Update Contact");
+
+                              context.read<ProfileSetupCubit>().set_profile(
+                                  Firstname: firstname.text,
+                                  lastname: lastnames ?? '',
+                                  username: username,
+                                  imageURL: imagurl ?? firstname.text,
+                                  phone_number: state.user.phoneNumber,
+                                  uid: state.user.phoneNumber);
+
+                              sharedPreferences.setString(
+                                  'uid', state.user.phoneNumber);
+                              sharedPreferences.setString(
+                                  'number', state.user.phoneNumber);
+                              Navigator.of(context).pushNamed('/');
+                            });
+                          }
+                        } else {
+                          setState(() {
+                            btnloading = false;
+                          });
+                        }
+                      },
+                      Texts: "DONE",
+                      widths: 80,
+                    ),
                     SizedBox(
                       height: 5.h,
                     )
@@ -434,11 +355,28 @@ class _profile_setupState extends State<profile_setup> {
     );
   }
 
+  Future<PermissionStatus> _checkPermission() async {
+    final Permission permission = Permission.contacts;
+    final status = await permission.request();
+    return status;
+  }
+
   Future<bool> usernameCheck(String username) async {
     final result = await FirebaseFirestore.instance
         .collection('users')
         .where('username', isEqualTo: username)
         .get();
     return result.docs.isEmpty;
+  }
+
+  Future<void> _askStoragePermission() async {
+    debugPrint(" ---------------- Asking for permission...");
+    await Permission.contacts.request();
+    if (await Permission.contacts.isGranted) {
+      PermissionStatus permissionStatus = await Permission.contacts.status;
+      setState(() {
+        _permissionStatus = permissionStatus;
+      });
+    }
   }
 }
