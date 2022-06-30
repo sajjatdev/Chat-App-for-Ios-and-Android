@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -49,9 +43,18 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCVmupcfVZEviOOzIJROZNJPlrzAFKOdIE',
+    appId: '1:8456637305:web:869542f00a551e84167da8',
+    messagingSenderId: '8456637305',
+    projectId: 'chatterapp-8dfbf',
+    authDomain: 'chatterapp-8dfbf.firebaseapp.com',
+    storageBucket: 'chatterapp-8dfbf.appspot.com',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAJJH0Uj7CvjefCOsbudF4d8RAeJHRZzg8',
-    appId: '1:8456637305:android:6763741b17aace71167da8',
+    appId: '1:8456637305:android:71ebb377ecb9cf08167da8',
     messagingSenderId: '8456637305',
     projectId: 'chatterapp-8dfbf',
     storageBucket: 'chatterapp-8dfbf.appspot.com',
@@ -59,11 +62,22 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAkM9lQkI4TauJY9BuIhATCeRctdn4cb-k',
-    appId: '1:8456637305:ios:1662ab30de35a9c3167da8',
+    appId: '1:8456637305:ios:980d219af7a3c204167da8',
     messagingSenderId: '8456637305',
     projectId: 'chatterapp-8dfbf',
     storageBucket: 'chatterapp-8dfbf.appspot.com',
-    androidClientId: '8456637305-bdihkcuqujdu1s45mfb29s3bo8knqvdn.apps.googleusercontent.com',
+    androidClientId: '8456637305-4mn3omlalfnba93pgvb6jc0toqi390hf.apps.googleusercontent.com',
+    iosClientId: '8456637305-un21g1nrmcvgl59itdk8pbbkqasngrbs.apps.googleusercontent.com',
+    iosBundleId: 'com.example.chat',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAkM9lQkI4TauJY9BuIhATCeRctdn4cb-k',
+    appId: '1:8456637305:ios:980d219af7a3c204167da8',
+    messagingSenderId: '8456637305',
+    projectId: 'chatterapp-8dfbf',
+    storageBucket: 'chatterapp-8dfbf.appspot.com',
+    androidClientId: '8456637305-4mn3omlalfnba93pgvb6jc0toqi390hf.apps.googleusercontent.com',
     iosClientId: '8456637305-un21g1nrmcvgl59itdk8pbbkqasngrbs.apps.googleusercontent.com',
     iosBundleId: 'com.example.chat',
   );

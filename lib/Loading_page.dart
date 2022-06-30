@@ -1,14 +1,19 @@
+import 'package:chatting/Services/Auth.dart';
 import 'package:chatting/logic/AuthStatus/authstatus_bloc.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/view/Screen/auth/loading_view.dart';
 import 'package:chatting/view/Screen/screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class Landing_page extends StatefulWidget {
-  const Landing_page({Key key}) : super(key: key);
+  const Landing_page({
+    Key key,
+  }) : super(key: key);
   static const String routeName = '/';
 
   static Route route() {
@@ -29,6 +34,9 @@ class _Landing_pageState extends State<Landing_page> {
     // TODO: implement initState
     super.initState();
 
+    BlocProvider(
+        create: (context) =>
+            AuthstatusBloc(AuthProvider(FirebaseAuth.instance)));
     setState(() {
       uid = sharedPreferences.getString('uid');
     });
@@ -36,24 +44,36 @@ class _Landing_pageState extends State<Landing_page> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthstatusBloc, AuthstatusState>(
-      builder: (context, state) {
-        if (state is statusloding) {
-          return Loading_view();
-        } else if (state is UserStatus) {
-          if (state.authstatuscheck == true) {
-            if (uid != null) {
-              return Home_view();
+    final loadingstaus = context.watch<AuthstatusBloc>().state;
+    return LoadingOverlay(
+      progressIndicator:
+          CupertinoActivityIndicator(color: Theme.of(context).iconTheme.color),
+      isLoading: uid == null
+          ? false
+          : loadingstaus is UserStatus
+              ? loadingstaus.authstatuscheck == true
+                  ? false
+                  : true
+              : true,
+      child: BlocBuilder<AuthstatusBloc, AuthstatusState>(
+        builder: (context, state) {
+          if (state is statusloding) {
+            return Loading_view();
+          } else if (state is UserStatus) {
+            if (state.authstatuscheck == true) {
+              if (uid != null) {
+                return Home_view();
+              } else {
+                return profile_setup();
+              }
             } else {
-              return profile_setup();
+              return welcome();
             }
           } else {
-            return welcome();
+            return Loading_view();
           }
-        } else {
-          return Loading_view();
-        }
-      },
+        },
+      ),
     );
   }
 }

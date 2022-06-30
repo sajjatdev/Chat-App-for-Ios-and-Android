@@ -1,13 +1,8 @@
 import 'package:chatting/logic/Phone_number_auth/phoneauth_bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../widget/widget.dart';
 
 class Auth_phone extends StatefulWidget {
@@ -82,7 +77,10 @@ class _Auth_phoneState extends State<Auth_phone> {
                       signed: true, decimal: true),
                   inputBorder: const OutlineInputBorder(),
                   onInputChanged: (number) {
-                    phone_number = number.toString();
+                    setState(() {
+                      phone_number = number.toString();
+                      print(phone_number);
+                    });
 
                     if (phone_number.length > 8) {
                       setState(() {
@@ -99,17 +97,12 @@ class _Auth_phoneState extends State<Auth_phone> {
             Button(
               buttonenable: buttonanable,
               onpress: () async {
-                if (phone_number[1] == "1") {
+                if (phone_number.isNotEmpty) {
                   BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
-                      phoneNumber: "+1 ${phoneNumberController.text}"));
-                  Navigator.of(context).pushNamed('/otp',
-                      arguments: "+1 ${phoneNumberController.text}");
-                } else {
-                  BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
-                      phoneNumber: "+880 ${phoneNumberController.text}"));
-                  Navigator.of(context).pushNamed('/otp',
-                      arguments: "+880 ${phoneNumberController.text}");
-                }
+                      phoneNumber: phone_number));
+                  Navigator.of(context)
+                      .pushNamed('/otp', arguments: phone_number);
+                } 
               },
               Texts: "SEND OTP",
               widths: 80,

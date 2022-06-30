@@ -206,6 +206,10 @@ class _Message_contactState extends State<Message_contact> {
               icon: Icon(Icons.arrow_back_ios)),
           actions: [
             PopupMenuButton<int>(
+                icon: Icon(
+                  Icons.more_vert,
+                  color: Theme.of(context).iconTheme.color,
+                ),
                 itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
                       PopupMenuItem<int>(
                           value: 1,

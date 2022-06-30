@@ -81,11 +81,11 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
   }
 
   void message_status() async {
-    bool ischat = widget.data['type'] == 'chat';
+    String Room_ID = widget.data['Single_Room_ID'] ?? widget.data['otheruid'];
     try {
       await FirebaseFirestore.instance
           .collection("chat")
-          .doc("soccerfanclub")
+          .doc(Room_ID)
           .collection("message")
           .where("sender", isNotEqualTo: myUID)
           .get()
@@ -96,7 +96,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
             if (read_dara == false) {
               FirebaseFirestore.instance
                   .collection("chat")
-                  .doc("soccerfanclub")
+                  .doc(Room_ID)
                   .collection("message")
                   .doc(element.id)
                   .update({"read": true});
@@ -288,7 +288,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                 snapshot.data.data();
 
                             return typing_data['typing_user'] != myUID &&
-                                    typing_data['typing']
+                                    typing_data['typing'] == true
                                 ? Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -981,14 +981,48 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600),
                 ),
-                Text(
-                  getdatadate.profile_data.userStatus,
-                  style: TextStyle(
-                      color: getdatadate.profile_data.userStatus == 'online'
-                          ? Colors.green
-                          : Colors.grey,
-                      fontSize: 10.sp),
-                ),
+                StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(frienduid)
+                        .collection('message_typing')
+                        .doc('typing')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        Map<String, dynamic> typing_data = snapshot.data.data();
+
+                        return typing_data['typing_user'] != myUID &&
+                                typing_data['typing'] == true
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/image/typing.gif",
+                                    width: 5.w,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Text(
+                                    "Typing",
+                                    style: TextStyle(
+                                        color: Colors.blue, fontSize: 10.sp),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                getdatadate.profile_data.userStatus,
+                                style: TextStyle(
+                                    color:
+                                        getdatadate.profile_data.userStatus ==
+                                                'online'
+                                            ? Colors.green
+                                            : Colors.grey,
+                                    fontSize: 10.sp),
+                              );
+                      } else {
+                        return Container();
+                      }
+                    }),
               ],
             ),
             actions: [

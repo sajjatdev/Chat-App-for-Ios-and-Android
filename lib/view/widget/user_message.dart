@@ -53,12 +53,10 @@ class Message_user_list extends StatelessWidget {
                           Room_ID: data.Room_Name,
                           time:
                               Time_Chat.readTimestamp(Room_Data['last_update']),
-                          messageText: Room_Data['Last_message'] != null
-                              ? Room_Data['Last_message']
-                              : '',
+                          messageText: Room_Data['Last_message'] ?? '',
                           type: "chat",
                           MessageType: Room_Data['message_type'],
-                          isMessageRead: false,
+                          isMessageRead: true,
                         );
                       } else {
                         return Container();

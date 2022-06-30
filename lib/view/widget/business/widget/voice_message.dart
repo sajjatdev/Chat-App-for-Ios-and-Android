@@ -65,7 +65,8 @@ class _voice_messageState extends State<voice_message> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
+      padding: EdgeInsets.only(top: 5.sp),
       child: Align(
         alignment: Alignment.centerRight,
         child: Stack(
@@ -76,7 +77,9 @@ class _voice_messageState extends State<voice_message> {
                   height: 10.w,
                   width: 10.w,
                   decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: widget.isreceiver == false
+                          ? Colors.white
+                          : Theme.of(context).secondaryHeaderColor,
                       borderRadius: BorderRadius.circular(30)),
                   child: IconButton(
                       onPressed: () {
@@ -95,23 +98,27 @@ class _voice_messageState extends State<voice_message> {
                           ? Icon(
                               Icons.play_arrow,
                               color: widget.isreceiver == true
-                                  ? Theme.of(context).iconTheme.color
+                                  ? Colors.blue
                                   : Colors.black,
                             )
                           : Icon(
                               Icons.pause,
                               color: widget.isreceiver == true
-                                  ? Theme.of(context).iconTheme.color
+                                  ? Colors.blue
                                   : Colors.black,
                             )),
                 ),
                 Slider(
-                  thumbColor: Colors.grey.shade300,
-                  activeColor: Colors.white,
-                  inactiveColor: Colors.white,
+                  thumbColor: widget.isreceiver == false
+                      ? Colors.grey.shade300
+                      : Colors.blue,
+                  activeColor:
+                      widget.isreceiver == false ? Colors.white : Colors.grey,
+                  inactiveColor:
+                      widget.isreceiver == false ? Colors.white : Colors.grey,
                   value: positions.inSeconds.toDouble(),
                   min: 0,
-                  max: duration.inSeconds.toDouble(),
+                  max: duration.inSeconds.toDouble() + 1.0,
                   onChanged: (value) async {
                     final position = Duration(seconds: value.toInt());
                     await audioPlayer.seek(position);
@@ -121,11 +128,17 @@ class _voice_messageState extends State<voice_message> {
                 isplay
                     ? Text(
                         formateTime(duration - positions),
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            color: widget.isreceiver == false
+                                ? Colors.white
+                                : Theme.of(context).iconTheme.color),
                       )
                     : Text(
                         formateTime(duration),
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            color: widget.isreceiver == false
+                                ? Colors.white
+                                : Theme.of(context).iconTheme.color),
                       )
               ],
             ),

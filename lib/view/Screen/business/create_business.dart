@@ -105,77 +105,82 @@ class _Create_businessState extends State<Create_business> {
               ),
             ),
             StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance.collection("marker").snapshots(),
+                stream:
+                    FirebaseFirestore.instance.collection("marker").snapshots(),
                 builder: (context, snapshot) {
-              return Expanded(
-                flex: 6,
-                child: ListView.builder(
-                    itemCount: 10,
-                    shrinkWrap: true,
-                    itemBuilder: (context, snapshot) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                  return Expanded(
+                    flex: 6,
+                    child: ListView.builder(
+                        itemCount: 10,
+                        shrinkWrap: true,
+                        itemBuilder: (context, snapshot) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 15,
+                            ),
+                            child: GestureDetector(
+                              onTap: () {},
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  CircleAvatar(),
-                                  SizedBox(
-                                    width: 2.5.w,
-                                  ),
-                                  Column(
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
+                                      CircleAvatar(),
+                                      SizedBox(
+                                        width: 2.5.w,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Starbucks",
+                                            style: TextStyle(
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context)
+                                                    .iconTheme
+                                                    .color),
+                                          ),
+                                          SizedBox(
+                                            height: 2.w,
+                                          ),
+                                          SizedBox(
+                                            width: 60.w,
+                                            child: Text(
+                                              state.address,
+                                              style: TextStyle(
+                                                  fontSize: 10.sp,
+                                                  color: HexColor.fromHex(
+                                                      "#707070")),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        width: 2.w,
+                                      ),
                                       Text(
-                                        "Starbucks",
+                                        "Available",
                                         style: TextStyle(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context)
-                                                .iconTheme
-                                                .color),
-                                      ),
-                                      SizedBox(
-                                        height: 2.w,
-                                      ),
-                                      SizedBox(
-                                        width: 60.w,
-                                        child: Text(
-                                          state.address,
-                                          style: TextStyle(
-                                              fontSize: 10.sp,
-                                              color:
-                                                  HexColor.fromHex("#707070")),
-                                        ),
+                                            fontSize: 10.sp,
+                                            color: HexColor.fromHex("#4479F6")),
                                       )
                                     ],
-                                  ),
-                                  SizedBox(
-                                    width: 2.5.w,
-                                  ),
-                                  Text(
-                                    "Available",
-                                    style: TextStyle(
-                                        fontSize: 10.sp,
-                                        color: HexColor.fromHex("#4479F6")),
                                   )
                                 ],
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-              );
-            }),
+                              ),
+                            ),
+                          );
+                        }),
+                  );
+                }),
             Spacer(),
             Button(
               buttonenable: true,

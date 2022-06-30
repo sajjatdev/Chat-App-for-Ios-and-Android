@@ -3,6 +3,7 @@ import 'package:chatting/logic/Phone_number_auth/phoneauth_bloc.dart';
 import 'package:chatting/logic/current_user/cunrrent_user_bloc.dart';
 import 'package:chatting/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -49,6 +50,8 @@ class _OTPState extends State<OTP> {
   @override
   Widget build(BuildContext context) {
     return LoadingOverlay(
+      progressIndicator:
+          CupertinoActivityIndicator(color: Theme.of(context).iconTheme.color),
       isLoading: buttonloading,
       child: Scaffold(
         body: SingleChildScrollView(
@@ -156,12 +159,13 @@ class _OTPState extends State<OTP> {
                           .add(VerifySMSCode(smscode: _pinPutController.text));
                       CheckAccount(number: widget.number).then((bool value) {
                         if (value == true) {
-                          print(widget.number);
                           setState(() {
                             sharedPreferences.setString('uid', widget.number);
-                            sharedPreferences.setString(
-                                'number', widget.number);
-                            Navigator.of(context).pushNamed('/');
+                            sharedPreferences
+                                .setString('number', widget.number)
+                                .then((value) {
+                              Navigator.of(context).pushNamed('/');
+                            });
                           });
                         } else {
                           setState(() {

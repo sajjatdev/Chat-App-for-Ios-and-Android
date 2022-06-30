@@ -16,7 +16,7 @@ class ConversationList extends StatefulWidget {
   String uid = '';
   final String status;
   String Room_ID;
-  bool isMessageRead;
+  bool isMessageRead = true;
   String MessageType;
   String last_name;
 
@@ -73,7 +73,9 @@ class _ConversationListState extends State<ConversationList> {
               height: 10.0,
               width: 10.0,
               decoration: BoxDecoration(
-                  color: widget.status == 'online' ? Colors.green : Colors.grey,
+                  color: widget.status == 'online'
+                      ? Colors.green
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(10)),
             ))
       ]),
