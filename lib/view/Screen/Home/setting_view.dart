@@ -81,7 +81,7 @@ class _setting_viewState extends State<setting_view> {
                       borderRadius: BorderRadius.circular(15.sp)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
+                        horizontal: 10, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

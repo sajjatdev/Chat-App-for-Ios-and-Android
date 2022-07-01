@@ -281,20 +281,25 @@ class _profile_setupState extends State<profile_setup> {
                         if (_permissionStatus.isGranted) {
                           final FormState status = _globalKey.currentState;
                           List contact_number_list = [];
+                          String imagurl;
                           if (status.validate()) {
                             setState(() {
                               btnloading = true;
                             });
-                            final path = result.path;
-                            final name = result.path;
-                            context
-                                .read<PhotouploadCubit>()
-                                .updateData(path, name, state.user.uid);
+                            if (result != null) {
+                              final path = result.path;
+                              final name = result.path;
+                              context
+                                  .read<PhotouploadCubit>()
+                                  .updateData(path, name, state.user.uid);
+                              setState(() async {
+                                imagurl = await firebase_storage
+                                    .FirebaseStorage.instance
+                                    .ref('userimage/${state.user.uid}/${name}')
+                                    .getDownloadURL();
+                              });
+                            }
 
-                            String imagurl = await firebase_storage
-                                .FirebaseStorage.instance
-                                .ref('userimage/${state.user.uid}/${name}')
-                                .getDownloadURL();
                             // profile setup Code Send
 
                             ContactsService.getContacts().then((value) {
