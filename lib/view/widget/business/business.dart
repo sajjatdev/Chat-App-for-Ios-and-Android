@@ -182,21 +182,12 @@ class _business_chatState extends State<business_chat> {
                                 link_check.contains('http://') &&
                                     (Room_Data['message_type'] == 'text');
 
-                            DateTime dateTime =
-                                Room_Data['message_time'].toDate();
-
-                            var dateValue = DateFormat("yyyy-MM-dd HH:mm:ss")
-                                .parse(dateTime.toString())
-                                .toLocal();
-                            String message_time =
-                                DateFormat("hh:mm a").format(dateValue);
-
                             return Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 10),
                               child: Room_Data['sender'] == widget.myUID
                                   ? sender(
-                                      message_time: message_time,
+                                      message_time: Room_Data["time"],
                                       Room_Data: Room_Data,
                                       islink: islink,
                                       myUID: widget.myUID,
@@ -204,7 +195,7 @@ class _business_chatState extends State<business_chat> {
                                       messageId: message,
                                       isDarkMode: widget.isDarkMode)
                                   : receiver(
-                                      message_time: message_time,
+                                      message_time: Room_Data["time"],
                                       userdoc: userdoc,
                                       messageId: message,
                                       RoomID: widget.Room_Id,

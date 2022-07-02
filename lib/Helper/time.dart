@@ -14,11 +14,11 @@ class Time_Chat {
       } else if (diff.inDays >= 2) {
         return "${diff.inDays}d";
       } else if (diff.inDays >= 1) {
-        return DateFormat("hh:mm a").format(notification);
+        return DateFormat("HH:mm").format(notification);
       } else if (diff.inHours >= 2) {
         return "${diff.inHours}h";
       } else if (diff.inDays >= 1) {
-        return DateFormat("hh:mm a").format(notification);
+        return DateFormat("HH:mm").format(notification);
       } else if (diff.inMinutes >= 2) {
         return "${diff.inMinutes}m";
       } else if (diff.inMinutes >= 1) {

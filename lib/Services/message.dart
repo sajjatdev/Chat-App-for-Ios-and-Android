@@ -152,7 +152,7 @@ class messageing {
       'type': type,
       "read": false,
       "message_type": message_type,
-      'message_time': DateTime.now(),
+      'message_time': DateTime.now().millisecondsSinceEpoch,
       "time": DateTime.now().millisecondsSinceEpoch
     }).then((value) {
       FirebaseFirestore.instance

@@ -13,7 +13,7 @@ class Image_view extends StatelessWidget {
   final Map<String, dynamic> Room_Data;
   final String myUID;
   final bool isDarkMode;
-  final String message_time;
+  final int message_time;
 
   @override
   Widget build(BuildContext context) {

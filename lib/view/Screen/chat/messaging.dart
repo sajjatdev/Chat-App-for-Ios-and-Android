@@ -633,11 +633,19 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                       },
                       child: Stack(
                         children: [
-                          CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(getdatadate.business.imageURl),
-                            maxRadius: 15.sp,
-                          ),
+                          if (getdatadate.business.imageURl
+                              .contains("https://")) ...[
+                            CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(getdatadate.business.imageURl),
+                              maxRadius: 15.sp,
+                            ),
+                          ] else ...[
+                            ProfilePicture(
+                              name: getdatadate.business.imageURl,
+                              fontsize: 15.sp,
+                            )
+                          ],
                         ],
                       ),
                     ),
@@ -742,13 +750,8 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             children: [
                                               CupertinoButton(
                                                 padding: EdgeInsets.zero,
-                                                child: Icon(
-                                                  Icons.add,
-                                                  size: 25,
-                                                  color: Theme.of(context)
-                                                      .iconTheme
-                                                      .color,
-                                                ),
+                                                child: SvgPicture.asset(
+                                                    "assets/svg/add_message.svg"),
                                                 onPressed: () async {
                                                   final result = await FilePicker
                                                       .platform
@@ -800,9 +803,9 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                   data: ThemeData(),
                                                   child: ChatComposer(
                                                     controller: messaage,
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 10),
+                                                    padding: const EdgeInsets
+                                                            .symmetric(
+                                                        vertical: 10),
                                                     onReceiveText: (str) {
                                                       setState(() {
                                                         messagesend(

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:getwidget/getwidget.dart';
@@ -104,14 +105,18 @@ class _commentState extends State<comment_page> {
                         }
                         if (snapshot.hasData) {
                           Map<String, dynamic> userinfo = snapshot.data.data();
+                          String urls = userinfo['imageUrl'];
                           return Row(
                             children: [
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: CircleAvatar(
-                                    backgroundImage:
-                                        NetworkImage(userinfo['imageUrl']),
-                                  )),
+                              if (urls.contains("https://")) ...[
+                                IconButton(
+                                    onPressed: () {},
+                                    icon: CircleAvatar(
+                                      backgroundImage: NetworkImage(urls),
+                                    )),
+                              ] else ...[
+                                ProfilePicture(name: urls, fontsize: 12.sp)
+                              ],
                             ],
                           );
                         } else {
@@ -207,11 +212,14 @@ class _commentState extends State<comment_page> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 10.sp, vertical: 5.sp),
                             child: Card(
-                              child: Text(
-                                comment_data['message'],
-                                style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Theme.of(context).iconTheme.color),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text(
+                                  comment_data['message'],
+                                  style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: Theme.of(context).iconTheme.color),
+                                ),
                               ),
                             ),
                           )
@@ -279,15 +287,15 @@ class _commentState extends State<comment_page> {
                                                         padding:
                                                             const EdgeInsets
                                                                     .symmetric(
-                                                                horizontal: 15,
-                                                                vertical: 20),
+                                                                horizontal: 20,
+                                                                vertical: 30),
                                                         child: Text(
                                                           comment_info[
                                                               'comment'],
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.white,
-                                                              fontSize: 12.sp),
+                                                              fontSize: 15.sp),
                                                         ),
                                                       ),
                                                     ),
