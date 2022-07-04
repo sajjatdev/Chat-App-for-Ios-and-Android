@@ -62,95 +62,91 @@ class _senderState extends State<sender> {
         padding: EdgeInsets.only(right: 5.sp),
         child: Stack(
           children: [
-            Container(
-              color: Colors.transparent,
-              constraints: BoxConstraints(
-                  maxWidth: 70.w, minWidth: 45.w, minHeight: 25.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    constraints: BoxConstraints(
-                        minHeight: 15.w, maxWidth: 70.w, minWidth: 45.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                      minHeight: 30.w, maxWidth: 70.w, minWidth: 50.w),
 
-                    decoration: const BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15),
-                            bottomLeft: Radius.circular(15))),
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 5.sp, bottom: 25.sp),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (widget.Room_Data['message_type'] != 'image' &&
-                              widget.islink == false &&
-                              widget.Room_Data['message_type'] != 'voice') ...[
-                            // Text View Start
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                widget.Room_Data['message'],
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 15.sp),
-                              ),
+                  decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          topRight: Radius.circular(15),
+                          bottomLeft: Radius.circular(15))),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 5.sp, bottom: 25.sp),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (widget.Room_Data['message_type'] != 'image' &&
+                            widget.islink == false &&
+                            widget.Room_Data['message_type'] != 'voice') ...[
+                          // Text View Start
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom: 10.w, right: 3.w, left: 3.w),
+                            child: Text(
+                              widget.Room_Data['message'],
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 15.sp),
                             ),
-                            // Text View End
-                          ] else if (widget.islink == true &&
-                              widget.Room_Data['message_type'] == 'text' &&
-                              widget.Room_Data['message_type'] != 'voice') ...[
-                            // Link View start
+                          ),
+                          // Text View End
+                        ] else if (widget.islink == true &&
+                            widget.Room_Data['message_type'] == 'text' &&
+                            widget.Room_Data['message_type'] != 'voice') ...[
+                          // Link View start
 
-                            link_view(
-                              Room_Data: widget.Room_Data,
-                              myUID: widget.myUID,
-                              isDarkMode: widget.isDarkMode,
-                            )
+                          link_view(
+                            Room_Data: widget.Room_Data,
+                            myUID: widget.myUID,
+                            isDarkMode: widget.isDarkMode,
+                          )
 
-                            // Link View End
-                          ] else if (widget.Room_Data['message_type'] ==
-                              'voice') ...[
-                            // voice Message Start
+                          // Link View End
+                        ] else if (widget.Room_Data['message_type'] ==
+                            'voice') ...[
+                          // voice Message Start
 
-                            voice_message(
-                              Room_Data: widget.Room_Data,
-                              myUID: widget.myUID,
-                              isDarkMode: widget.isDarkMode,
-                              isreceiver: false,
-                            )
+                          voice_message(
+                            Room_Data: widget.Room_Data,
+                            myUID: widget.myUID,
+                            isDarkMode: widget.isDarkMode,
+                            isreceiver: false,
+                          )
 
-                            // VoiceMessage(
-                            //   audioSrc:
-                            //       "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-                            //   played: false, // To show played badge or not.
-                            //   me: true, // Set message side.
-                            //   onPlay: () {}, // Do something when voice played.
-                            // )
+                          // VoiceMessage(
+                          //   audioSrc:
+                          //       "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                          //   played: false, // To show played badge or not.
+                          //   me: true, // Set message side.
+                          //   onPlay: () {}, // Do something when voice played.
+                          // )
 
-                            // voice Message End
-                          ] else ...[
-                            // Image View Start
+                          // voice Message End
+                        ] else ...[
+                          // Image View Start
 
-                            Image_view(
-                              message_time: widget.message_time,
-                              Room_Data: widget.Room_Data,
-                            )
+                          Image_view(
+                            message_time: widget.message_time,
+                            Room_Data: widget.Room_Data,
+                          )
 
-                            // Image View End
-                          ],
+                          // Image View End
                         ],
-                      ),
+                      ],
                     ),
-                    // My Message Section End
                   ),
-                ],
-              ),
+                  // My Message Section End
+                ),
+              ],
             ),
             Positioned(
-              bottom: 15.sp,
+              bottom: 5.sp,
               right: 5.sp,
               child: Row(
                 children: [
@@ -170,65 +166,65 @@ class _senderState extends State<sender> {
               ),
             ),
             Positioned(
-              bottom: 0.sp,
+              bottom: 20.sp,
               left: 50.sp,
-              child: Container(
-                width: 8.w,
-                height: 8.w,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: HexColor.fromHex("#C9DDFE"),
-                    borderRadius: BorderRadius.circular(20.sp)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/comment', arguments: {
-                          "message_id": widget.messageId,
-                          "Room_Id": widget.RoomID
-                        });
-                      },
-                      child: SvgPicture.asset(
-                        'assets/svg/commentcht.svg',
-                        width: 6.w,
-                        height: 6.w,
-                      ),
-                    ),
-                    // StreamBuilder<QuerySnapshot>(
-                    //     stream: FirebaseFirestore.instance
-                    //         .collection('chat')
-                    //         .doc(widget.RoomID)
-                    //         .collection('message')
-                    //         .doc(widget.messageId)
-                    //         .collection('comment')
-                    //         .snapshots(),
-                    //     builder: (context, snapshot) {
-                    //       if (snapshot.hasData) {
-                    //         return Padding(
-                    //           padding:
-                    //               EdgeInsets.only(left: 2.sp, right: 10.sp),
-                    //           child: Text(
-                    //             snapshot.data.docs.length.toString(),
-                    //             style: TextStyle(color: Colors.white),
-                    //           ),
-                    //         );
-                    //       }
-                    //       return Padding(
-                    //         padding: EdgeInsets.only(left: 2.sp, right: 10.sp),
-                    //         child: Text(
-                    //           '0',
-                    //           style: TextStyle(color: Colors.white),
-                    //         ),
-                    //       );
-                    //     })
-                  ],
-                ),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/comment', arguments: {
+                    "message_id": widget.messageId,
+                    "Room_Id": widget.RoomID
+                  });
+                },
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.RoomID)
+                        .collection('message')
+                        .doc(widget.messageId)
+                        .collection('comment')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Container(
+                          height: 8.w,
+                          width: snapshot.data.docs.isNotEmpty ? 18.w : 8.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              color: HexColor.fromHex("#C9DDFE"),
+                              borderRadius: BorderRadius.circular(20.sp)),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5.sp),
+                            child: Row(
+                              mainAxisAlignment: snapshot.data.docs.isNotEmpty
+                                  ? MainAxisAlignment.spaceAround
+                                  : MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: SvgPicture.asset(
+                                    'assets/svg/commentcht.svg',
+                                    width: 6.w,
+                                    height: 6.w,
+                                  ),
+                                ),
+                                snapshot.data.docs.isNotEmpty
+                                    ? Text(
+                                        snapshot.data.docs.length.toString(),
+                                        style: TextStyle(color: Colors.blue),
+                                      )
+                                    : Container(),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
               ),
             ),
             Positioned(
-              bottom: 0,
+              bottom: 20.sp,
               left: 7.sp,
               child: Container(
                 child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(

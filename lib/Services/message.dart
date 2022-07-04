@@ -165,6 +165,7 @@ class messageing {
         "Last_message": message,
         'last_update': DateTime.now().millisecondsSinceEpoch,
         'type': type,
+        "message_type": message_type,
         'Room_ID': RoomID
       });
 

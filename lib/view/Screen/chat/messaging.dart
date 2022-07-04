@@ -485,7 +485,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             print("focus: $focus"),
                                         child: ChatComposer(
                                           controller: messaage,
-                                          padding: EdgeInsets.symmetric(
+                                          padding:const EdgeInsets.symmetric(
                                               vertical: 10),
                                           onReceiveText: (str) {
                                             setState(() {

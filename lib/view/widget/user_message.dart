@@ -4,6 +4,7 @@ import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:getwidget/components/shimmer/gf_shimmer.dart';
 import 'package:sizer/sizer.dart';
 
@@ -110,7 +111,7 @@ class Message_user_list extends StatelessWidget {
               if (Room_Data['type'] == 'business' &&
                   Room_Data['Business_Name'] != null) {
                 // Add Image Icon and time and title online etc.
-
+                String imagecheck = Room_Data['imageURl'];
                 return ListTile(
                   onTap: () {
                     Navigator.of(context).pushNamed('/messageing', arguments: {
@@ -124,7 +125,7 @@ class Message_user_list extends StatelessWidget {
                     style: TextStyle(fontSize: 15.sp),
                   ),
                   trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
@@ -135,21 +136,48 @@ class Message_user_list extends StatelessWidget {
                       ),
                     ],
                   ),
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(Room_Data['imageURl']),
-                    maxRadius: 20,
-                  ),
+                  leading: imagecheck.contains("https://")
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(Room_Data['imageURl']),
+                          maxRadius: 20,
+                        )
+                      : ProfilePicture(
+                          name: imagecheck, radius: 18.sp, fontsize: 18.sp),
                   subtitle: SizedBox(
                     width: 70.w,
-                    child: Text(
-                      Room_Data['Last_message'] != null
-                          ? ""
-                          : Room_Data['Last_message'],
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 12.sp, color: Colors.grey.shade400),
-                    ),
+                    child: Room_Data["message_type"] != null
+                        ? Room_Data["message_type"] == 'text'
+                            ? Text(
+                                Room_Data["message_type"],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey.shade400),
+                              )
+                            : Room_Data["message_type"] == 'voice'
+                                ? Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Icon(
+                                      Icons.mic,
+                                      color: Theme.of(context).iconTheme.color,
+                                    ))
+                                : Room_Data["message_type"] == "image"
+                                    ? Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Icon(
+                                          Icons.image,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        ))
+                                    : Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Icon(
+                                          Icons.link,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        ))
+                        : Container(),
                   ),
                 );
               } else {

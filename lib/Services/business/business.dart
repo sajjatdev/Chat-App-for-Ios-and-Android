@@ -36,6 +36,7 @@ class Business_Services {
       "business_date_and_time": DateTime.now().millisecondsSinceEpoch,
       "description": description,
       "customer": customer,
+      "message_type": null,
       "type": type,
       "latitude": latitude,
       "longitude": longitude,
