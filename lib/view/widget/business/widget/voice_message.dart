@@ -69,79 +69,77 @@ class _voice_messageState extends State<voice_message> {
       padding: EdgeInsets.only(top: 5.sp),
       child: Align(
         alignment: Alignment.centerRight,
-        child: Stack(
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  height: 10.w,
-                  width: 10.w,
-                  decoration: BoxDecoration(
-                      color: widget.isreceiver == false
-                          ? Colors.white
-                          : Theme.of(context).secondaryHeaderColor,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: IconButton(
-                      onPressed: () {
-                        if (isplay) {
-                          audioPlayer.pause();
-                        } else {
-                          audioPlayer.play(widget.Room_Data['message']);
-                        }
-                        audioPlayer.onPlayerCompletion.listen((event) {
-                          setState(() {
-                            isplay = false;
-                          });
-                        });
-                      },
-                      icon: isplay == false
-                          ? Icon(
-                              Icons.play_arrow,
-                              color: widget.isreceiver == true
-                                  ? Colors.blue
-                                  : Colors.black,
-                            )
-                          : Icon(
-                              Icons.pause,
-                              color: widget.isreceiver == true
-                                  ? Colors.blue
-                                  : Colors.black,
-                            )),
-                ),
-                Slider(
-                  thumbColor: widget.isreceiver == false
-                      ? Colors.grey.shade300
-                      : Colors.blue,
-                  activeColor:
-                      widget.isreceiver == false ? Colors.white : Colors.grey,
-                  inactiveColor:
-                      widget.isreceiver == false ? Colors.white : Colors.grey,
-                  value: positions.inSeconds.toDouble(),
-                  min: 0,
-                  max: duration.inSeconds.toDouble() + 1.0,
-                  onChanged: (value) async {
-                    final position = Duration(seconds: value.toInt());
-                    await audioPlayer.seek(position);
-                    await audioPlayer.resume();
+            Container(
+              height: 10.w,
+              width: 10.w,
+              decoration: BoxDecoration(
+                  color: widget.isreceiver == false
+                      ? Colors.white
+                      : Theme.of(context).secondaryHeaderColor,
+                  borderRadius: BorderRadius.circular(30)),
+              child: IconButton(
+                  onPressed: () {
+                    if (isplay) {
+                      audioPlayer.pause();
+                    } else {
+                      audioPlayer.play(widget.Room_Data['message']);
+                    }
+                    audioPlayer.onPlayerCompletion.listen((event) {
+                      setState(() {
+                        isplay = false;
+                      });
+                    });
                   },
-                ),
-                isplay
-                    ? Text(
-                        formateTime(duration - positions),
-                        style: TextStyle(
-                            color: widget.isreceiver == false
-                                ? Colors.white
-                                : Theme.of(context).iconTheme.color),
-                      )
-                    : Text(
-                        formateTime(duration),
-                        style: TextStyle(
-                            color: widget.isreceiver == false
-                                ? Colors.white
-                                : Theme.of(context).iconTheme.color),
-                      )
-              ],
+                  icon: isplay == false
+                      ? Icon(
+                          Icons.play_arrow,
+                          color: widget.isreceiver == true
+                              ? Colors.blue
+                              : Colors.black,
+                        )
+                      : Icon(
+                          Icons.pause,
+                          color: widget.isreceiver == true
+                              ? Colors.blue
+                              : Colors.black,
+                        )),
             ),
+            Expanded(
+              child: Slider(
+                thumbColor: widget.isreceiver == false
+                    ? Colors.grey.shade300
+                    : Colors.blue,
+                activeColor:
+                    widget.isreceiver == false ? Colors.white : Colors.grey,
+                inactiveColor:
+                    widget.isreceiver == false ? Colors.white : Colors.grey,
+                value: positions.inSeconds.toDouble(),
+                min: 0,
+                max: duration.inSeconds.toDouble() + 1.0,
+                onChanged: (value) async {
+                  final position = Duration(seconds: value.toInt());
+                  await audioPlayer.seek(position);
+                  await audioPlayer.resume();
+                },
+              ),
+            ),
+            isplay
+                ? Text(
+                    formateTime(duration - positions),
+                    style: TextStyle(
+                        color: widget.isreceiver == false
+                            ? Colors.white
+                            : Theme.of(context).iconTheme.color),
+                  )
+                : Text(
+                    formateTime(duration),
+                    style: TextStyle(
+                        color: widget.isreceiver == false
+                            ? Colors.white
+                            : Theme.of(context).iconTheme.color),
+                  )
           ],
         ),
       ),

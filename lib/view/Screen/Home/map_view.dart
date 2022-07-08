@@ -2,17 +2,18 @@ import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/business_location/business_location_cubit.dart';
 import 'package:chatting/logic/markers/markers_cubit.dart';
+import 'package:chatting/logic/yelp/yelpapi_cubit.dart';
 import 'package:chatting/main.dart';
-import 'package:chatting/view/widget/widget.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lottie/lottie.dart' as loate;
 
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
@@ -57,8 +58,8 @@ class _Map_viewState extends State<Map_view> {
     if (state is has_marker && location is Has_Location) {
       for (var item = 0; item < state.marker_list.length; item++) {
         _markerList.add(Marker(
-            height: 40,
-            width: 40,
+            height: 30.w,
+            width: 30.w,
             point: LatLng(state.marker_list[item].latitude,
                 state.marker_list[item].longitude),
             builder: (_) {
@@ -71,28 +72,7 @@ class _Map_viewState extends State<Map_view> {
                       print("Item is $item");
                     });
                   },
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: SvgPicture.asset(
-                          'assets/svg/mark_location.svg',
-                        ),
-                      ),
-                      Positioned(
-                        left: 5,
-                        right: 5,
-                        bottom: 15,
-                        top: 5,
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: CircleAvatar(
-                              radius: 10,
-                              backgroundImage: NetworkImage(
-                                  state.marker_list[item].ImageUrl)),
-                        ),
-                      )
-                    ],
-                  ));
+                  child: loate.Lottie.asset("assets/image/locationani.json"));
             }));
       }
 
@@ -135,58 +115,22 @@ class _Map_viewState extends State<Map_view> {
               ),
             ),
             Positioned(
-              top: 0,
+              top: 25.sp,
               left: 0,
               right: 0,
-              child: Container(
-                height: 40.w,
-                decoration: BoxDecoration(
-                    color: Theme.of(context).secondaryHeaderColor),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      top: 30, bottom: 10, left: 20, right: 20),
-                  child: Column(children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          " Hangouts",
-                          style: TextStyle(
-                              color: Theme.of(context).iconTheme.color,
-                              fontSize: 21.sp,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                            onPressed: () {
-                              showAdaptiveActionSheet(
-                                context: context,
-                                title: const Text('Set Search Perimeter'),
-                                androidBorderRadius: 30,
-                                actions: <BottomSheetAction>[
-                                  BottomSheetAction(
-                                      title: const Text('Near me'),
-                                      onPressed: () {}),
-                                  BottomSheetAction(
-                                      title: const Text('City'),
-                                      onPressed: () {}),
-                                  BottomSheetAction(
-                                      title: const Text('Country'),
-                                      onPressed: () {}),
-                                  BottomSheetAction(
-                                      title: const Text('No Limit'),
-                                      onPressed: () {}),
-                                ],
-                                cancelAction: CancelAction(
-                                    title: const Text(
-                                        'Cancel')), // onPressed parameter is optional by default will dismiss the ActionSheet
-                              );
-                            },
-                            icon: SvgPicture.asset(
-                                'assets/svg/fi-rr-settings-sliders.svg',
-                                color: Theme.of(context).iconTheme.color))
-                      ],
-                    ),
-                    Container(
+              child: BlocListener<YelpapiCubit, YelpapiState>(
+                listener: (context, state) {
+                  if (state is YelpDataGet) {
+                    setState(() {
+                      print("Data Get Done");
+                    });
+                  }
+                },
+                child: Container(
+                    height: 25.w,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 30, bottom: 10, left: 20, right: 20),
                       child: TextFormField(
                         validator: (value) =>
                             value.isEmpty ? "Name can't be blank" : null,
@@ -195,13 +139,38 @@ class _Map_viewState extends State<Map_view> {
                             fontSize: 12.sp),
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.close,
-                                color: Theme.of(context).iconTheme.color,
-                              )),
+                              onPressed: () {
+                                showAdaptiveActionSheet(
+                                  context: context,
+                                  title: const Text('Set Search Perimeter'),
+                                  androidBorderRadius: 30,
+                                  actions: <BottomSheetAction>[
+                                    BottomSheetAction(
+                                        title: const Text('Near me'),
+                                        onPressed: () {}),
+                                    BottomSheetAction(
+                                        title: const Text('City'),
+                                        onPressed: () {}),
+                                    BottomSheetAction(
+                                        title: const Text('Country'),
+                                        onPressed: () {}),
+                                    BottomSheetAction(
+                                        title: const Text('No Limit'),
+                                        onPressed: () {}),
+                                  ],
+                                  cancelAction: CancelAction(
+                                      title: const Text(
+                                          'Cancel')), // onPressed parameter is optional by default will dismiss the ActionSheet
+                                );
+                              },
+                              icon: SvgPicture.asset(
+                                  'assets/svg/fi-rr-settings-sliders.svg',
+                                  color: Theme.of(context).iconTheme.color)),
                           prefixIcon: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                context.read<YelpapiCubit>().YelpApiGetDatafun(
+                                    Location: "Cadana", category: "Aquariums");
+                              },
                               icon: Icon(
                                 Icons.search,
                                 color: Theme.of(context).iconTheme.color,
@@ -231,9 +200,7 @@ class _Map_viewState extends State<Map_view> {
                               borderSide: BorderSide.none),
                         ),
                       ),
-                    )
-                  ]),
-                ),
+                    )),
               ),
             ),
             list_item == null

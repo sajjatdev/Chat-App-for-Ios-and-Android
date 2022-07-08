@@ -464,6 +464,9 @@ class _Admin_ProfileState extends State<Admin_Profile> {
                                                                   .circular(
                                                                       10)),
                                                     );
+                                                  } else if (snapshot
+                                                      .hasError) {
+                                                    return Container();
                                                   } else {
                                                     return Container();
                                                   }

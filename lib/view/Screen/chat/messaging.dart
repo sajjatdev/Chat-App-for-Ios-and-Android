@@ -485,7 +485,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                             print("focus: $focus"),
                                         child: ChatComposer(
                                           controller: messaage,
-                                          padding:const EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               vertical: 10),
                                           onReceiveText: (str) {
                                             setState(() {
@@ -727,7 +727,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                                 .doc(room_id['Room_ID'])
                                                 .collection('message')
                                                 .orderBy('time',
-                                                    descending: false)
+                                                    descending: true)
                                                 .snapshots(),
                                             builder: (context, snapshot) {
                                               if (snapshot.hasData) {

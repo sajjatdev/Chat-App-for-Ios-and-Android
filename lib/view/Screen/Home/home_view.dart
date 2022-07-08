@@ -27,8 +27,6 @@ class _Home_viewState extends State<Home_view> {
   int currentindex = 0;
   final screen = [
     chat_view(),
-    call_view(),
-    // Feed_Home(),
     Map_view(),
     setting_view(),
   ];
@@ -72,28 +70,13 @@ class _Home_viewState extends State<Home_view> {
                       },
                       icon: SvgPicture.asset(
                         currentindex == 1
-                            ? 'assets/svg/callin.svg'
-                            : 'assets/svg/Calls.svg',
+                            ? 'assets/svg/locationsin.svg'
+                            : 'assets/svg/Hangout.svg',
                         color: currentindex != 1
                             ? HexColor.fromHex('#8C8C8C')
                             : Theme.of(context).iconTheme.color,
                         width: currentindex == 1 ? 19.sp : null,
                       )),
-                  // IconButton(
-                  //     onPressed: () {
-                  //       setState(() {
-                  //         currentindex = 2;
-                  //       });
-                  //     },
-                  //     icon: SvgPicture.asset(
-                  //       currentindex == 2
-                  //           ? 'assets/svg/locationsin.svg'
-                  //           : 'assets/svg/Hangout.svg',
-                  //       color: currentindex != 2
-                  //           ? HexColor.fromHex('#8C8C8C')
-                  //           : Theme.of(context).iconTheme.color,
-                  //       width: currentindex == 2 ? 19.sp : null,
-                  //     )),
                   IconButton(
                       onPressed: () {
                         setState(() {
@@ -102,27 +85,12 @@ class _Home_viewState extends State<Home_view> {
                       },
                       icon: SvgPicture.asset(
                         currentindex == 2
-                            ? 'assets/svg/locationsin.svg'
-                            : 'assets/svg/Hangout.svg',
+                            ? 'assets/svg/Shapein.svg'
+                            : 'assets/svg/Settings.svg',
                         color: currentindex != 2
                             ? HexColor.fromHex('#8C8C8C')
                             : Theme.of(context).iconTheme.color,
                         width: currentindex == 2 ? 19.sp : null,
-                      )),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          currentindex = 3;
-                        });
-                      },
-                      icon: SvgPicture.asset(
-                        currentindex == 3
-                            ? 'assets/svg/Shapein.svg'
-                            : 'assets/svg/Settings.svg',
-                        color: currentindex != 3
-                            ? HexColor.fromHex('#8C8C8C')
-                            : Theme.of(context).iconTheme.color,
-                        width: currentindex == 3 ? 19.sp : null,
                       )),
                 ],
               ),

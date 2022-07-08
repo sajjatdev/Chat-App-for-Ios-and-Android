@@ -156,6 +156,22 @@ class _Message_contactState extends State<Message_contact> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           ListTile(
+            onTap: (() {
+              //Navigator.of(context).pushReplacementNamed('/create_business');
+            }),
+            leading: Icon(
+              Icons.link,
+              color: Colors.black,
+              size: 20.sp,
+            ),
+            title: Text(
+              "Invite",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).iconTheme.color),
+            ),
+          ),
+          ListTile(
             onTap: () {
               Navigator.of(context).pushReplacementNamed('/seleted_members');
             },
@@ -166,22 +182,6 @@ class _Message_contactState extends State<Message_contact> {
             ),
             title: Text(
               "Group Create",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).iconTheme.color),
-            ),
-          ),
-          ListTile(
-            onTap: (() {
-              Navigator.of(context).pushReplacementNamed('/create_business');
-            }),
-            leading: Icon(
-              Icons.business,
-              color: Colors.black,
-              size: 20.sp,
-            ),
-            title: Text(
-              "Business Create",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).iconTheme.color),

@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
 
@@ -44,299 +45,156 @@ class _setting_viewState extends State<setting_view> {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
-    return Scaffold(
-      body: Builder(builder: (context) {
-        final getstate = context.watch<ReadDataCubit>().state;
-        if (getstate is Loadingstate) {
-          return Center(
-            child: CupertinoActivityIndicator(
-                color: Theme.of(context).iconTheme.color),
-          );
-        }
-        if (getstate is getprofileData) {
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-              child: Column(children: [
-                Row(
-                  children: [
-                    Text(
-                      'Settings',
-                      style: TextStyle(
-                          color: Theme.of(context).iconTheme.color,
-                          fontSize: 24.sp),
-                    ),
-                  ],
-                ),
-                const Spacer(
-                  flex: 1,
-                ),
-                Container(
-                  height: 25.w,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? HexColor.fromHex("#1a1a1c")
-                          : HexColor.fromHex("#ffffff"),
-                      borderRadius: BorderRadius.circular(15.sp)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(children: [
-                          if (getstate.profile_data.imageUrl
-                              .contains("https://")) ...[
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundImage:
-                                  NetworkImage(getstate.profile_data.imageUrl),
-                            )
-                          ] else ...[
-                            ProfilePicture(
-                              name: getstate.profile_data.fullName.trim(),
-                              radius: 30,
-                              fontsize: 21,
-                            )
-                          ],
-                          SizedBox(
-                            width: 50.w,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 50.w,
-                                    child: Text(
-                                      " ${capitalize(getstate.profile_data.fullName)} ${getstate.profile_data.lastname ?? ""}",
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      style: TextStyle(
-                                          color:
-                                              Theme.of(context).iconTheme.color,
-                                          fontSize: 16.sp),
-                                    ),
-                                  ),
+    return Builder(builder: (context) {
+      final getstate = context.watch<ReadDataCubit>().state;
+      if (getstate is Loadingstate) {
+        return Center(
+          child: CupertinoActivityIndicator(
+              color: Theme.of(context).iconTheme.color),
+        );
+      }
 
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 5.sp),
-                                    child: Text(
-                                      capitalize(
-                                          getstate.profile_data.username),
-                                      style: TextStyle(
-                                          color: Theme.of(context)
-                                              .iconTheme
-                                              .color
-                                              .withOpacity(0.5),
-                                          fontSize: 12.sp),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 1.5.w,
-                                  ),
-                                  // Text(
-                                  //   number,
-                                  //   style: TextStyle(
-                                  //       color: Theme.of(context)
-                                  //           .iconTheme
-                                  //           .color
-                                  //           .withOpacity(0.5),
-                                  //       fontSize: 12.sp),
-                                  // )
-                                ],
-                              ),
-                            ),
-                          )
-                        ]),
-                        IconButton(
-                            onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => Profile_edit(
-                                        lastname:
-                                            getstate.profile_data.lastname,
-                                        image: getstate.profile_data.imageUrl,
-                                        name: getstate.profile_data.fullName,
-                                        myuid: uid,
-                                      )));
-                            },
-                            icon: SvgPicture.asset(
-                              'assets/svg/Left.svg',
-                              color: HexColor.fromHex('#5F5F62'),
-                              width: 7.sp,
-                              height: 12.sp,
-                            ))
+      if (getstate is getprofileData) {
+        return Scaffold(
+          appBar: AppBar(
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              actions: [
+                TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "Edit",
+                      style: TextStyle(color: Colors.blue, fontSize: 15.sp),
+                    ))
+              ]),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
+                  child: Row(
+                    children: [
+                      if (getstate.profile_data.imageUrl
+                          .contains("https://")) ...[
+                        CircleAvatar(
+                          radius: 30.sp,
+                          backgroundImage:
+                              NetworkImage(getstate.profile_data.imageUrl),
+                        )
+                      ] else ...[
+                        ProfilePicture(
+                            name: getstate.profile_data.imageUrl.trim(),
+                            radius: 30.sp,
+                            fontsize: 25.sp)
                       ],
-                    ),
+                      SizedBox(
+                        width: 10.sp,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              getstate.profile_data.fullName +
+                                      " " +
+                                      getstate.profile_data.lastname ??
+                                  "",
+                              style: TextStyle(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).iconTheme.color),
+                            ),
+                            Text(
+                              getstate.profile_data.phone,
+                              style: TextStyle(
+                                  fontSize: 15.sp,
+                                  color: Theme.of(context).iconTheme.color),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
                   ),
                 ),
-                Spacer(),
-                Container(
-                  height: 70.w,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? HexColor.fromHex("#1a1a1c")
-                          : HexColor.fromHex("#ffffff"),
-                      borderRadius: BorderRadius.circular(15.sp)),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ListTile(
+                Expanded(
+                  child: SettingsList(
+                    sections: [
+                      SettingsSection(
                         title: Text(
-                          "Notification",
-                          style: TextStyle(
+                          'Setttings',
+                        ),
+                        tiles: <SettingsTile>[
+                          SettingsTile.navigation(
+                            leading: Icon(
+                              Icons.notifications,
                               color: Theme.of(context).iconTheme.color,
-                              fontSize: 16.sp),
-                        ),
-                        leading: SvgPicture.asset(
-                          'assets/svg/notification.svg',
-                          width: 30.sp,
-                          height: 30.sp,
-                        ),
-                        trailing: IconButton(
-                            onPressed: () {},
-                            icon: SvgPicture.asset(
-                              'assets/svg/Left.svg',
-                              color: HexColor.fromHex('#5F5F62'),
-                              width: 7.sp,
-                              height: 12.sp,
-                            )),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: SizedBox(
-                          height: 10.0,
-                          child: Center(
-                            child: Container(
-                              margin: const EdgeInsetsDirectional.only(
-                                  start: 1.0, end: 1.0),
-                              height: 0.5,
-                              color: Colors.grey.withOpacity(0.2),
+                              size: 15.sp,
+                            ),
+                            title: Text(
+                              'Notification',
+                              style: TextStyle(fontSize: 15.sp),
                             ),
                           ),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text(
-                          "Chats",
-                          style: TextStyle(
+                          SettingsTile.navigation(
+                            leading: Icon(
+                              CupertinoIcons.chat_bubble,
                               color: Theme.of(context).iconTheme.color,
-                              fontSize: 16.sp),
-                        ),
-                        leading: SvgPicture.asset(
-                          'assets/svg/starred-message.svg',
-                          width: 30.sp,
-                          height: 30.sp,
-                        ),
-                        trailing: IconButton(
-                            onPressed: () {},
-                            icon: SvgPicture.asset(
-                              'assets/svg/Left.svg',
-                              color: HexColor.fromHex('#5F5F62'),
-                              width: 7.sp,
-                              height: 12.sp,
-                            )),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: SizedBox(
-                          height: 10.0,
-                          child: Center(
-                            child: Container(
-                              margin: const EdgeInsetsDirectional.only(
-                                  start: 1.0, end: 1.0),
-                              height: 0.5,
-                              color: Colors.grey.withOpacity(0.2),
+                              size: 15.sp,
+                            ),
+                            title: Text(
+                              'chat',
+                              style: TextStyle(fontSize: 15.sp),
                             ),
                           ),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text(
-                          "Privacy",
-                          style: TextStyle(
+                          SettingsTile.navigation(
+                            leading: Icon(
+                              CupertinoIcons.lock_circle,
                               color: Theme.of(context).iconTheme.color,
-                              fontSize: 16.sp),
-                        ),
-                        leading: SvgPicture.asset(
-                          'assets/svg/security.svg',
-                          width: 30.sp,
-                          height: 30.sp,
-                        ),
-                        trailing: IconButton(
-                            onPressed: () {},
-                            icon: SvgPicture.asset(
-                              'assets/svg/Left.svg',
-                              color: HexColor.fromHex('#5F5F62'),
-                              width: 7.sp,
-                              height: 12.sp,
-                            )),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: SizedBox(
-                          height: 10.0,
-                          child: Center(
-                            child: Container(
-                              margin: EdgeInsetsDirectional.only(
-                                  start: 1.0, end: 1.0),
-                              height: 0.5,
-                              color: Colors.grey.withOpacity(0.2),
+                              size: 15.sp,
+                            ),
+                            title: Text(
+                              'Privacy',
+                              style: TextStyle(fontSize: 15.sp),
                             ),
                           ),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text(
-                          "About",
-                          style: TextStyle(
+                          SettingsTile.navigation(
+                            leading: Icon(
+                              CupertinoIcons.mail,
                               color: Theme.of(context).iconTheme.color,
-                              fontSize: 16.sp),
-                        ),
-                        leading: SvgPicture.asset(
-                          'assets/svg/saved.svg',
-                          width: 30.sp,
-                          height: 30.sp,
-                        ),
-                        trailing: IconButton(
-                            onPressed: () {},
-                            icon: SvgPicture.asset(
-                              'assets/svg/Left.svg',
-                              color: HexColor.fromHex('#5F5F62'),
-                              width: 7.sp,
-                              height: 12.sp,
-                            )),
+                              size: 15.sp,
+                            ),
+                            title: Text(
+                              'Contact us',
+                              style: TextStyle(fontSize: 15.sp),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                Spacer(),
                 Button(
                   buttonenable: true,
                   onpress: () async {
-                    FirebaseAuth.instance.signOut();
-                    await _deleteCacheDir();
-                    await _deleteAppDir();
-
+                    await FirebaseAuth.instance.signOut();
                     Navigator.of(context).pushNamed("/");
                   },
-                  Texts: "Logout",
+                  Texts: "LOGOUT",
                   widths: 80,
                 ),
-              ]),
+                SizedBox(
+                  height: 15.sp,
+                )
+              ],
             ),
-          );
-        } else {
-          return Column(children: []);
-        }
-      }),
-    );
+          ),
+        );
+      } else {
+        return Column(children: []);
+      }
+    });
   }
 
   /// this will delete cache

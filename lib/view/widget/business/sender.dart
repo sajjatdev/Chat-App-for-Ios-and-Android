@@ -112,11 +112,15 @@ class _senderState extends State<sender> {
                             'voice') ...[
                           // voice Message Start
 
-                          voice_message(
-                            Room_Data: widget.Room_Data,
-                            myUID: widget.myUID,
-                            isDarkMode: widget.isDarkMode,
-                            isreceiver: false,
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom: 10.w, right: 3.w, left: 3.w),
+                            child: voice_message(
+                              Room_Data: widget.Room_Data,
+                              myUID: widget.myUID,
+                              isDarkMode: widget.isDarkMode,
+                              isreceiver: false,
+                            ),
                           )
 
                           // VoiceMessage(
@@ -187,7 +191,7 @@ class _senderState extends State<sender> {
                       if (snapshot.hasData) {
                         return Container(
                           height: 8.w,
-                          width: snapshot.data.docs.isNotEmpty ? 18.w : 8.w,
+                          width: snapshot.data.docs.isNotEmpty ? 12.w : 8.w,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                               color: HexColor.fromHex("#C9DDFE"),
@@ -252,51 +256,58 @@ class _senderState extends State<sender> {
                             like['Like'] != null ? like['Like'] : [];
                         if (like_Data.contains(uid)) {
                           return Container(
-                            width: 8.w,
+                            width: like.isNotEmpty ? 12.w : 8.w,
                             height: 8.w,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                                 color: HexColor.fromHex("#C9DDFE"),
                                 borderRadius: BorderRadius.circular(20.sp)),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                GestureDetector(
-                                    onTap: () {
-                                      FirebaseFirestore.instance
-                                          .collection('chat')
-                                          .doc(widget.RoomID)
-                                          .collection('message')
-                                          .doc(widget.messageId)
-                                          .update({
-                                        "Like": FieldValue.arrayRemove([uid])
-                                      });
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 3.sp),
+                                    child: GestureDetector(
+                                        onTap: () {
+                                          FirebaseFirestore.instance
+                                              .collection('chat')
+                                              .doc(widget.RoomID)
+                                              .collection('message')
+                                              .doc(widget.messageId)
+                                              .update({
+                                            "Like":
+                                                FieldValue.arrayRemove([uid])
+                                          });
 
-                                      setState(() {});
-                                    },
-                                    child: SvgPicture.asset(
-                                      'assets/svg/likechat.svg',
-                                      width: 6.w,
-                                      height: 6.w,
-                                    )),
-                                // SizedBox(
-                                //   width: 2.w,
-                                // ),
-                                // Padding(
-                                //   padding: EdgeInsets.only(top: 2.sp),
-                                //   child: like['Like'] != null
-                                //       ? Text(
-                                //           like_Data.length.toString(),
-                                //           style: const TextStyle(
-                                //               color: Colors.white),
-                                //         )
-                                //       : Text(
-                                //           '0'.toString(),
-                                //           style: const TextStyle(
-                                //               color: Colors.white),
-                                //         ),
-                                // ),
+                                          setState(() {});
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/svg/likechat.svg',
+                                          width: 6.w,
+                                          height: 6.w,
+                                        )),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      top: 2.sp,
+                                    ),
+                                    child: like['Like'] != null
+                                        ? Text(
+                                            like_Data.length.toString(),
+                                            style: const TextStyle(
+                                                color: Colors.blue),
+                                          )
+                                        : Text(
+                                            '0'.toString(),
+                                            style: const TextStyle(
+                                                color: Colors.blue),
+                                          ),
+                                  ),
+                                ),
                               ],
                             ),
                           );

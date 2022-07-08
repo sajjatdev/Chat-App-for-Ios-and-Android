@@ -52,7 +52,11 @@ class Business_Services {
             .doc(days[i])
             .set({"ID": days[i], 'open': "24 Hours", 'cls': "24 Hours"});
       }
-
+      firebaseFirestore
+          .collection('chat')
+          .doc(Business_Id)
+          .collection("Request_notification")
+          .doc("re");
       firebaseFirestore
           .collection('user')
           .doc(owner)
