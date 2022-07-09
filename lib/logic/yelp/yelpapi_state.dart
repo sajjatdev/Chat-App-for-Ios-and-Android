@@ -12,7 +12,7 @@ class YelpapiInitial extends YelpapiState {}
 class Loading extends YelpapiState {}
 
 class YelpDataGet extends YelpapiState {
-  final List<yelp_model> yelpdata;
+  final List<BusinessYelp> yelpdata;
 
   YelpDataGet({this.yelpdata});
 

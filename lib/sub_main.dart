@@ -1,4 +1,3 @@
-import 'package:chatting/Helper/config.dart';
 import 'package:chatting/Loading_page.dart';
 import 'package:chatting/Router/route.dart';
 import 'package:chatting/Services/Auth.dart';
@@ -20,15 +19,14 @@ import 'package:chatting/logic/group_create/group_create_cubit.dart';
 import 'package:chatting/logic/markers/markers_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/logic/search/search_cubit.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:device_preview/device_preview.dart';
-import 'package:dio/dio.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
 import 'package:chatting/Helper/theme_data.dart';
-import 'package:yelp_fusion_client/yelp_fusion_client.dart';
 
 import 'Services/Contact/Firebase_contact.dart';
 
@@ -102,9 +100,7 @@ class _ChattingState extends State<Chatting> {
           BlocProvider(
               create: (context) => BusinessHoursCubit(
                   Business_Services(FirebaseFirestore.instance))),
-          BlocProvider(
-              create: (context) => YelpapiCubit(
-                  yelp_api_services(Dio()))),
+          BlocProvider(create: (context) => YelpapiCubit(Repositorys.get())),
           BlocProvider(
               create: (context) => ContactCubit(FirebaseContact())
                 ..Getallcontactlist(

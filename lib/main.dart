@@ -18,9 +18,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   sharedPreferences = await SharedPreferences.getInstance();
-  yelpapi = YelpFusion(
-      apiKey:
-          'EIpbinNZQAftydhz4isi_u-87kgcRcZLmrB4hpVEg-2_MNiqgwhVbMjs0aE1teyxpmMEvYMZaYgWKbe7qOpfQh9_YbN9RJPYRV24VK-ia_1tQcHQavtUV5IryoLEYnYx');
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

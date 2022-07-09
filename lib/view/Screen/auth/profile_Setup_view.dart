@@ -277,66 +277,59 @@ class _profile_setupState extends State<profile_setup> {
                       buttonenable: true,
                       loadingbtn: false,
                       onpress: () async {
-                        await _askStoragePermission();
-                        if (_permissionStatus.isGranted) {
-                          final FormState status = _globalKey.currentState;
-                          List contact_number_list = [];
-                          String imagurl;
-                          if (status.validate()) {
-                            setState(() {
-                              btnloading = true;
-                            });
-                            if (result != null) {
-                              final path = result.path;
-                              final name = result.path;
-                              context
-                                  .read<PhotouploadCubit>()
-                                  .updateData(path, name, state.user.uid);
-                              setState(() async {
-                                imagurl = await firebase_storage
-                                    .FirebaseStorage.instance
-                                    .ref('userimage/${state.user.uid}/${name}')
-                                    .getDownloadURL();
-                              });
-                            }
-
-                            // profile setup Code Send
-
-                            ContactsService.getContacts().then((value) {
-                              for (var item in value) {
-                                print("done");
-                                if (item.phones.isNotEmpty) {
-                                  contact_number_list.add(item.phones[0].value);
-                                } else {
-                                  print("Null Phone number");
-                                }
-                              }
-
-                              FirebaseFirestore.instance
-                                  .collection("Contact_list")
-                                  .doc(state.user.phoneNumber)
-                                  .set({"list_Contact": contact_number_list});
-
-                              print("Update Contact");
-
-                              context.read<ProfileSetupCubit>().set_profile(
-                                  Firstname: firstname.text,
-                                  lastname: lastnames ?? '',
-                                  username: username,
-                                  imageURL: imagurl ?? firstname.text,
-                                  phone_number: state.user.phoneNumber,
-                                  uid: state.user.phoneNumber);
-
-                              sharedPreferences.setString(
-                                  'uid', state.user.phoneNumber);
-                              sharedPreferences.setString(
-                                  'number', state.user.phoneNumber);
-                              Navigator.of(context).pushNamed('/');
+                        final FormState status = _globalKey.currentState;
+                        List contact_number_list = [];
+                        String imagurl;
+                        if (status.validate()) {
+                          setState(() {
+                            btnloading = true;
+                          });
+                          if (result != null) {
+                            final path = result.path;
+                            final name = result.path;
+                            context
+                                .read<PhotouploadCubit>()
+                                .updateData(path, name, state.user.uid);
+                            setState(() async {
+                              imagurl = await firebase_storage
+                                  .FirebaseStorage.instance
+                                  .ref('userimage/${state.user.uid}/${name}')
+                                  .getDownloadURL();
                             });
                           }
-                        } else {
-                          setState(() {
-                            btnloading = false;
+
+                          // profile setup Code Send
+
+                          ContactsService.getContacts().then((value) {
+                            for (var item in value) {
+                              print("done");
+                              if (item.phones.isNotEmpty) {
+                                contact_number_list.add(item.phones[0].value);
+                              } else {
+                                print("Null Phone number");
+                              }
+                            }
+
+                            FirebaseFirestore.instance
+                                .collection("Contact_list")
+                                .doc(state.user.phoneNumber)
+                                .set({"list_Contact": contact_number_list});
+
+                            print("Update Contact");
+
+                            context.read<ProfileSetupCubit>().set_profile(
+                                Firstname: firstname.text,
+                                lastname: lastnames ?? '',
+                                username: username,
+                                imageURL: imagurl ?? firstname.text,
+                                phone_number: state.user.phoneNumber,
+                                uid: state.user.phoneNumber);
+
+                            sharedPreferences.setString(
+                                'uid', state.user.phoneNumber);
+                            sharedPreferences.setString(
+                                'number', state.user.phoneNumber);
+                            Navigator.of(context).pushNamed('/');
                           });
                         }
                       },

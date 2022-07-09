@@ -14,6 +14,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as loate;
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
@@ -26,6 +27,7 @@ class Map_view extends StatefulWidget {
 }
 
 class _Map_viewState extends State<Map_view> {
+  TextEditingController search = TextEditingController();
   bool hiden_show = false;
   int list_item;
   String myID;
@@ -38,6 +40,7 @@ class _Map_viewState extends State<Map_view> {
     // TODO: implement initState
     super.initState();
     getmyuid();
+    Permission.location.request().isGranted;
   }
 
   void getmyuid() {
@@ -54,12 +57,36 @@ class _Map_viewState extends State<Map_view> {
 
     final state = context.watch<MarkersCubit>().state;
     final location = context.watch<BusinessLocationCubit>().state;
+    final search_marker = context.watch<YelpapiCubit>().state;
 
-    if (state is has_marker && location is Has_Location) {
+    if (state is has_marker &&
+        location is Has_Location &&
+        search_marker is YelpDataGet) {
+      if (search_marker.yelpdata.isNotEmpty) {
+        for (var item = 0; item < search_marker.yelpdata.length; item++) {
+          _markerList.add(Marker(
+              height: 15.w,
+              width: 15.w,
+              point: LatLng(search_marker.yelpdata[item].latitude,
+                  search_marker.yelpdata[item].longitude),
+              builder: (_) {
+                return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        hiden_show = true;
+
+                        list_item = item;
+                        print("Item is $item");
+                      });
+                    },
+                    child: loate.Lottie.asset("assets/image/locationani.json"));
+              }));
+        }
+      }
       for (var item = 0; item < state.marker_list.length; item++) {
         _markerList.add(Marker(
-            height: 30.w,
-            width: 30.w,
+            height: 10.w,
+            width: 10.w,
             point: LatLng(state.marker_list[item].latitude,
                 state.marker_list[item].longitude),
             builder: (_) {
@@ -72,7 +99,9 @@ class _Map_viewState extends State<Map_view> {
                       print("Item is $item");
                     });
                   },
-                  child: loate.Lottie.asset("assets/image/locationani.json"));
+                  child: loate.Lottie.asset(
+                    "assets/image/sad.json",
+                  ));
             }));
       }
 
@@ -80,39 +109,42 @@ class _Map_viewState extends State<Map_view> {
         body: Stack(
           children: [
             Positioned.fill(
-              child: FlutterMap(
-                options: MapOptions(
-                    maxZoom: 20,
-                    zoom: 15,
-                    center: LatLng(double.parse(location.latitude),
-                        double.parse(location.longitude))),
-                nonRotatedLayers: [
-                  TileLayerOptions(
-                      urlTemplate:
-                          "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-                      additionalOptions: {
-                        'accessToken': MAPBOX_ACCESS_TOKEN,
-                        'id':
-                            isDarkMode ? "mapbox/dark-v10" : "mapbox/light-v10"
-                      }),
-                  MarkerLayerOptions(markers: _markerList),
-                  MarkerLayerOptions(markers: [
-                    // Marker(
-                    //     height: 20,
-                    //     width: 20,
-                    //     point: LatLng(double.parse(location.latitude),
-                    //         double.parse(location.longitude)),
-                    //     builder: (_) {
-                    //       return Container(
-                    //         decoration: BoxDecoration(
-                    //           // color: Colors.green,
-                    //           borderRadius: BorderRadius.circular(20),
-                    //         ),
-                    //       );
-                    //     })
-                  ]),
-                ],
-              ),
+              child: Builder(builder: (context) {
+                return FlutterMap(
+                  options: MapOptions(
+                      maxZoom: 20,
+                      zoom: 2,
+                      center: LatLng(double.parse(location.latitude),
+                          double.parse(location.longitude))),
+                  nonRotatedLayers: [
+                    TileLayerOptions(
+                        urlTemplate:
+                            "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+                        additionalOptions: {
+                          'accessToken': MAPBOX_ACCESS_TOKEN,
+                          'id': isDarkMode
+                              ? "mapbox/dark-v10"
+                              : "mapbox/light-v10"
+                        }),
+                    MarkerLayerOptions(markers: _markerList),
+                    MarkerLayerOptions(markers: [
+                      Marker(
+                          height: 20,
+                          width: 20,
+                          point: LatLng(double.parse(location.latitude),
+                              double.parse(location.longitude)),
+                          builder: (_) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                // color: Colors.green,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            );
+                          })
+                    ]),
+                  ],
+                );
+              }),
             ),
             Positioned(
               top: 25.sp,
@@ -121,9 +153,28 @@ class _Map_viewState extends State<Map_view> {
               child: BlocListener<YelpapiCubit, YelpapiState>(
                 listener: (context, state) {
                   if (state is YelpDataGet) {
-                    setState(() {
-                      print("Data Get Done");
-                    });
+                    for (var item = 0; item < state.yelpdata.length; item++) {
+                      setState(() {
+                        _markerList.add(Marker(
+                            height: 20.w,
+                            width: 20.w,
+                            point: LatLng(state.yelpdata[item].latitude,
+                                state.yelpdata[item].longitude),
+                            builder: (_) {
+                              return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      hiden_show = true;
+
+                                      list_item = item;
+                                      print("Item is $item");
+                                    });
+                                  },
+                                  child: loate.Lottie.asset(
+                                      "assets/image/locationani.json"));
+                            }));
+                      });
+                    }
                   }
                 },
                 child: Container(
@@ -132,8 +183,13 @@ class _Map_viewState extends State<Map_view> {
                       padding: const EdgeInsets.only(
                           top: 30, bottom: 10, left: 20, right: 20),
                       child: TextFormField(
+                        controller: search,
                         validator: (value) =>
                             value.isEmpty ? "Name can't be blank" : null,
+                        onFieldSubmitted: (value) {
+                          context.read<YelpapiCubit>().YelpApiGetDatafun(
+                              categories: value, Location: "canada");
+                        },
                         style: TextStyle(
                             color: Theme.of(context).iconTheme.color,
                             fontSize: 12.sp),
@@ -169,7 +225,8 @@ class _Map_viewState extends State<Map_view> {
                           prefixIcon: IconButton(
                               onPressed: () {
                                 context.read<YelpapiCubit>().YelpApiGetDatafun(
-                                    Location: "Cadana", category: "Aquariums");
+                                    categories: search.text,
+                                    Location: "canada");
                               },
                               icon: Icon(
                                 Icons.search,
