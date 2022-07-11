@@ -10,13 +10,13 @@ abstract class MarkersState extends Equatable {
 class MarkersInitial extends MarkersState {}
 
 class has_marker extends MarkersState {
-  final List<marker_model> marker_list;
+  final List<marker_model> yelpdata;
 
-  has_marker({this.marker_list});
+  has_marker({this.yelpdata});
 
   @override
   // TODO: implement props
-  List<Object> get props => [marker_list];
+  List<Object> get props => [yelpdata];
 }
 
 class notfind_marker extends MarkersState {

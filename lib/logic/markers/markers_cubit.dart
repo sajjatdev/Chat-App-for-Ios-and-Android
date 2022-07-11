@@ -17,7 +17,7 @@ class MarkersCubit extends Cubit<MarkersState> {
   Future<void> getMarkersData() {
     streamSubscription = getMarker.getmarker().listen((maker) {
       if (maker != null) {
-        emit(has_marker(marker_list: maker));
+        emit(has_marker(yelpdata: maker));
       } else {
         emit(notfind_marker(message: "Not Find Marker"));
       }

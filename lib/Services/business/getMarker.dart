@@ -9,20 +9,9 @@ class GetMarker {
       : firebaseFirestore = firestore ?? FirebaseFirestore.instance;
 
   Stream<List<marker_model>> getmarker() {
-    final ref = firebaseFirestore.collection('marker');
+    final ref = firebaseFirestore.collection('business_list');
     return ref.snapshots().map((QuerySnapshot snapshot) => snapshot.docs
-        .map((DocumentSnapshot doc) => marker_model(
-              markerId: doc['Business_Id'],
-              business_id: doc['Business_Id'],
-              ImageUrl: doc['imageURl'],
-              Address: doc['address'],
-              type: doc['type'],
-              customer: doc['customer'],
-              latitude: double.parse(doc["latitude"]),
-              longitude: double.parse(doc["longitude"]),
-              Descritpion: doc['description'],
-              title: doc['Business_Name'],
-            ))
+        .map((DocumentSnapshot doc) => marker_model.fromJson(doc.data()))
         .toList());
   }
 }

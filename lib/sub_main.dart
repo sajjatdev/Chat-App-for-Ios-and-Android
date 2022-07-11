@@ -30,10 +30,12 @@ import 'package:chatting/Helper/theme_data.dart';
 
 import 'Services/Contact/Firebase_contact.dart';
 
+import 'Services/Google Map/SearchMap.dart';
 import 'Services/business/getMarker.dart';
 import 'Services/business/map_yelp_data/yelp.dart';
 import 'logic/Business_profile/business_profile_cubit.dart';
 import 'logic/Contact/contact_cubit.dart';
+import 'logic/Google_Search/cubit/map_search_cubit.dart';
 import 'logic/Profile_data_get/read_data_cubit.dart';
 import 'logic/Profile_setup/profile_setup_cubit.dart';
 import 'logic/group_profile/group_profile_cubit.dart';
@@ -100,6 +102,8 @@ class _ChattingState extends State<Chatting> {
           BlocProvider(
               create: (context) => BusinessHoursCubit(
                   Business_Services(FirebaseFirestore.instance))),
+          BlocProvider(
+              create: (context) => MapSearchCubit(mapsearch: MapServices())),
           BlocProvider(create: (context) => YelpapiCubit(Repositorys.get())),
           BlocProvider(
               create: (context) => ContactCubit(FirebaseContact())

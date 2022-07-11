@@ -11,10 +11,10 @@ class YelpapiInitial extends YelpapiState {}
 
 class Loading extends YelpapiState {}
 
-class YelpDataGet extends YelpapiState {
+class YelpSearchData extends YelpapiState {
   final List<BusinessYelp> yelpdata;
 
-  YelpDataGet({this.yelpdata});
+  YelpSearchData({this.yelpdata});
 
   @override
   // TODO: implement props

@@ -1,23 +1,20 @@
+import 'dart:async';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:chatting/Helper/color.dart';
+import 'package:chatting/Helper/config.dart';
+import 'package:chatting/logic/Google_Search/cubit/map_search_cubit.dart';
 import 'package:chatting/logic/business_location/business_location_cubit.dart';
-import 'package:chatting/logic/markers/markers_cubit.dart';
-import 'package:chatting/logic/yelp/yelpapi_cubit.dart';
 import 'package:chatting/main.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:chatting/model/Google%20Map%20/Map_Search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:lottie/lottie.dart' as loate;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import 'package:sizer/sizer.dart';
-import 'package:strings/strings.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Map_view extends StatefulWidget {
   const Map_view({Key key}) : super(key: key);
@@ -28,18 +25,26 @@ class Map_view extends StatefulWidget {
 
 class _Map_viewState extends State<Map_view> {
   TextEditingController search = TextEditingController();
+  Completer<GoogleMapController> _controller = Completer();
+  Set<Marker> _markers = Set<Marker>();
+  List<Google_map_search> MarkerDataList;
   bool hiden_show = false;
+  bool isloading = false;
   int list_item;
+  double lat = 0;
+  double lng = 0;
   String myID;
-  static const MAPBOX_ACCESS_TOKEN =
-      'pk.eyJ1Ijoic2FqamF0NjYiLCJhIjoiY2wxNGwyNDZ5MHdqdjNrbjFzaXE0bTM3ZiJ9.Gfw4GbGdIbD7UlwaFlDHIA';
-  static const MAPBOX_STYLE = '';
+  int dataindex = 0;
+
+  int markerIdCounter = 1;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     getmyuid();
+
     Permission.location.request().isGranted;
   }
 
@@ -49,368 +54,286 @@ class _Map_viewState extends State<Map_view> {
     });
   }
 
+  void _setMarker(point, state) {}
+
+  // Future<void> gotoSearchedPlace() async {
+  //   final mapdata = context.watch<MapSearchCubit>().state;
+
+  //   if (mapdata is GetDataformGoogle) {
+  //     for (var i = 0; i < mapdata.GetDataFormGoogle.length; i++) {
+  //       final GoogleMapController controller = await _controller.future;
+
+  //       controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+  //         zoom: 12,
+  //         target: LatLng(mapdata.GetDataFormGoogle[i].geometry.location.lat,
+  //             mapdata.GetDataFormGoogle[i].geometry.location.lng),
+  //       )));
+
+  //       _setMarker(LatLng(mapdata.GetDataFormGoogle[i].geometry.location.lat,
+  //           mapdata.GetDataFormGoogle[i].geometry.location.lng),mapdata);
+  //     }
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
-    final _markerList = <Marker>[];
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
-
-    final state = context.watch<MarkersCubit>().state;
-    final location = context.watch<BusinessLocationCubit>().state;
-    final search_marker = context.watch<YelpapiCubit>().state;
-
-    if (state is has_marker &&
-        location is Has_Location &&
-        search_marker is YelpDataGet) {
-      if (search_marker.yelpdata.isNotEmpty) {
-        for (var item = 0; item < search_marker.yelpdata.length; item++) {
-          _markerList.add(Marker(
-              height: 15.w,
-              width: 15.w,
-              point: LatLng(search_marker.yelpdata[item].latitude,
-                  search_marker.yelpdata[item].longitude),
-              builder: (_) {
-                return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        hiden_show = true;
-
-                        list_item = item;
-                        print("Item is $item");
-                      });
-                    },
-                    child: loate.Lottie.asset("assets/image/locationani.json"));
-              }));
-        }
-      }
-      for (var item = 0; item < state.marker_list.length; item++) {
-        _markerList.add(Marker(
-            height: 10.w,
-            width: 10.w,
-            point: LatLng(state.marker_list[item].latitude,
-                state.marker_list[item].longitude),
-            builder: (_) {
-              return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      hiden_show = true;
-
-                      list_item = item;
-                      print("Item is $item");
-                    });
-                  },
-                  child: loate.Lottie.asset(
-                    "assets/image/sad.json",
-                  ));
-            }));
-      }
-
-      return Scaffold(
-        body: Stack(
-          children: [
-            Positioned.fill(
-              child: Builder(builder: (context) {
-                return FlutterMap(
-                  options: MapOptions(
-                      maxZoom: 20,
-                      zoom: 2,
-                      center: LatLng(double.parse(location.latitude),
-                          double.parse(location.longitude))),
-                  nonRotatedLayers: [
-                    TileLayerOptions(
-                        urlTemplate:
-                            "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-                        additionalOptions: {
-                          'accessToken': MAPBOX_ACCESS_TOKEN,
-                          'id': isDarkMode
-                              ? "mapbox/dark-v10"
-                              : "mapbox/light-v10"
-                        }),
-                    MarkerLayerOptions(markers: _markerList),
-                    MarkerLayerOptions(markers: [
-                      Marker(
-                          height: 20,
-                          width: 20,
-                          point: LatLng(double.parse(location.latitude),
-                              double.parse(location.longitude)),
-                          builder: (_) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                // color: Colors.green,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            );
-                          })
-                    ]),
-                  ],
-                );
-              }),
-            ),
-            Positioned(
-              top: 25.sp,
-              left: 0,
-              right: 0,
-              child: BlocListener<YelpapiCubit, YelpapiState>(
-                listener: (context, state) {
-                  if (state is YelpDataGet) {
-                    for (var item = 0; item < state.yelpdata.length; item++) {
-                      setState(() {
-                        _markerList.add(Marker(
-                            height: 20.w,
-                            width: 20.w,
-                            point: LatLng(state.yelpdata[item].latitude,
-                                state.yelpdata[item].longitude),
-                            builder: (_) {
-                              return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      hiden_show = true;
-
-                                      list_item = item;
-                                      print("Item is $item");
-                                    });
-                                  },
-                                  child: loate.Lottie.asset(
-                                      "assets/image/locationani.json"));
-                            }));
-                      });
-                    }
-                  }
-                },
-                child: Container(
-                    height: 25.w,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 30, bottom: 10, left: 20, right: 20),
-                      child: TextFormField(
-                        controller: search,
-                        validator: (value) =>
-                            value.isEmpty ? "Name can't be blank" : null,
-                        onFieldSubmitted: (value) {
-                          context.read<YelpapiCubit>().YelpApiGetDatafun(
-                              categories: value, Location: "canada");
-                        },
-                        style: TextStyle(
-                            color: Theme.of(context).iconTheme.color,
-                            fontSize: 12.sp),
-                        decoration: InputDecoration(
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                showAdaptiveActionSheet(
-                                  context: context,
-                                  title: const Text('Set Search Perimeter'),
-                                  androidBorderRadius: 30,
-                                  actions: <BottomSheetAction>[
-                                    BottomSheetAction(
-                                        title: const Text('Near me'),
-                                        onPressed: () {}),
-                                    BottomSheetAction(
-                                        title: const Text('City'),
-                                        onPressed: () {}),
-                                    BottomSheetAction(
-                                        title: const Text('Country'),
-                                        onPressed: () {}),
-                                    BottomSheetAction(
-                                        title: const Text('No Limit'),
-                                        onPressed: () {}),
-                                  ],
-                                  cancelAction: CancelAction(
-                                      title: const Text(
-                                          'Cancel')), // onPressed parameter is optional by default will dismiss the ActionSheet
-                                );
-                              },
-                              icon: SvgPicture.asset(
-                                  'assets/svg/fi-rr-settings-sliders.svg',
-                                  color: Theme.of(context).iconTheme.color)),
-                          prefixIcon: IconButton(
-                              onPressed: () {
-                                context.read<YelpapiCubit>().YelpApiGetDatafun(
-                                    categories: search.text,
-                                    Location: "canada");
-                              },
-                              icon: Icon(
-                                Icons.search,
-                                color: Theme.of(context).iconTheme.color,
-                              )),
-                          hintText: "Search around",
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          hintStyle: TextStyle(
-                              color: Theme.of(context).iconTheme.color,
-                              fontSize: 12.sp),
-                          fillColor: isDarkMode
-                              ? HexColor.fromHex("#696969")
-                              : HexColor.fromHex("#EEEEEF"),
-                          filled: true,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: BorderSide.none),
-                          errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: BorderSide.none),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: BorderSide.none),
-                        ),
-                      ),
-                    )),
-              ),
-            ),
-            list_item == null
-                ? Container()
-                : AnimatedPositioned(
-                    duration: Duration(milliseconds: 200),
-                    bottom: hiden_show ? 5.w : -60.w,
-                    left: 8.w,
-                    right: 8.w,
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 500),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).secondaryHeaderColor,
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 30),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      state.marker_list[list_item].ImageUrl),
-                                ),
-                                SizedBox(
-                                  width: 3.w,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      capitalize(
-                                          state.marker_list[list_item].title),
-                                      style: TextStyle(
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .iconTheme
-                                              .color),
-                                    ),
-                                    SizedBox(
-                                      height: 2.w,
-                                    ),
-                                    SizedBox(
-                                      width: 50.w,
-                                      child: Text(
-                                        state.marker_list[list_item].Address,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: Colors.grey.shade400),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 2.5.w,
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        FirebaseFirestore.instance
-                                            .collection("chat")
-                                            .doc(state.marker_list[list_item]
-                                                .business_id)
-                                            .update({
-                                          'customer': FieldValue.arrayUnion([
-                                            myID,
-                                          ])
-                                        }).then((value) {
-                                          FirebaseFirestore.instance
-                                              .collection('user')
-                                              .doc(myID)
-                                              .collection("Friends")
-                                              .doc(state.marker_list[list_item]
-                                                  .business_id)
-                                              .set({
-                                            "Room_ID": state
-                                                .marker_list[list_item]
-                                                .business_id,
-                                            "time": DateTime.now()
-                                                .millisecondsSinceEpoch
-                                                .toString(),
-                                            "type": state
-                                                .marker_list[list_item].type,
-                                            "uid": state.marker_list[list_item]
-                                                .business_id,
-                                          });
-                                          Navigator.of(context).pushNamed(
-                                              '/messageing',
-                                              arguments: {
-                                                'mamber_list': state
-                                                    .marker_list[list_item]
-                                                    .customer,
-                                                'type': state
-                                                    .marker_list[list_item]
-                                                    .type,
-                                                'otheruid': state
-                                                    .marker_list[list_item]
-                                                    .business_id,
-                                              });
-                                        });
-                                      },
-                                      child: Container(
-                                        height: 10.w,
-                                        width: 50.w,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .iconTheme
-                                                .color,
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        child: Text("Join",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .secondaryHeaderColor)),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    )),
-            AnimatedPositioned(
-                duration: Duration(milliseconds: 200),
-                bottom: hiden_show ? 32.w : -60.w,
-                left: 65.w,
-                right: 0,
-                child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        hiden_show = false;
-                      });
-                    },
-                    icon: Icon(Icons.close)))
-          ],
-        ),
-      );
+    final locationbloc = context.watch<BusinessLocationCubit>().state;
+    if (locationbloc is Has_Location) {
+      setState(() {
+        lat = double.parse(locationbloc.latitude);
+        lng = double.parse(locationbloc.longitude);
+      });
     }
-    return Scaffold(
-      body: Center(
-          child: CupertinoActivityIndicator(
-        color: Theme.of(context).iconTheme.color,
+    return LoadingOverlay(
+      isLoading: isloading,
+      progressIndicator:
+          CupertinoActivityIndicator(color: Theme.of(context).iconTheme.color),
+      child: Scaffold(
+          body: Stack(
+        children: [
+          BlocConsumer<MapSearchCubit, MapSearchState>(
+            listener: ((context, state) async {
+              if (state is GetDataformGoogle) {
+                setState(() {
+                  isloading = false;
+                  MarkerDataList = state.GetDataFormGoogle;
+                });
+                for (var i = 1; i <= state.GetDataFormGoogle.length; i++) {
+                  final GoogleMapController controller =
+                      await _controller.future;
+
+                  controller.animateCamera(
+                      CameraUpdate.newCameraPosition(CameraPosition(
+                    zoom: 12,
+                    target: LatLng(
+                        state.GetDataFormGoogle[i].geometry.location.lat,
+                        state.GetDataFormGoogle[i].geometry.location.lng),
+                  )));
+                  var counter = markerIdCounter++;
+
+                  final Marker marker = Marker(
+                      markerId: MarkerId('marker_$counter'),
+                      position: LatLng(
+                          state.GetDataFormGoogle[i].geometry.location.lat,
+                          state.GetDataFormGoogle[i].geometry.location.lng),
+                      onTap: () {
+                        setState(() {
+                          dataindex = i;
+                          debugPrint(i.toString());
+                        });
+                      },
+                      infoWindow: InfoWindow(
+                          title: state.GetDataFormGoogle[i].name,
+                          snippet: state.GetDataFormGoogle[i].formattedAddress),
+                      icon: BitmapDescriptor.defaultMarker);
+
+                  setState(() {
+                    _markers.add(marker);
+                  });
+                }
+              }
+              if (state is error) {
+                setState(() {
+                  isloading = false;
+                });
+              }
+            }),
+            builder: (context, state) {
+              if (state is GetDataformGoogle) {
+                // gotoSearchedPlace();
+                return GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(lat, lng),
+                    zoom: 14,
+                  ),
+                  onTap: (value) {
+                    print(value.latitude);
+                  },
+                  mapType: MapType.normal,
+                  zoomControlsEnabled: false,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  markers: _markers,
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                );
+              } else {
+                return GoogleMap(
+                  initialCameraPosition: const CameraPosition(
+                    target: LatLng(23.8103, 90.3795),
+                    zoom: 14,
+                  ),
+                  mapType: MapType.normal,
+                  zoomControlsEnabled: false,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                );
+              }
+            },
+          ),
+
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          /// search box
+          ///
+          ///
+
+          Positioned(
+            top: 25.sp,
+            left: 0,
+            right: 0,
+            child: Container(
+                height: 25.w,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      top: 30, bottom: 10, left: 20, right: 20),
+                  child: TextFormField(
+                    controller: search,
+                    validator: (value) =>
+                        value.isEmpty ? "Name can't be blank" : null,
+                    onFieldSubmitted: (value) {
+                      setState(() {
+                        isloading = true;
+                        String searchkey = value;
+                        _markers = {};
+                        print(searchkey);
+                        context.read<MapSearchCubit>().MapSearchdata(
+                            Address: searchkey.replaceAll(" ", "%"));
+                      });
+                    },
+                    style: TextStyle(
+                        color: Theme.of(context).iconTheme.color,
+                        fontSize: 12.sp),
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                          onPressed: () {
+                            showAdaptiveActionSheet(
+                              context: context,
+                              title: const Text('Set Search Perimeter'),
+                              androidBorderRadius: 30,
+                              actions: <BottomSheetAction>[
+                                BottomSheetAction(
+                                    title: const Text('Near me'),
+                                    onPressed: () {}),
+                                BottomSheetAction(
+                                    title: const Text('City'),
+                                    onPressed: () {}),
+                                BottomSheetAction(
+                                    title: const Text('Country'),
+                                    onPressed: () {}),
+                                BottomSheetAction(
+                                    title: const Text('No Limit'),
+                                    onPressed: () {}),
+                              ],
+                              cancelAction: CancelAction(
+                                  title: const Text(
+                                      'Cancel')), // onPressed parameter is optional by default will dismiss the ActionSheet
+                            );
+                          },
+                          icon: SvgPicture.asset(
+                              'assets/svg/fi-rr-settings-sliders.svg',
+                              color: Theme.of(context).iconTheme.color)),
+                      prefixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              isloading = true;
+                              String searchkey = search.text;
+                              _markers = {};
+                              print(searchkey);
+                              context.read<MapSearchCubit>().MapSearchdata(
+                                  Address: searchkey.replaceAll(" ", "%"));
+                            });
+                          },
+                          icon: Icon(
+                            Icons.search,
+                            color: Theme.of(context).iconTheme.color,
+                          )),
+                      hintText: "Search around",
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      hintStyle: TextStyle(
+                          color: Theme.of(context).iconTheme.color,
+                          fontSize: 12.sp),
+                      fillColor: isDarkMode
+                          ? HexColor.fromHex("#696969")
+                          : HexColor.fromHex("#EEEEEF"),
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                          borderSide: BorderSide.none),
+                      errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                          borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                          borderSide: BorderSide.none),
+                    ),
+                  ),
+                )),
+          ),
+          ////
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///
+          ///Intro Data sheet
+          ///
+          ///
+
+          dataindex > 0 && MarkerDataList.isNotEmpty
+              ? SlidingUpPanel(
+                  backdropEnabled: true,
+                  parallaxEnabled: true,
+                  parallaxOffset: .5,
+                  backdropColor: Theme.of(context).iconTheme.color,
+                  color: Theme.of(context).secondaryHeaderColor,
+                  panel: Column(children: [
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                            "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${MarkerDataList[dataindex].photos[1].photoReference}&key=$GOOGLEMAPAPI"),
+                      ),
+                      title: Text(
+                        MarkerDataList[dataindex].photos[1].photoReference,
+                        style: TextStyle(
+                            fontSize: 15.sp,
+                            color: Theme.of(context).iconTheme.color),
+                      ),
+                      subtitle: Text(
+                        MarkerDataList[dataindex].formattedAddress,
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Theme.of(context).iconTheme.color),
+                      ),
+                    )
+                  ]),
+                )
+              : Container(),
+        ],
       )),
     );
   }
