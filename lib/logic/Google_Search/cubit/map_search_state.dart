@@ -8,9 +8,9 @@ abstract class MapSearchState extends Equatable {
 }
 
 class MapSearchInitial extends MapSearchState {}
-
+class Loading extends MapSearchState{}
 class GetDataformGoogle extends MapSearchState {
-  final List<Google_map_search> GetDataFormGoogle;
+  final List<SearchResult> GetDataFormGoogle;
 
   GetDataformGoogle({this.GetDataFormGoogle});
 
@@ -19,6 +19,14 @@ class GetDataformGoogle extends MapSearchState {
   List<Object> get props => [GetDataFormGoogle];
 }
 
-class error extends MapSearchState{
-  
+class MoveSearch extends MapSearchState {
+  final List<SearchResult> MoveSearchs;
+
+  MoveSearch({this.MoveSearchs});
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [MoveSearchs];
 }
+
+class error extends MapSearchState {}

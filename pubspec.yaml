@@ -80,7 +80,12 @@ dependencies:
   settings_ui: ^2.0.2
   custom_marker: ^1.0.0
   sliding_up_panel: ^2.0.0+1
-  
+  galleryimage: ^1.2.0
+  google_geocoding: ^0.2.0
+  google_place: ^0.4.7
+  internet_connection_checker: ^0.0.1+4
+ 
+
  
  
 

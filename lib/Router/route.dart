@@ -1,6 +1,7 @@
 import 'package:chatting/Loading_page.dart';
 import 'package:chatting/view/Screen/auth/loading_view.dart';
 import 'package:flutter/material.dart';
+import 'package:google_place/google_place.dart';
 
 import '../view/Screen/Screen.dart';
 
@@ -35,7 +36,8 @@ class Routers {
         return Business_image_show.route(
             imageurl: settings.arguments as String);
       case Create_business.routeName:
-        return Create_business.route();
+        return Create_business.route(
+            BUSINESSDATA: settings.arguments as SearchResult);
       case privacy_policy.routeName:
         return privacy_policy.route();
       case UsernameCreate.routeName:

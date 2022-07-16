@@ -9,12 +9,16 @@ class Button extends StatelessWidget {
   final double widths;
   final bool loadingbtn;
   final bool buttonenable;
+  final Color color;
+  final bool addcolor;
   Button(
       {this.onpress,
       this.Texts,
       this.widths,
       this.loadingbtn = false,
-      this.buttonenable = false});
+      this.buttonenable = false,
+      this.color = Colors.red,
+      this.addcolor = false});
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +31,13 @@ class Button extends StatelessWidget {
         width: widths.w,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-            color: buttonenable
-                ? isDarkMode
-                    ? HexColor.fromHex("#ffffff")
-                    : HexColor.fromHex("#000000")
-                : Colors.grey,
+            color: addcolor
+                ? color
+                : buttonenable
+                    ? isDarkMode
+                        ? HexColor.fromHex("#ffffff")
+                        : HexColor.fromHex("#000000")
+                    : Colors.grey,
             borderRadius: BorderRadius.circular(5.0)),
         child: loadingbtn
             ? CupertinoActivityIndicator(

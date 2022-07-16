@@ -1,22 +1,27 @@
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/business_location/business_location_cubit.dart';
+import 'package:chatting/view/Screen/business/setupBusinessProfile/setup.dart';
 import 'package:chatting/view/widget/button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_place/google_place.dart';
 import 'package:sizer/sizer.dart';
 
 class Create_business extends StatefulWidget {
   static const String routeName = '/create_business';
 
-  static Route route() {
+  static Route route({SearchResult BUSINESSDATA}) {
     return MaterialPageRoute(
         settings: RouteSettings(name: routeName),
-        builder: (_) => Create_business());
+        builder: (_) => Create_business(
+              BUSINESSDATA: BUSINESSDATA,
+            ));
   }
 
-  const Create_business({Key key}) : super(key: key);
+  final SearchResult BUSINESSDATA;
+  const Create_business({Key key, this.BUSINESSDATA}) : super(key: key);
 
   @override
   State<Create_business> createState() => _Create_businessState();
@@ -31,89 +36,78 @@ class _Create_businessState extends State<Create_business> {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<BusinessLocationCubit>().state;
-
-    if (state is Loading_location) {
-      return Center(
-        child: CupertinoActivityIndicator(
-            color: Theme.of(context).iconTheme.color),
-      );
-    }
-    if (state is Has_Location) {
-      print(state.address);
-      return Scaffold(
-        appBar: AppBar(
-            elevation: 0,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: Theme.of(context).iconTheme.color,
-              ),
-            )),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            Align(
-              alignment: Alignment.topLeft,
+    return Scaffold(
+      appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Theme.of(context).iconTheme.color,
+            ),
+          )),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "Create\nbusiness",
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                  fontSize: 30.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).iconTheme.color),
+            ),
+          ),
+          Spacer(),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Text(
-                "Create\nbusiness",
-                textAlign: TextAlign.start,
+                widget.BUSINESSDATA.formattedAddress,
                 style: TextStyle(
-                    fontSize: 30.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).iconTheme.color),
               ),
             ),
-            Spacer(),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  state.address,
-                  style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).iconTheme.color),
-                ),
-              ),
+          ),
+          SizedBox(
+            height: 10.w,
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "Enter your business location to see if there is already Hangout spot created for your business.",
+              style: TextStyle(color: HexColor.fromHex("#707070")),
             ),
-            SizedBox(
-              height: 10.w,
+          ),
+          Spacer(),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "Result",
+              style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).iconTheme.color),
             ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                "Enter your business location to see if there is already Hangout spot created for your business.",
-                style: TextStyle(color: HexColor.fromHex("#707070")),
-              ),
-            ),
-            Spacer(),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                "Result",
-                style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).iconTheme.color),
-              ),
-            ),
-            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream:
-                    FirebaseFirestore.instance.collection("marker").snapshots(),
-                builder: (context, snapshot) {
+          ),
+          FutureBuilder<List<SearchResult>>(
+              future: AvailableBusines(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
                   return Expanded(
                     flex: 6,
                     child: ListView.builder(
-                        itemCount: 10,
+                        itemCount: snapshot.data.length,
                         shrinkWrap: true,
-                        itemBuilder: (context, snapshot) {
+                        itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 15,
@@ -129,7 +123,13 @@ class _Create_businessState extends State<Create_business> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      CircleAvatar(),
+                                      CircleAvatar(
+                                        child: Image.network(
+                                          snapshot.data[index].icon,
+                                          color: Colors.white,
+                                          scale: 4.sp,
+                                        ),
+                                      ),
                                       SizedBox(
                                         width: 2.5.w,
                                       ),
@@ -140,7 +140,7 @@ class _Create_businessState extends State<Create_business> {
                                             MainAxisAlignment.start,
                                         children: [
                                           Text(
-                                            "Starbucks",
+                                            snapshot.data[index].name,
                                             style: TextStyle(
                                                 fontSize: 12.sp,
                                                 fontWeight: FontWeight.bold,
@@ -154,7 +154,9 @@ class _Create_businessState extends State<Create_business> {
                                           SizedBox(
                                             width: 60.w,
                                             child: Text(
-                                              state.address,
+                                              snapshot
+                                                  .data[index].formattedAddress
+                                                  .toString(),
                                               style: TextStyle(
                                                   fontSize: 10.sp,
                                                   color: HexColor.fromHex(
@@ -166,12 +168,38 @@ class _Create_businessState extends State<Create_business> {
                                       SizedBox(
                                         width: 2.w,
                                       ),
-                                      Text(
-                                        "Available",
-                                        style: TextStyle(
-                                            fontSize: 10.sp,
-                                            color: HexColor.fromHex("#4479F6")),
-                                      )
+                                      FutureBuilder<bool>(
+                                          future: BusinessCheck(
+                                              id: snapshot.data[index].placeId),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasData) {
+                                              if (snapshot.data) {
+                                                return Text(
+                                                  "Connect",
+                                                  style: TextStyle(
+                                                      fontSize: 10.sp,
+                                                      color: HexColor.fromHex(
+                                                          "#4479F6")),
+                                                );
+                                              } else {
+                                                return Text(
+                                                  "Available",
+                                                  style: TextStyle(
+                                                      fontSize: 10.sp,
+                                                      color: HexColor.fromHex(
+                                                          "#4479F6")),
+                                                );
+                                              }
+                                            } else {
+                                              return Center(
+                                                child:
+                                                    CupertinoActivityIndicator(
+                                                        color: Theme.of(context)
+                                                            .iconTheme
+                                                            .color),
+                                              );
+                                            }
+                                          })
                                     ],
                                   )
                                 ],
@@ -180,25 +208,47 @@ class _Create_businessState extends State<Create_business> {
                           );
                         }),
                   );
-                }),
-            Spacer(),
-            Button(
-              buttonenable: true,
-              onpress: () {
-                Navigator.of(context).pushReplacementNamed(
-                    '/create_business_profile',
-                    arguments: {
-                      'address': state.address,
-                      'latitude': state.latitude,
-                      'longitude': state.longitude
-                    });
-              },
-              Texts: "CREATE",
-              widths: 80,
-            )
-          ]),
-        ),
-      );
-    }
+                } else {
+                  return Container();
+                }
+              }),
+          Spacer(),
+          Button(
+            buttonenable: true,
+            onpress: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SetupBusiness(
+                        business: widget.BUSINESSDATA,
+                      )));
+            },
+            Texts: "Hangout Setup",
+            widths: 80,
+          )
+        ]),
+      ),
+    );
+  }
+
+  Future<bool> BusinessCheck({String id}) async {
+    final result = await FirebaseFirestore.instance
+        .collection("marker")
+        .where("Business_Id", isEqualTo: id)
+        .get();
+
+    return result.docs.isNotEmpty;
+  }
+
+  Future<List<SearchResult>> AvailableBusines() async {
+    var stringList = widget.BUSINESSDATA.types.join("%");
+    print(stringList);
+    var googlePlace = GooglePlace("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
+    var result = await googlePlace.search.getTextSearch(
+      stringList,
+      location: Location(
+          lng: widget.BUSINESSDATA.geometry.location.lng,
+          lat: widget.BUSINESSDATA.geometry.location.lat),
+    );
+
+    return result.results;
   }
 }
