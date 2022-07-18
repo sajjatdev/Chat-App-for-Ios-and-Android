@@ -43,15 +43,15 @@ class _Map_viewState extends State<Map_view> {
   double lat = 0;
   double lng = 0;
   String myID;
-  int dataindex = 0;
   Position position = Position();
   int markerIdCounter = 1;
   List<String> Image = [];
   List<PlaceAPI.AutocompletePrediction> predictions = [];
   bool connectionChecker = false;
   bool areaSearch = false;
-  int oldindex = 1;
+  int oldindex = 0;
   int radius = 2;
+  int clickindex = 0;
 
   @override
   void initState() {
@@ -116,44 +116,103 @@ class _Map_viewState extends State<Map_view> {
                                         MarkerDataList =
                                             state.GetDataFormGoogle;
                                       });
-                                      for (var i = 0;
+                                      for (var i = 1;
                                           i < state.GetDataFormGoogle.length;
                                           i++) {
+                                        print(i);
                                         final GoogleMapController controller =
                                             await _controller.future;
 
                                         controller.animateCamera(
                                             CameraUpdate.newCameraPosition(
                                                 CameraPosition(
-                                          zoom: 12,
+                                          zoom: 9,
                                           target: LatLng(
-                                              state.GetDataFormGoogle[0]
+                                              state.GetDataFormGoogle[1]
                                                   .geometry.location.lat,
-                                              state.GetDataFormGoogle[0]
+                                              state.GetDataFormGoogle[1]
                                                   .geometry.location.lng),
                                         )));
-                                        var counter = markerIdCounter++;
 
                                         final Marker marker = Marker(
-                                            markerId:
-                                                MarkerId('marker_$counter'),
+                                            markerId: MarkerId('$i'),
                                             position: LatLng(
                                                 state.GetDataFormGoogle[i]
                                                     .geometry.location.lat,
                                                 state.GetDataFormGoogle[i]
                                                     .geometry.location.lng),
-                                            onTap: () {
+                                            onTap: () async {
                                               setState(() {
+                                                clickindex = i;
                                                 hiden_show = true;
                                               });
+
+                                              final GoogleMapController
+                                                  controller =
+                                                  await _controller.future;
+
+                                              controller.animateCamera(
+                                                  CameraUpdate
+                                                      .newCameraPosition(
+                                                          CameraPosition(
+                                                zoom: 15,
+                                                target: LatLng(
+                                                    state.GetDataFormGoogle[i]
+                                                        .geometry.location.lat,
+                                                    state.GetDataFormGoogle[i]
+                                                        .geometry.location.lng),
+                                              )));
+
+                                              final Marker marker = Marker(
+                                                  markerId:
+                                                      MarkerId(i.toString()),
+                                                  position: LatLng(
+                                                      state
+                                                          .GetDataFormGoogle[i]
+                                                          .geometry
+                                                          .location
+                                                          .lat,
+                                                      state
+                                                          .GetDataFormGoogle[i]
+                                                          .geometry
+                                                          .location
+                                                          .lng),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      hiden_show = true;
+                                                    });
+                                                  },
+                                                  icon: await MarkerIcon
+                                                      .pictureAssetWithCenterText(
+                                                          text: """$i""",
+                                                          fontSize: 30,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          assetPath:
+                                                              "assets/svg/set.png",
+                                                          size:
+                                                              Size(150, 150)));
+
+                                              setState(() {
+                                                _markers[i] = marker;
+                                              });
                                             },
-                                            icon:
-                                                BitmapDescriptor.defaultMarker);
+                                            icon: await MarkerIcon
+                                                .pictureAssetWithCenterText(
+                                                    text: """$i""",
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
+                                                    assetPath:
+                                                        "assets/svg/search_marker.png",
+                                                    size: Size(150, 150)));
 
                                         setState(() {
                                           _markers.add(marker);
                                         });
                                       }
+                                      setState(() {
+                                        markerIdCounter = 1;
+                                      });
                                     }
                                     if (state is MoveSearch) {
                                       for (var i = 0;
@@ -163,8 +222,7 @@ class _Map_viewState extends State<Map_view> {
                                         print(state.MoveSearchs[i].placeId
                                             .trim());
                                         final Marker marker = Marker(
-                                            markerId:
-                                                MarkerId('marker_$counter'),
+                                            markerId: MarkerId('$counter'),
                                             position: LatLng(
                                                 state.MoveSearchs[i].geometry
                                                     .location.lat,
@@ -180,8 +238,15 @@ class _Map_viewState extends State<Map_view> {
                                                     state.MoveSearchs[i].name,
                                                 snippet: state.MoveSearchs[i]
                                                     .formattedAddress),
-                                            icon:
-                                                BitmapDescriptor.defaultMarker);
+                                            icon: await MarkerIcon
+                                                .pictureAssetWithCenterText(
+                                                    text:
+                                                        """$markerIdCounter""",
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
+                                                    assetPath:
+                                                        "assets/svg/search_marker.png",
+                                                    size: Size(150, 150)));
 
                                         setState(() {
                                           _markers.add(marker);
@@ -217,10 +282,10 @@ class _Map_viewState extends State<Map_view> {
                                         markers: Set.of(_markers),
                                         onMapCreated:
                                             (GoogleMapController controller) {
-                                          _controller.complete(controller);
                                           controller.setMapStyle(isDarkMode
                                               ? mapstyledark
                                               : MapStyleLight);
+                                          _controller.complete(controller);
                                         },
                                       );
                                     }
@@ -248,10 +313,10 @@ class _Map_viewState extends State<Map_view> {
                                         markers: Set.of(_markers),
                                         onMapCreated:
                                             (GoogleMapController controller) {
-                                          _controller.complete(controller);
                                           controller.setMapStyle(isDarkMode
                                               ? mapstyledark
                                               : MapStyleLight);
+                                          _controller.complete(controller);
                                         },
                                       );
                                     } else {
@@ -271,10 +336,10 @@ class _Map_viewState extends State<Map_view> {
                                         markers: Set.of(_markers),
                                         onMapCreated:
                                             (GoogleMapController controller) {
-                                          _controller.complete(controller);
                                           controller.setMapStyle(isDarkMode
                                               ? mapstyledark
                                               : MapStyleLight);
+                                          _controller.complete(controller);
                                         },
                                       );
                                     }
@@ -476,10 +541,12 @@ class _Map_viewState extends State<Map_view> {
                                               : null,
                                           onFieldSubmitted: (value) {
                                             setState(() {
+                                              hiden_show = false;
                                               isloading = true;
                                               String searchkey = value;
                                               _markers = [];
                                               predictions = [];
+                                              markerIdCounter = 0;
                                               BlocProvider.of<
                                                           BusinessInfoGetCubit>(
                                                       context)
@@ -605,6 +672,7 @@ class _Map_viewState extends State<Map_view> {
                                             prefixIcon: IconButton(
                                                 onPressed: () {
                                                   setState(() {
+                                                    hiden_show = false;
                                                     isloading = true;
                                                     String searchkey =
                                                         search.text;
@@ -708,6 +776,10 @@ class _Map_viewState extends State<Map_view> {
                                                   padding: EdgeInsets.symmetric(
                                                       horizontal: 6.w),
                                                   child: PageView.builder(
+                                                    controller: PageController(
+                                                        initialPage: clickindex,
+                                                        keepPage: true,
+                                                        viewportFraction: 1),
                                                     itemCount: state
                                                         .GetDataFormGoogle
                                                         .length,
@@ -715,7 +787,10 @@ class _Map_viewState extends State<Map_view> {
                                                         Axis.horizontal,
                                                     onPageChanged:
                                                         (index) async {
+                                                      int mainindex = index;
+
                                                       // New Marker
+
                                                       final GoogleMapController
                                                           controller =
                                                           await _controller
@@ -729,34 +804,33 @@ class _Map_viewState extends State<Map_view> {
                                                         target: LatLng(
                                                             state
                                                                 .GetDataFormGoogle[
-                                                                    index]
+                                                                    mainindex]
                                                                 .geometry
                                                                 .location
                                                                 .lat,
                                                             state
                                                                 .GetDataFormGoogle[
-                                                                    index]
+                                                                    mainindex]
                                                                 .geometry
                                                                 .location
                                                                 .lng),
                                                       )));
-                                                      var counter =
-                                                          markerIdCounter++;
 
                                                       final Marker marker =
                                                           Marker(
-                                                              markerId: MarkerId(
-                                                                  'marker_$counter'),
+                                                              markerId:
+                                                                  MarkerId(index
+                                                                      .toString()),
                                                               position: LatLng(
                                                                   state
                                                                       .GetDataFormGoogle[
-                                                                          index]
+                                                                          mainindex]
                                                                       .geometry
                                                                       .location
                                                                       .lat,
                                                                   state
                                                                       .GetDataFormGoogle[
-                                                                          index]
+                                                                          mainindex]
                                                                       .geometry
                                                                       .location
                                                                       .lng),
@@ -766,39 +840,57 @@ class _Map_viewState extends State<Map_view> {
                                                                       true;
                                                                 });
                                                               },
-                                                              icon:
-                                                                  await MarkerIcon
-                                                                      .svgAsset(
-                                                                assetName:
-                                                                    "assets/svg/place.svg",
-                                                                context:
-                                                                    context,
-                                                                size: 30.sp,
-                                                              ));
+                                                              icon: await MarkerIcon.pictureAssetWithCenterText(
+                                                                  text:
+                                                                      """$mainindex""",
+                                                                  fontSize: 30,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  assetPath:
+                                                                      "assets/svg/set.png",
+                                                                  size: Size(
+                                                                      150,
+                                                                      150)));
 
                                                       // New Marker End
                                                       if (oldindex != index) {
-                                                        final Marker marker = Marker(
-                                                            markerId: MarkerId(state
-                                                                .GetDataFormGoogle[
-                                                                    oldindex]
-                                                                .placeId
-                                                                .toString()),
-                                                            position: LatLng(
-                                                                state
-                                                                    .GetDataFormGoogle[
-                                                                        oldindex]
-                                                                    .geometry
-                                                                    .location
-                                                                    .lat,
-                                                                state
-                                                                    .GetDataFormGoogle[
-                                                                        oldindex]
-                                                                    .geometry
-                                                                    .location
-                                                                    .lng),
-                                                            icon: BitmapDescriptor
-                                                                .defaultMarker);
+                                                        final Marker marker =
+                                                            Marker(
+                                                                markerId: MarkerId(
+                                                                    'marker_$oldindex'),
+                                                                position: LatLng(
+                                                                    state
+                                                                        .GetDataFormGoogle[
+                                                                            oldindex]
+                                                                        .geometry
+                                                                        .location
+                                                                        .lat,
+                                                                    state
+                                                                        .GetDataFormGoogle[
+                                                                            oldindex]
+                                                                        .geometry
+                                                                        .location
+                                                                        .lng),
+                                                                onTap: () {
+                                                                  setState(() {
+                                                                    hiden_show =
+                                                                        true;
+                                                                  });
+                                                                },
+                                                                icon: await MarkerIcon.pictureAssetWithCenterText(
+                                                                    text:
+                                                                        """$oldindex""",
+                                                                    fontSize:
+                                                                        30,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    assetPath:
+                                                                        "assets/svg/search_marker.png",
+                                                                    size: Size(
+                                                                        150,
+                                                                        150)));
 
                                                         setState(() {
                                                           _markers[oldindex] =
@@ -806,9 +898,9 @@ class _Map_viewState extends State<Map_view> {
                                                         });
                                                       }
                                                       setState(() {
+                                                        oldindex = mainindex;
                                                         _markers[index] =
                                                             marker;
-                                                        oldindex = index;
                                                       });
                                                     },
                                                     itemBuilder:
@@ -1442,7 +1534,12 @@ class _Map_viewState extends State<Map_view> {
           });
         },
         infoWindow: InfoWindow(snippet: risult.results[0].formattedAddress),
-        icon: BitmapDescriptor.defaultMarker);
+        icon: await MarkerIcon.pictureAssetWithCenterText(
+            text: """$markerIdCounter""",
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            assetPath: "assets/svg/search_marker.png",
+            size: Size(150, 150)));
 
     setState(() {
       _markers.add(marker);
