@@ -84,7 +84,7 @@ dependencies:
   google_geocoding: ^0.2.0
   google_place: ^0.4.7
   internet_connection_checker: ^0.0.1+4
-  image_network: ^2.5.1
+  widget_marker_google_map: ^0.0.2
 
 
  
@@ -114,3 +114,4 @@ flutter:
     - assets/image/
     - assets/svg/
     - assets/audio/
+    - assets/markerIcon/
