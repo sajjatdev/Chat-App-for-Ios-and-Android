@@ -84,7 +84,8 @@ dependencies:
   google_geocoding: ^0.2.0
   google_place: ^0.4.7
   internet_connection_checker: ^0.0.1+4
- 
+  image_network: ^2.5.1
+
 
  
  

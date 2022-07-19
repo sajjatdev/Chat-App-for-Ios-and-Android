@@ -1,27 +1,25 @@
-import 'dart:async';
-import 'package:chatting/view/Screen/business/businessintro.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:custom_marker/marker_icon.dart';
-import 'package:google_place/google_place.dart' as PlaceAPI;
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/BusinessInfoGet/business_info_get_cubit.dart';
 import 'package:chatting/logic/Google_Search/cubit/map_search_cubit.dart';
 import 'package:chatting/main.dart';
+import 'package:chatting/view/Screen/business/businessintro.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:galleryimage/galleryimage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:getwidget/components/rating/gf_rating.dart';
-import 'package:google_geocoding/google_geocoding.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_geocoding/google_geocoding.dart' as geocode;
+import 'package:google_place/google_place.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:latlong2/latlong.dart' as latlng;
 import 'package:loading_overlay/loading_overlay.dart';
-import 'package:lottie/lottie.dart' as lottie;
+import 'package:lottie/lottie.dart' as lottic;
 import 'package:permission_handler/permission_handler.dart';
-
 import 'package:sizer/sizer.dart';
 
 class Map_view extends StatefulWidget {
@@ -33,10 +31,12 @@ class Map_view extends StatefulWidget {
 
 class _Map_viewState extends State<Map_view> {
   TextEditingController search = TextEditingController();
-  Completer<GoogleMapController> _controller = Completer();
 
+  MapController mapController;
+  String AccessToken =
+      "pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g";
   List<Marker> _markers = [];
-  List<PlaceAPI.SearchResult> MarkerDataList;
+  List<SearchResult> MarkerDataList;
   bool hiden_show = false;
   bool isloading = false;
   int list_item;
@@ -46,7 +46,7 @@ class _Map_viewState extends State<Map_view> {
   Position position = Position();
   int markerIdCounter = 1;
   List<String> Image = [];
-  List<PlaceAPI.AutocompletePrediction> predictions = [];
+  List<AutocompletePrediction> predictions = [];
   bool connectionChecker = false;
   bool areaSearch = false;
   int oldindex = 0;
@@ -57,7 +57,7 @@ class _Map_viewState extends State<Map_view> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    mapController = MapController();
     getmyuid();
     Permission.location.request().isGranted;
   }
@@ -66,6 +66,10 @@ class _Map_viewState extends State<Map_view> {
     setState(() {
       myID = sharedPreferences.getString('uid');
     });
+  }
+
+  void _onMapCreated(MapController controller) {
+    mapController = controller;
   }
 
   // Future<void> gotoSearchedPlace() async {
@@ -116,142 +120,78 @@ class _Map_viewState extends State<Map_view> {
                                         MarkerDataList =
                                             state.GetDataFormGoogle;
                                       });
+                                      mapController.move(
+                                          latlng.LatLng(
+                                              state.GetDataFormGoogle[0]
+                                                  .geometry.location.lat,
+                                              state.GetDataFormGoogle[0]
+                                                  .geometry.location.lng),
+                                          10);
                                       for (var i = 1;
                                           i < state.GetDataFormGoogle.length;
                                           i++) {
                                         print(i);
-                                        final GoogleMapController controller =
-                                            await _controller.future;
-
-                                        controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                          zoom: 9,
-                                          target: LatLng(
-                                              state.GetDataFormGoogle[1]
-                                                  .geometry.location.lat,
-                                              state.GetDataFormGoogle[1]
-                                                  .geometry.location.lng),
-                                        )));
-
-                                        final Marker marker = Marker(
-                                            markerId: MarkerId('$i'),
-                                            position: LatLng(
+                                        final marker = Marker(
+                                            height: 10.w,
+                                            width: 10.w,
+                                            point: latlng.LatLng(
                                                 state.GetDataFormGoogle[i]
                                                     .geometry.location.lat,
                                                 state.GetDataFormGoogle[i]
                                                     .geometry.location.lng),
-                                            onTap: () async {
-                                              setState(() {
-                                                clickindex = i;
-                                                hiden_show = true;
-                                              });
-
-                                              final GoogleMapController
-                                                  controller =
-                                                  await _controller.future;
-
-                                              controller.animateCamera(
-                                                  CameraUpdate
-                                                      .newCameraPosition(
-                                                          CameraPosition(
-                                                zoom: 15,
-                                                target: LatLng(
-                                                    state.GetDataFormGoogle[i]
-                                                        .geometry.location.lat,
-                                                    state.GetDataFormGoogle[i]
-                                                        .geometry.location.lng),
-                                              )));
-
-                                              final Marker marker = Marker(
-                                                  markerId:
-                                                      MarkerId(i.toString()),
-                                                  position: LatLng(
-                                                      state
-                                                          .GetDataFormGoogle[i]
-                                                          .geometry
-                                                          .location
-                                                          .lat,
-                                                      state
-                                                          .GetDataFormGoogle[i]
-                                                          .geometry
-                                                          .location
-                                                          .lng),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      hiden_show = true;
-                                                    });
-                                                  },
-                                                  icon: await MarkerIcon
-                                                      .pictureAssetWithCenterText(
-                                                          text: """$i""",
-                                                          fontSize: 30,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          assetPath:
-                                                              "assets/svg/set.png",
-                                                          size:
-                                                              Size(150, 150)));
-
-                                              setState(() {
-                                                _markers[i] = marker;
-                                              });
-                                            },
-                                            icon: await MarkerIcon
-                                                .pictureAssetWithCenterText(
-                                                    text: """$i""",
-                                                    fontSize: 30,
-                                                    fontWeight: FontWeight.bold,
-                                                    assetPath:
-                                                        "assets/svg/search_marker.png",
-                                                    size: Size(150, 150)));
+                                            builder: (_) {
+                                              return GestureDetector(
+                                                onTap: () {},
+                                                child: Container(
+                                                  key: Key(state
+                                                      .GetDataFormGoogle[i]
+                                                      .placeId),
+                                                  child: Stack(
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                          "assets/svg/uns.svg"),
+                                                      Positioned(
+                                                          top: 0,
+                                                          left: 0,
+                                                          bottom: 0,
+                                                          right: 0,
+                                                          child: Container(
+                                                            height: 7.w,
+                                                            width: 7.w,
+                                                            color: Colors
+                                                                .transparent,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            child: Text(
+                                                              i.toString(),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      14.sp,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                          ))
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            });
 
                                         setState(() {
                                           _markers.add(marker);
                                         });
                                       }
-                                      setState(() {
-                                        markerIdCounter = 1;
-                                      });
                                     }
                                     if (state is MoveSearch) {
                                       for (var i = 0;
                                           i < state.MoveSearchs.length;
-                                          i++) {
-                                        var counter = markerIdCounter++;
-                                        print(state.MoveSearchs[i].placeId
-                                            .trim());
-                                        final Marker marker = Marker(
-                                            markerId: MarkerId('$counter'),
-                                            position: LatLng(
-                                                state.MoveSearchs[i].geometry
-                                                    .location.lat,
-                                                state.MoveSearchs[i].geometry
-                                                    .location.lng),
-                                            onTap: () {
-                                              setState(() {
-                                                hiden_show = true;
-                                              });
-                                            },
-                                            infoWindow: InfoWindow(
-                                                title:
-                                                    state.MoveSearchs[i].name,
-                                                snippet: state.MoveSearchs[i]
-                                                    .formattedAddress),
-                                            icon: await MarkerIcon
-                                                .pictureAssetWithCenterText(
-                                                    text:
-                                                        """$markerIdCounter""",
-                                                    fontSize: 30,
-                                                    fontWeight: FontWeight.bold,
-                                                    assetPath:
-                                                        "assets/svg/search_marker.png",
-                                                    size: Size(150, 150)));
-
-                                        setState(() {
-                                          _markers.add(marker);
-                                        });
-                                      }
+                                          i++) {}
                                     }
                                     if (state is error) {
                                       setState(() {
@@ -261,87 +201,104 @@ class _Map_viewState extends State<Map_view> {
                                   }),
                                   builder: (context, state) {
                                     if (state is MoveSearch) {
-                                      return GoogleMap(
-                                        onCameraMove: ((position) {
-                                          setState(() {
-                                            areaSearch = true;
-                                            lat = position.target.latitude;
-                                            lng = position.target.longitude;
-                                          });
-                                        }),
-                                        initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
-                                          zoom: 14,
-                                        ),
-                                        // onTap: MaponTap,
-                                        mapType: MapType.normal,
-                                        zoomControlsEnabled: false,
-                                        myLocationEnabled: true,
-                                        myLocationButtonEnabled: false,
-                                        markers: Set.of(_markers),
-                                        onMapCreated:
-                                            (GoogleMapController controller) {
-                                          controller.setMapStyle(isDarkMode
-                                              ? mapstyledark
-                                              : MapStyleLight);
-                                          _controller.complete(controller);
-                                        },
-                                      );
+                                      return FlutterMap(
+                                          mapController: mapController,
+                                          options: MapOptions(
+                                              enableMultiFingerGestureRace:
+                                                  true,
+                                              maxZoom: 20,
+                                              zoom: 15,
+                                              center: latlng.LatLng(
+                                                  double.parse(
+                                                      "${snapshot.data.latitude}"),
+                                                  double.parse(
+                                                      "${snapshot.data.longitude}"))),
+                                          nonRotatedLayers: [
+                                            TileLayerOptions(
+                                                urlTemplate:
+                                                    "https://api.mapbox.com/styles/v1/ymohamma/{id}/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g",
+                                                additionalOptions: {
+                                                  'accessToken':
+                                                      "pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g",
+                                                  'id': isDarkMode
+                                                      ? "cl5rxs3tm000716o62ghzo53f"
+                                                      : "cl5rzovmv00gn14o10pke1m7a"
+                                                }),
+                                            MarkerLayerOptions(
+                                                markers: _markers),
+                                            MarkerLayerOptions(markers: [
+                                              // Marker(
+                                              //     height: 20,
+                                              //     width: 20,
+                                              //     point: LatLng(double.parse(location.latitude),
+                                              //         double.parse(location.longitude)),
+                                              //     builder: (_) {
+                                              //       return Container(
+                                              //         decoration: BoxDecoration(
+                                              //           // color: Colors.green,
+                                              //           borderRadius: BorderRadius.circular(20),
+                                              //         ),
+                                              //       );
+                                              //     })
+                                            ]),
+                                          ]);
                                     }
                                     if (state is GetDataformGoogle) {
-                                      // print(position);
-
-                                      return GoogleMap(
-                                        onCameraMove: (position) {
-                                          setState(() {
-                                            areaSearch = true;
-                                            lat = position.target.latitude;
-                                            lng = position.target.longitude;
-                                          });
-                                        },
-                                        initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
-                                          zoom: 14,
-                                        ),
-                                        //onTap: MaponTap,
-                                        mapType: MapType.normal,
-                                        zoomControlsEnabled: false,
-                                        myLocationEnabled: true,
-                                        myLocationButtonEnabled: false,
-                                        markers: Set.of(_markers),
-                                        onMapCreated:
-                                            (GoogleMapController controller) {
-                                          controller.setMapStyle(isDarkMode
-                                              ? mapstyledark
-                                              : MapStyleLight);
-                                          _controller.complete(controller);
-                                        },
-                                      );
+                                      return FlutterMap(
+                                          mapController: mapController,
+                                          options: MapOptions(
+                                              enableMultiFingerGestureRace:
+                                                  true,
+                                              onPositionChanged:
+                                                  ((position, hasGesture) {
+                                                print(position.center.latitude);
+                                              }),
+                                              maxZoom: 20,
+                                              zoom: 15,
+                                              center: latlng.LatLng(
+                                                  double.parse(
+                                                      "${snapshot.data.latitude}"),
+                                                  double.parse(
+                                                      "${snapshot.data.longitude}"))),
+                                          nonRotatedLayers: [
+                                            TileLayerOptions(
+                                                urlTemplate:
+                                                    "https://api.mapbox.com/styles/v1/ymohamma/{id}/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g",
+                                                additionalOptions: {
+                                                  'accessToken':
+                                                      "pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g",
+                                                  'id': isDarkMode
+                                                      ? "cl5rxs3tm000716o62ghzo53f"
+                                                      : "cl5rzovmv00gn14o10pke1m7a"
+                                                }),
+                                            MarkerLayerOptions(
+                                                markers: _markers),
+                                          ]);
                                     } else {
-                                      return GoogleMap(
-                                        initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
-                                          zoom: 14,
-                                        ),
-                                        //onTap: MaponTap,
-                                        onCameraMove: (position) =>
-                                            print(position),
-                                        mapType: MapType.normal,
-                                        zoomControlsEnabled: false,
-                                        myLocationEnabled: true,
-                                        myLocationButtonEnabled: false,
-                                        markers: Set.of(_markers),
-                                        onMapCreated:
-                                            (GoogleMapController controller) {
-                                          controller.setMapStyle(isDarkMode
-                                              ? mapstyledark
-                                              : MapStyleLight);
-                                          _controller.complete(controller);
-                                        },
-                                      );
+                                      return FlutterMap(
+                                          mapController: mapController,
+                                          options: MapOptions(
+                                              maxZoom: 20,
+                                              zoom: 15,
+                                              center: latlng.LatLng(
+                                                  double.parse(
+                                                      "${snapshot.data.latitude}"),
+                                                  double.parse(
+                                                      "${snapshot.data.longitude}"))),
+                                          nonRotatedLayers: [
+                                            TileLayerOptions(
+                                                urlTemplate:
+                                                    "https://api.mapbox.com/styles/v1/ymohamma/{id}/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g",
+                                                additionalOptions: {
+                                                  'accessToken':
+                                                      "pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1cGp0MzB2MW5xbDNibWcxdHU0bDlheSJ9.rHiBh8YgCZ55X53N6rGR5g",
+                                                  'id': isDarkMode
+                                                      ? "cl5rxs3tm000716o62ghzo53f"
+                                                      : "cl5rzovmv00gn14o10pke1m7a"
+                                                }),
+                                            MarkerLayerOptions(
+                                                markers: _markers),
+                                          ]);
                                     }
                                   },
                                 ),
@@ -419,6 +376,7 @@ class _Map_viewState extends State<Map_view> {
                                 ///
                                 ///Auto Complate Listview
                                 ///
+
                                 if (predictions.isNotEmpty) ...[
                                   Positioned(
                                     top: 30.w,
@@ -430,9 +388,11 @@ class _Map_viewState extends State<Map_view> {
                                       child: Container(
                                         height: 40.h,
                                         decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .secondaryHeaderColor
-                                                .withOpacity(0.6),
+                                            color: isDarkMode
+                                                ? HexColor.fromHex("#696969")
+                                                    .withOpacity(.6)
+                                                : HexColor.fromHex("#EEEEEF")
+                                                    .withOpacity(.6),
                                             borderRadius:
                                                 BorderRadius.circular(10.sp)),
                                         child: ListView.builder(
@@ -787,121 +747,7 @@ class _Map_viewState extends State<Map_view> {
                                                         Axis.horizontal,
                                                     onPageChanged:
                                                         (index) async {
-                                                      int mainindex = index;
-
                                                       // New Marker
-
-                                                      final GoogleMapController
-                                                          controller =
-                                                          await _controller
-                                                              .future;
-
-                                                      controller.animateCamera(
-                                                          CameraUpdate
-                                                              .newCameraPosition(
-                                                                  CameraPosition(
-                                                        zoom: 15,
-                                                        target: LatLng(
-                                                            state
-                                                                .GetDataFormGoogle[
-                                                                    mainindex]
-                                                                .geometry
-                                                                .location
-                                                                .lat,
-                                                            state
-                                                                .GetDataFormGoogle[
-                                                                    mainindex]
-                                                                .geometry
-                                                                .location
-                                                                .lng),
-                                                      )));
-
-                                                      final Marker marker =
-                                                          Marker(
-                                                              markerId:
-                                                                  MarkerId(index
-                                                                      .toString()),
-                                                              position: LatLng(
-                                                                  state
-                                                                      .GetDataFormGoogle[
-                                                                          mainindex]
-                                                                      .geometry
-                                                                      .location
-                                                                      .lat,
-                                                                  state
-                                                                      .GetDataFormGoogle[
-                                                                          mainindex]
-                                                                      .geometry
-                                                                      .location
-                                                                      .lng),
-                                                              onTap: () {
-                                                                setState(() {
-                                                                  hiden_show =
-                                                                      true;
-                                                                });
-                                                              },
-                                                              icon: await MarkerIcon.pictureAssetWithCenterText(
-                                                                  text:
-                                                                      """$mainindex""",
-                                                                  fontSize: 30,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  assetPath:
-                                                                      "assets/svg/set.png",
-                                                                  size: Size(
-                                                                      150,
-                                                                      150)));
-
-                                                      // New Marker End
-                                                      if (oldindex != index) {
-                                                        final Marker marker =
-                                                            Marker(
-                                                                markerId: MarkerId(
-                                                                    'marker_$oldindex'),
-                                                                position: LatLng(
-                                                                    state
-                                                                        .GetDataFormGoogle[
-                                                                            oldindex]
-                                                                        .geometry
-                                                                        .location
-                                                                        .lat,
-                                                                    state
-                                                                        .GetDataFormGoogle[
-                                                                            oldindex]
-                                                                        .geometry
-                                                                        .location
-                                                                        .lng),
-                                                                onTap: () {
-                                                                  setState(() {
-                                                                    hiden_show =
-                                                                        true;
-                                                                  });
-                                                                },
-                                                                icon: await MarkerIcon.pictureAssetWithCenterText(
-                                                                    text:
-                                                                        """$oldindex""",
-                                                                    fontSize:
-                                                                        30,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    assetPath:
-                                                                        "assets/svg/search_marker.png",
-                                                                    size: Size(
-                                                                        150,
-                                                                        150)));
-
-                                                        setState(() {
-                                                          _markers[oldindex] =
-                                                              marker;
-                                                        });
-                                                      }
-                                                      setState(() {
-                                                        oldindex = mainindex;
-                                                        _markers[index] =
-                                                            marker;
-                                                      });
                                                     },
                                                     itemBuilder:
                                                         (context, index) {
@@ -1159,14 +1005,14 @@ class _Map_viewState extends State<Map_view> {
                             );
                           } else {
                             return Center(
-                              child: lottie.Lottie.asset(
+                              child: lottic.Lottie.asset(
                                   "assets/image/mapani.json"),
                             );
                           }
                         }));
               } else {
                 return Center(
-                  child: lottie.Lottie.asset(
+                  child: lottic.Lottie.asset(
                     "assets/image/nointernet.json",
                     width: 70.w,
                   ),
@@ -1174,7 +1020,7 @@ class _Map_viewState extends State<Map_view> {
               }
             } else {
               return Center(
-                child: lottie.Lottie.asset("assets/image/mapani.json",
+                child: lottic.Lottie.asset("assets/image/mapani.json",
                     width: 40.w),
               );
             }
@@ -1182,385 +1028,21 @@ class _Map_viewState extends State<Map_view> {
     );
   }
 
-  String MapStyleLight = """
-
-
-
-[
-    {
-        "featureType": "water",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#e9e9e9"
-            },
-            {
-                "lightness": 17
-            }
-        ]
-    },
-    {
-        "featureType": "landscape",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#f5f5f5"
-            },
-            {
-                "lightness": 20
-            }
-        ]
-    },
-    {
-        "featureType": "road.highway",
-        "elementType": "geometry.fill",
-        "stylers": [
-            {
-                "color": "#ffffff"
-            },
-            {
-                "lightness": 17
-            }
-        ]
-    },
-    {
-        "featureType": "road.highway",
-        "elementType": "geometry.stroke",
-        "stylers": [
-            {
-                "color": "#ffffff"
-            },
-            {
-                "lightness": 29
-            },
-            {
-                "weight": 0.2
-            }
-        ]
-    },
-    {
-        "featureType": "road.arterial",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#ffffff"
-            },
-            {
-                "lightness": 18
-            }
-        ]
-    },
-    {
-        "featureType": "road.local",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#ffffff"
-            },
-            {
-                "lightness": 16
-            }
-        ]
-    },
-    {
-        "featureType": "poi",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#f5f5f5"
-            },
-            {
-                "lightness": 21
-            }
-        ]
-    },
-    {
-        "featureType": "poi.park",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#dedede"
-            },
-            {
-                "lightness": 21
-            }
-        ]
-    },
-    {
-        "elementType": "labels.text.stroke",
-        "stylers": [
-            {
-                "visibility": "on"
-            },
-            {
-                "color": "#ffffff"
-            },
-            {
-                "lightness": 16
-            }
-        ]
-    },
-    {
-        "elementType": "labels.text.fill",
-        "stylers": [
-            {
-                "saturation": 36
-            },
-            {
-                "color": "#333333"
-            },
-            {
-                "lightness": 40
-            }
-        ]
-    },
-    {
-        "elementType": "labels.icon",
-        "stylers": [
-            {
-                "visibility": "off"
-            }
-        ]
-    },
-    {
-        "featureType": "transit",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#f2f2f2"
-            },
-            {
-                "lightness": 19
-            }
-        ]
-    },
-    {
-        "featureType": "administrative",
-        "elementType": "geometry.fill",
-        "stylers": [
-            {
-                "color": "#fefefe"
-            },
-            {
-                "lightness": 20
-            }
-        ]
-    },
-    {
-        "featureType": "administrative",
-        "elementType": "geometry.stroke",
-        "stylers": [
-            {
-                "color": "#fefefe"
-            },
-            {
-                "lightness": 17
-            },
-            {
-                "weight": 1.2
-            }
-        ]
-    }
-]
-""";
-
-  String mapstyledark = """
-[
-    {
-        "featureType": "all",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "color": "#202c3e"
-            }
-        ]
-    },
-    {
-        "featureType": "all",
-        "elementType": "labels.text.fill",
-        "stylers": [
-            {
-                "gamma": 0.01
-            },
-            {
-                "lightness": 20
-            },
-            {
-                "weight": "1.39"
-            },
-            {
-                "color": "#ffffff"
-            }
-        ]
-    },
-    {
-        "featureType": "all",
-        "elementType": "labels.text.stroke",
-        "stylers": [
-            {
-                "weight": "0.96"
-            },
-            {
-                "saturation": "9"
-            },
-            {
-                "visibility": "on"
-            },
-            {
-                "color": "#000000"
-            }
-        ]
-    },
-    {
-        "featureType": "all",
-        "elementType": "labels.icon",
-        "stylers": [
-            {
-                "visibility": "off"
-            }
-        ]
-    },
-    {
-        "featureType": "landscape",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "lightness": 30
-            },
-            {
-                "saturation": "9"
-            },
-            {
-                "color": "#29446b"
-            }
-        ]
-    },
-    {
-        "featureType": "poi",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "saturation": 20
-            }
-        ]
-    },
-    {
-        "featureType": "poi.park",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "lightness": 20
-            },
-            {
-                "saturation": -20
-            }
-        ]
-    },
-    {
-        "featureType": "road",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "lightness": 10
-            },
-            {
-                "saturation": -30
-            }
-        ]
-    },
-    {
-        "featureType": "road",
-        "elementType": "geometry.fill",
-        "stylers": [
-            {
-                "color": "#193a55"
-            }
-        ]
-    },
-    {
-        "featureType": "road",
-        "elementType": "geometry.stroke",
-        "stylers": [
-            {
-                "saturation": 25
-            },
-            {
-                "lightness": 25
-            },
-            {
-                "weight": "0.01"
-            }
-        ]
-    },
-    {
-        "featureType": "water",
-        "elementType": "all",
-        "stylers": [
-            {
-                "lightness": -20
-            }
-        ]
-    }
-]
-  
-  """;
-
   void MaponTap(value) async {
     _markers = [];
     //Get Place Id Form Google
     var googleGeocoding =
-        GoogleGeocoding("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
+        geocode.GoogleGeocoding("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
     var risult = await googleGeocoding.geocoding
-        .getReverse(LatLon(value.latitude, value.longitude));
+        .getReverse(geocode.LatLon(value.latitude, value.longitude));
 
-    print(risult.results[1].placeId);
-    final GoogleMapController controller = await _controller.future;
-
-    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-      zoom: 14,
-      target: LatLng(risult.results[1].geometry.location.lat,
-          risult.results[1].geometry.location.lng),
-    )));
     // Add Marker in Maps
-    var counter = markerIdCounter++;
-    final Marker marker = Marker(
-        markerId: MarkerId('marker_$counter'),
-        position: LatLng(risult.results[1].geometry.location.lat,
-            risult.results[1].geometry.location.lng),
-        onTap: () {
-          // Marker Clickable
-          setState(() {
-            hiden_show = true;
-          });
-        },
-        infoWindow: InfoWindow(snippet: risult.results[0].formattedAddress),
-        icon: await MarkerIcon.pictureAssetWithCenterText(
-            text: """$markerIdCounter""",
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            assetPath: "assets/svg/search_marker.png",
-            size: Size(150, 150)));
-
-    setState(() {
-      _markers.add(marker);
-    });
-
-    // setState(() {
-    //   hiden_show = true;
-    //   context
-    //       .read<BusinessInfoGetCubit>()
-    //       .GetDataFormGoogleGet(
-    //           id: risult.results[1].placeId.trim(),
-    //           name: risult
-    //               .results[1].formattedAddress
-    //               .replaceAll(" ", ''));
-    // });
   }
 
   void autoCompleteSearch(String value) async {
     try {
       final googlePlace =
-          PlaceAPI.GooglePlace("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
+          GooglePlace("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
 
       var result = await googlePlace.queryAutocomplete.get(value);
 

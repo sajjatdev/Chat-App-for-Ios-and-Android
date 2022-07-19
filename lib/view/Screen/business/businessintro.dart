@@ -19,6 +19,7 @@ class BusinessIntro extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+           
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.w),
                 child: Container(
