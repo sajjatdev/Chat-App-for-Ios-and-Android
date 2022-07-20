@@ -26,6 +26,28 @@ class MapServices {
     }
   }
 
+  Future<List<SearchResult>> Filter({String address, int radius}) async {
+    try {
+      var googlePlace = GooglePlace(key);
+      var result = await googlePlace.search.getTextSearch(
+        address,
+        radius: radius,
+      );
+
+      if (result.results != null) {
+        return result.results;
+      } else {
+        result = await googlePlace.search.getTextSearch(
+          address,
+          radius: radius,
+        );
+        return result.results;
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   Future<List<SearchResult>> googleMapMoveSearch(
       {String address, double lat, double lng}) async {
     try {

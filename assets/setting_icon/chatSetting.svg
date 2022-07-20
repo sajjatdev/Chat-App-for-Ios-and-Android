@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>text</title>
+    <defs>
+        <linearGradient x1="0%" y1="50%" x2="100%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#16B0E2" offset="0%"></stop>
+            <stop stop-color="#6E5AF0" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="7.72329061e-15%" y1="50%" x2="100%" y2="50%" id="linearGradient-2">
+            <stop stop-color="#16B0E2" offset="0%"></stop>
+            <stop stop-color="#6E5AF0" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="2.08983158e-14%" y1="50%" x2="100%" y2="50%" id="linearGradient-3">
+            <stop stop-color="#16B0E2" offset="0%"></stop>
+            <stop stop-color="#6E5AF0" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Your-Own-Profile" transform="translate(-32.000000, -281.000000)" fill-rule="nonzero">
+            <g id="text" transform="translate(32.000000, 281.000000)">
+                <path d="M25,7.5 L25,17.5 C25,22.5 22.5,25 17.5,25 L1.25,25 C0.559644063,25 0,24.4403559 0,23.75 L0,7.5 C0,2.5 2.5,0 7.5,0 L17.5,0 C22.5,0 25,2.5 25,7.5 Z" id="Path" fill="url(#linearGradient-1)" opacity="0.4"></path>
+                <path d="M19.6875,9.375 C19.6875,9.89270978 19.2677098,10.312362 18.75,10.3125 L6.25,10.3125 C5.73223305,10.3125 5.3125,9.89276695 5.3125,9.375 C5.3125,8.85723305 5.73223305,8.4375 6.25,8.4375 L18.75,8.4375 C19.2677098,8.437638 19.6875,8.85729022 19.6875,9.375 L19.6875,9.375 Z" id="Path" fill="url(#linearGradient-2)"></path>
+                <path d="M15.9375,15.625 C15.937362,16.1427098 15.5177098,16.562362 15,16.5625 L6.25,16.5625 C5.73223305,16.5625 5.3125,16.142767 5.3125,15.625 C5.3125,15.107233 5.73223305,14.6875 6.25,14.6875 L15,14.6875 C15.5177098,14.687638 15.937362,15.1072902 15.9375,15.625 L15.9375,15.625 Z" id="Path" fill="url(#linearGradient-3)"></path>
+            </g>
+        </g>
+    </g>
+</svg>

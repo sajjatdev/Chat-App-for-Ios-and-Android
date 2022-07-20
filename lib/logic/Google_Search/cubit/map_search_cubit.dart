@@ -28,6 +28,23 @@ class MapSearchCubit extends Cubit<MapSearchState> {
     }
   }
 
+  Future<void> FilterMap(
+      {String address, double lat, double lng, int radius}) async {
+    try {
+      List<SearchResult> Mapdata =
+          await mapsearch.Filter(address: address, radius: radius);
+
+      if (Mapdata != null) {
+        debugPrint(Mapdata.toString());
+        emit(GetDataformGoogle(GetDataFormGoogle: Mapdata));
+      } else {
+        emit(error());
+      }
+    } catch (e) {
+      emit(error());
+    }
+  }
+
   Future<void> MapMoveSearchdata(
       {String Address, double lat, double lng}) async {
     try {
