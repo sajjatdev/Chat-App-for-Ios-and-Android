@@ -5,3 +5,12 @@ enum Filtermap{
     Country,
     NoLimit
 }
+
+enum PhoneupdateStatus{
+  PhoneInvalid,
+  OTPVerifySuccess,
+  OTPInvalid,
+  OTPIEx,
+  error,
+  SendOTP,
+}

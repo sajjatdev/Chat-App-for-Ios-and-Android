@@ -10,6 +10,7 @@ import 'package:chatting/Services/location/get_location.dart';
 import 'package:chatting/Services/message.dart';
 import 'package:chatting/logic/AuthStatus/authstatus_bloc.dart';
 import 'package:chatting/logic/Get_message_list/get_message_list_cubit.dart';
+import 'package:chatting/logic/Phone_Update/phoneupdate_cubit.dart';
 import 'package:chatting/logic/Phone_number_auth/phoneauth_bloc.dart';
 import 'package:chatting/logic/business_create/business_create_cubit.dart';
 import 'package:chatting/logic/business_hours/business_hours_cubit.dart';
@@ -108,6 +109,7 @@ class _ChattingState extends State<Chatting> {
           BlocProvider(
               create: (context) => BusinessInfoGetCubit(MapServices())),
           BlocProvider(create: (context) => YelpapiCubit(Repositorys.get())),
+            BlocProvider(create: (context) => PhoneupdateCubit(AuthProvider(FirebaseAuth.instance))),
           BlocProvider(
               create: (context) => ContactCubit(FirebaseContact())
                 ..Getallcontactlist(

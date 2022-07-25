@@ -62,7 +62,17 @@ class _setting_viewState extends State<setting_view> {
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               actions: [
                 TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => Profile_edit(
+                                image: getstate.profile_data.imageUrl,
+                                name: getstate.profile_data.fullName,
+                                lastname: getstate.profile_data.lastname,
+                                myuid: uid,
+                                phonenumber: getstate.profile_data.phone,
+                                Username: getstate.profile_data.username,
+                              )));
+                    },
                     child: Text(
                       "Edit",
                       style: TextStyle(color: Colors.blue, fontSize: 15.sp),
@@ -70,101 +80,94 @@ class _setting_viewState extends State<setting_view> {
               ]),
           body: SafeArea(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.w),
-                  child: Row(
-                    children: [
-                      if (getstate.profile_data.imageUrl
-                          .contains("https://")) ...[
-                        CircleAvatar(
-                          radius: 30.sp,
-                          backgroundImage:
-                              NetworkImage(getstate.profile_data.imageUrl),
-                        )
-                      ] else ...[
-                        ProfilePicture(
-                            name: getstate.profile_data.imageUrl.trim(),
-                            radius: 30.sp,
-                            fontsize: 25.sp)
-                      ],
-                      SizedBox(
-                        width: 10.sp,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              getstate.profile_data.fullName +
-                                      " " +
-                                      getstate.profile_data.lastname ??
-                                  "",
-                              style: TextStyle(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).iconTheme.color),
-                            ),
-                            Text(
-                              getstate.profile_data.phone,
-                              style: TextStyle(
-                                  fontSize: 15.sp,
-                                  color: Theme.of(context).iconTheme.color),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                if (getstate.profile_data.imageUrl.contains("https://")) ...[
+                  CircleAvatar(
+                    radius: 30.sp,
+                    backgroundImage:
+                        NetworkImage(getstate.profile_data.imageUrl),
+                  )
+                ] else ...[
+                  ProfilePicture(
+                      name: getstate.profile_data.imageUrl.trim(),
+                      radius: 30.sp,
+                      fontsize: 25.sp)
+                ],
+                SizedBox(
+                  height: 10.sp,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      getstate.profile_data.fullName +
+                              " " +
+                              getstate.profile_data.lastname ??
+                          "",
+                      style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).iconTheme.color),
+                    ),
+                    SizedBox(
+                      height: 5.sp,
+                    ),
+                    Text(
+                      getstate.profile_data.phone,
+                      style: TextStyle(fontSize: 15.sp, color: Colors.grey),
+                    ),
+                    SizedBox(
+                      height: 5.sp,
+                    ),
+                    Text(
+                      getstate.profile_data.username,
+                      style: TextStyle(fontSize: 15.sp, color: Colors.grey),
+                    ),
+                  ],
                 ),
                 Expanded(
+                  flex: 2,
                   child: SettingsList(
+                    lightTheme: SettingsThemeData(
+                        settingsListBackground: Colors.transparent),
                     sections: [
                       SettingsSection(
                         title: Text(
-                          'Setttings',
+                          '',
                         ),
                         tiles: <SettingsTile>[
                           SettingsTile.navigation(
-                            leading: Icon(
-                              Icons.notifications,
-                              color: Theme.of(context).iconTheme.color,
-                              size: 15.sp,
-                            ),
+                            onPressed: (BuildContext) {
+                              print("Welcome");
+                            },
+                            leading: SvgPicture.asset(
+                                "assets/setting_icon/notificationSetting.svg"),
                             title: Text(
-                              'Notification',
+                              'Notification and Sounds',
                               style: TextStyle(fontSize: 15.sp),
                             ),
                           ),
                           SettingsTile.navigation(
-                            leading: Icon(
-                              CupertinoIcons.chat_bubble,
-                              color: Theme.of(context).iconTheme.color,
-                              size: 15.sp,
-                            ),
+                            leading: SvgPicture.asset(
+                                "assets/setting_icon/chatSetting.svg"),
                             title: Text(
-                              'chat',
+                              'Chat',
                               style: TextStyle(fontSize: 15.sp),
                             ),
                           ),
                           SettingsTile.navigation(
-                            leading: Icon(
-                              CupertinoIcons.lock_circle,
-                              color: Theme.of(context).iconTheme.color,
-                              size: 15.sp,
-                            ),
+                            leading: SvgPicture.asset(
+                                "assets/setting_icon/PrivacySetting.svg"),
                             title: Text(
                               'Privacy',
                               style: TextStyle(fontSize: 15.sp),
                             ),
                           ),
                           SettingsTile.navigation(
-                            leading: Icon(
-                              CupertinoIcons.mail,
-                              color: Theme.of(context).iconTheme.color,
-                              size: 15.sp,
-                            ),
+                            leading: SvgPicture.asset(
+                                "assets/setting_icon/contactSetting.svg"),
                             title: Text(
                               'Contact us',
                               style: TextStyle(fontSize: 15.sp),
@@ -175,14 +178,26 @@ class _setting_viewState extends State<setting_view> {
                     ],
                   ),
                 ),
-                Button(
-                  buttonenable: true,
-                  onpress: () async {
+                InkWell(
+                  onTap: () async {
                     await FirebaseAuth.instance.signOut();
                     Navigator.of(context).pushNamed("/");
                   },
-                  Texts: "LOGOUT",
-                  widths: 80,
+                  child: Container(
+                    height: 5.h,
+                    width: 80.w,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? HexColor.fromHex("#353535")
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      "Log Out",
+                      style: TextStyle(color: Colors.red, fontSize: 15.sp),
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 15.sp,

@@ -59,7 +59,7 @@ class _Home_viewState extends State<Home_view> {
                             : 'assets/svg/Chat.svg',
                         color: currentindex != 0
                             ? HexColor.fromHex('#8C8C8C')
-                            : Theme.of(context).iconTheme.color,
+                            : Colors.blue,
                         width: currentindex == 0 ? 19.sp : null,
                       )),
                   IconButton(
@@ -74,7 +74,7 @@ class _Home_viewState extends State<Home_view> {
                             : 'assets/svg/Hangout.svg',
                         color: currentindex != 1
                             ? HexColor.fromHex('#8C8C8C')
-                            : Theme.of(context).iconTheme.color,
+                            : Colors.blue,
                         width: currentindex == 1 ? 19.sp : null,
                       )),
                   IconButton(
@@ -89,7 +89,7 @@ class _Home_viewState extends State<Home_view> {
                             : 'assets/svg/Settings.svg',
                         color: currentindex != 2
                             ? HexColor.fromHex('#8C8C8C')
-                            : Theme.of(context).iconTheme.color,
+                            : Colors.blue,
                         width: currentindex == 2 ? 19.sp : null,
                       )),
                 ],

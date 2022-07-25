@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
+import 'package:chatting/view/Screen/profile/numberchange.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,17 +11,27 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:sizer/sizer.dart';
 
 class Profile_edit extends StatefulWidget {
   const Profile_edit(
-      {Key key, this.image, this.name, this.myuid, this.lastname})
+      {Key key,
+      this.image,
+      this.name,
+      this.myuid,
+      this.lastname,
+      this.phonenumber,
+      this.Username})
       : super(key: key);
   final String image;
   final String name;
   final String myuid;
   final String lastname;
+  final String phonenumber;
+  final Username;
 
   @override
   State<Profile_edit> createState() => _Profile_editState();
@@ -106,8 +117,8 @@ class _Profile_editState extends State<Profile_edit> {
                       .getprofile_data(type: "profile", uid: widget.myuid);
                 },
                 child: Text(
-                  "SAVE",
-                  style: TextStyle(color: Theme.of(context).iconTheme.color),
+                  "Done",
+                  style: TextStyle(color: Colors.blue, fontSize: 12.sp),
                 ))
           ],
         ),
@@ -154,42 +165,113 @@ class _Profile_editState extends State<Profile_edit> {
                       }
                     },
                     child: Text(
-                      "Set New  Display Image ",
-                      style:
-                          TextStyle(color: Theme.of(context).iconTheme.color),
+                      "Set New Photo",
+                      style: TextStyle(color: Colors.blue, fontSize: 15.sp),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    child: TextField(
-                      controller: name,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: isDarkMode
-                              ? HexColor.fromHex("#1a1a1c")
-                              : HexColor.fromHex("#ffffff"),
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(20))),
-                    ),
+                  SizedBox(
+                    height: 5.w,
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    child: TextField(
-                      controller: lastname,
-                      decoration: InputDecoration(
-                          hintText: "Last Name",
-                          filled: true,
-                          fillColor: isDarkMode
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.sp, vertical: 0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: isDarkMode
                               ? HexColor.fromHex("#1a1a1c")
                               : HexColor.fromHex("#ffffff"),
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(20))),
+                          borderRadius: BorderRadius.circular(10.sp)),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.sp, vertical: 0),
+                            child: TextField(
+                              style: TextStyle(
+                                  fontSize: 15.sp,
+                                  color: Theme.of(context).iconTheme.color),
+                              cursorColor: Theme.of(context).iconTheme.color,
+                              controller: name,
+                              decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                              )),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.sp),
+                            child: Divider(
+                              height: .5,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.sp, vertical: 0),
+                            child: TextField(
+                              style: TextStyle(
+                                  fontSize: 15.sp,
+                                  color: Theme.of(context).iconTheme.color),
+                              cursorColor: Theme.of(context).iconTheme.color,
+                              controller: lastname,
+                              decoration: InputDecoration(
+                                  hintText: "Last Name",
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                  )),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  )
+                  ),
+                  SizedBox(
+                    height: 5.w,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                    child: Text(
+                      "Enter your name and add an optional profile photo",
+                      style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                    ),
+                  ),
+                  Expanded(
+                    child: SettingsList(
+                      sections: [
+                        SettingsSection(
+                          title: Text(
+                            '',
+                          ),
+                          tiles: <SettingsTile>[
+                            SettingsTile.navigation(
+                              onPressed: (context) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => NumberChange(myuid: widget.myuid,)));
+                              },
+                              value: Text(
+                                widget.phonenumber,
+                                style: TextStyle(fontSize: 12.sp),
+                              ),
+                              title: Text(
+                                'Chanage Number',
+                                style: TextStyle(fontSize: 15.sp),
+                              ),
+                            ),
+                            SettingsTile.navigation(
+                              value: Text(
+                                widget.Username,
+                                style: TextStyle(fontSize: 12.sp),
+                              ),
+                              title: Text(
+                                'Username',
+                                style: TextStyle(fontSize: 15.sp),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ]),
           ),
         ),

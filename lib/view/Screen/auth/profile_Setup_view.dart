@@ -325,8 +325,7 @@ class _profile_setupState extends State<profile_setup> {
                                 phone_number: state.user.phoneNumber,
                                 uid: state.user.phoneNumber);
 
-                            sharedPreferences.setString(
-                                'uid', state.user.phoneNumber);
+                            sharedPreferences.setString('uid', state.user.uid);
                             sharedPreferences.setString(
                                 'number', state.user.phoneNumber);
                             Navigator.of(context).pushNamed('/');

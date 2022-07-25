@@ -116,3 +116,5 @@ flutter:
     - assets/svg/
     - assets/audio/
     - assets/markerIcon/
+    - assets/setting_icon/
+

@@ -26,6 +26,8 @@ class AuthProvider {
     });
   }
 
+
+
   Future<PhoneAuthModel> verifySMS(
       {String smscode, String VerificationId}) async {
     try {
