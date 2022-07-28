@@ -1,3 +1,5 @@
+import 'package:chatting/model/Google%20Map%20/defaultMapdata.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_place/google_place.dart';
 import 'package:http/http.dart' as http;
 
@@ -46,6 +48,14 @@ class MapServices {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  Future<List<DefaultMapdata>> defaultMapdata() async {
+    return FirebaseFirestore.instance.collection("marker").get().then((value) =>
+        value.docs
+            .map((QueryDocumentSnapshot documentSnapshot) =>
+                DefaultMapdata.fromJson(documentSnapshot.data()))
+            .toList());
   }
 
   Future<List<SearchResult>> googleMapMoveSearch(

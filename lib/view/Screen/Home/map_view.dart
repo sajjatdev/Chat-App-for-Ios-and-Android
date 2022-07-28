@@ -85,7 +85,7 @@ class _Map_viewState extends State<Map_view> {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
-
+    context.read<MapSearchCubit>().DefaultMapDataFirebase();
     return LoadingOverlay(
       isLoading: isloading,
       progressIndicator:
@@ -104,6 +104,9 @@ class _Map_viewState extends State<Map_view> {
                               children: [
                                 BlocConsumer<MapSearchCubit, MapSearchState>(
                                   listener: ((context, state) async {
+                                    if (state is DefaultMapdata) {
+                                      print(state.defaultdata.length);
+                                    }
                                     if (state is GetDataformGoogle) {
                                       setState(() {
                                         isloading = false;
@@ -371,7 +374,8 @@ class _Map_viewState extends State<Map_view> {
                                               isDarkMode ? dark : light);
                                         },
                                       );
-                                    } else {
+                                    }
+                                    if (state is DefaultMapdata) {
                                       return GoogleMap(
                                         onCameraMove: ((position) {
                                           print(position.target.latitude);
@@ -392,6 +396,8 @@ class _Map_viewState extends State<Map_view> {
                                               isDarkMode ? dark : light);
                                         },
                                       );
+                                    } else {
+                                      return Container();
                                     }
                                   },
                                 ),

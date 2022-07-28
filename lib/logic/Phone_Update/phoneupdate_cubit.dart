@@ -43,10 +43,11 @@ class PhoneupdateCubit extends Cubit<PhoneupdateState> {
     try {
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
           verificationId: verificationIds, smsCode: code);
-      await FirebaseAuth.instance.currentUser.updatePhoneNumber(credential);
-      if (credential.token != null) {
+      await FirebaseAuth.instance.currentUser
+          .updatePhoneNumber(credential)
+          .then((value) {
         emit(VerifyDone());
-      }
+      });
     } on FirebaseAuthException catch (e) {
       if (e.message.contains(
           "e.message.contains('The sms verification code used to create the phone auth credential is invalid')")) {

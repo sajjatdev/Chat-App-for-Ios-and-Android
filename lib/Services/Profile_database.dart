@@ -22,7 +22,7 @@ class cloud_FireStore {
     List<String> phoneKeyword = keyword_phones(phones: phone_number);
 
     CollectionReference users = firebaseFirestore.collection('user');
-    users.doc(phone_number).set({
+    users.doc(uid).set({
       'first_name': Firstname,
       'last_name': lastname == '' ? '' : lastname,
       'username': username,

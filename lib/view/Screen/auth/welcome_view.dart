@@ -86,8 +86,7 @@ class _welcomeState extends State<welcome> {
               Button(
                 buttonenable: true,
                 onpress: () async {
-                  await Permission.contacts.request().isGranted;
-                  await Permission.locationAlways.request().isGranted;
+                  _contactsPermissions();
                   Navigator.of(context).pushNamed('/auth_phone');
                 },
                 Texts: "LOGIN WITH PHONE",
@@ -101,5 +100,17 @@ class _welcomeState extends State<welcome> {
         ),
       ],
     ));
+  }
+
+  _contactsPermissions() async {
+    PermissionStatus permission = await Permission.contacts.status;
+    if (permission != PermissionStatus.granted &&
+        permission != PermissionStatus.denied) {
+      Map<Permission, PermissionStatus> permissionStatus =
+          await [Permission.contacts].request();
+      return permissionStatus[Permission.contacts] ?? PermissionStatus.granted;
+    } else {
+      return permission;
+    }
   }
 }

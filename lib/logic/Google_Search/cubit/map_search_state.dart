@@ -7,8 +7,20 @@ abstract class MapSearchState extends Equatable {
   List<Object> get props => [];
 }
 
+class DefaultMapdata extends MapSearchState {
+  final List<DefaultMapdata> defaultdata;
+
+  DefaultMapdata({this.defaultdata});
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [this.defaultdata];
+}
+
 class MapSearchInitial extends MapSearchState {}
-class Loading extends MapSearchState{}
+
+class Loading extends MapSearchState {}
+
 class GetDataformGoogle extends MapSearchState {
   final List<SearchResult> GetDataFormGoogle;
 

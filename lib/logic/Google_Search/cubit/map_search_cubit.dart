@@ -1,7 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:chatting/Services/Google%20Map/SearchMap.dart';
 import 'package:chatting/model/Google%20Map%20/Map_Search.dart';
+import 'package:chatting/model/Google%20Map%20/defaultMapdata.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_place/google_place.dart';
 
@@ -26,6 +29,17 @@ class MapSearchCubit extends Cubit<MapSearchState> {
     } catch (e) {
       emit(error());
     }
+  }
+
+  Future<void> DefaultMapDataFirebase() async {
+    print("Default Map Marker data");
+    try {
+      List<DefaultMapdata> defaultdata =
+          mapsearch.defaultMapdata() as List<DefaultMapdata>;
+      if (defaultdata.isNotEmpty) {
+        emit(DefaultMapdata(defaultdata: defaultdata));
+      }
+    } catch (e) {}
   }
 
   Future<void> FilterMap(

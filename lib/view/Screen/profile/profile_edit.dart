@@ -1,9 +1,10 @@
 import 'dart:io';
-
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/view/Screen/profile/numberchange.dart';
+import 'package:chatting/view/Screen/profile/phoneNumberChangeAlert.dart';
+import 'package:chatting/view/Screen/profile/usernamechange.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -55,6 +56,7 @@ class _Profile_editState extends State<Profile_edit> {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
+
     return LoadingOverlay(
       isLoading: loader,
       progressIndicator:
@@ -246,22 +248,56 @@ class _Profile_editState extends State<Profile_edit> {
                             SettingsTile.navigation(
                               onPressed: (context) {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => NumberChange(myuid: widget.myuid,)));
+                                    builder: (context) => PhoneChangeAlert(
+                                          myuid: widget.myuid,
+                                        )));
                               },
-                              value: Text(
-                                widget.phonenumber,
-                                style: TextStyle(fontSize: 12.sp),
-                              ),
+                              value: StreamBuilder<DocumentSnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('user')
+                                      .doc(widget.myuid)
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      Map<String, dynamic> phonenumber =
+                                          snapshot.data.data();
+                                      return Text(
+                                        phonenumber["Phone_number"] ?? "",
+                                        style: TextStyle(fontSize: 12.sp),
+                                      );
+                                    } else {
+                                      return Container();
+                                    }
+                                  }),
                               title: Text(
                                 'Chanage Number',
                                 style: TextStyle(fontSize: 15.sp),
                               ),
                             ),
                             SettingsTile.navigation(
-                              value: Text(
-                                widget.Username,
-                                style: TextStyle(fontSize: 12.sp),
-                              ),
+                              onPressed: (context) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => usernamechange(
+                                          myuid: widget.myuid,
+                                        )));
+                              },
+                              value: StreamBuilder<DocumentSnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('user')
+                                      .doc(widget.myuid)
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      Map<String, dynamic> phonenumber =
+                                          snapshot.data.data();
+                                      return Text(
+                                        phonenumber["username"] ?? "",
+                                        style: TextStyle(fontSize: 12.sp),
+                                      );
+                                    } else {
+                                      return Container();
+                                    }
+                                  }),
                               title: Text(
                                 'Username',
                                 style: TextStyle(fontSize: 15.sp),

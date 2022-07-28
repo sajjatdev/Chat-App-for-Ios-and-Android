@@ -312,7 +312,7 @@ class _profile_setupState extends State<profile_setup> {
 
                             FirebaseFirestore.instance
                                 .collection("Contact_list")
-                                .doc(state.user.phoneNumber)
+                                .doc(state.user.uid)
                                 .set({"list_Contact": contact_number_list});
 
                             print("Update Contact");
@@ -323,7 +323,7 @@ class _profile_setupState extends State<profile_setup> {
                                 username: username,
                                 imageURL: imagurl ?? firstname.text,
                                 phone_number: state.user.phoneNumber,
-                                uid: state.user.phoneNumber);
+                                uid: state.user.uid);
 
                             sharedPreferences.setString('uid', state.user.uid);
                             sharedPreferences.setString(

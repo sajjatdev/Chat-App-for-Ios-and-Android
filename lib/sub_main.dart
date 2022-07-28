@@ -105,11 +105,14 @@ class _ChattingState extends State<Chatting> {
               create: (context) => BusinessHoursCubit(
                   Business_Services(FirebaseFirestore.instance))),
           BlocProvider(
-              create: (context) => MapSearchCubit(mapsearch: MapServices())),
+              create: (context) => MapSearchCubit(mapsearch: MapServices())
+                ..DefaultMapDataFirebase()),
           BlocProvider(
               create: (context) => BusinessInfoGetCubit(MapServices())),
           BlocProvider(create: (context) => YelpapiCubit(Repositorys.get())),
-            BlocProvider(create: (context) => PhoneupdateCubit(AuthProvider(FirebaseAuth.instance))),
+          BlocProvider(
+              create: (context) =>
+                  PhoneupdateCubit(AuthProvider(FirebaseAuth.instance))),
           BlocProvider(
               create: (context) => ContactCubit(FirebaseContact())
                 ..Getallcontactlist(

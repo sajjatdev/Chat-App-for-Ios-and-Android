@@ -1,12 +1,14 @@
 import 'package:chatting/Helper/color.dart';
-import 'package:chatting/Helper/enum.dart';
+
 import 'package:chatting/logic/Phone_Update/phoneupdate_cubit.dart';
-import 'package:chatting/logic/Profile_setup/profile_setup_cubit.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:phone_form_field/phone_form_field.dart';
 import 'package:sizer/sizer.dart';
 
 class NumberChange extends StatefulWidget {
@@ -17,7 +19,7 @@ class NumberChange extends StatefulWidget {
 }
 
 class _NumberChangeState extends State<NumberChange> {
-  TextEditingController phoneupdare = TextEditingController();
+  PhoneController phoneNumberController = PhoneController(null);
   TextEditingController otp = TextEditingController();
   bool isphonenumber = false;
   bool isloading = false;
@@ -43,8 +45,8 @@ class _NumberChangeState extends State<NumberChange> {
           centerTitle: true,
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
-          child: BlocListener<PhoneupdateCubit, PhoneupdateState>(
+            padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
+            child: BlocListener<PhoneupdateCubit, PhoneupdateState>(
               listener: (context, state) {
                 if (state is Loading) {
                   setState(() {
@@ -98,9 +100,11 @@ class _NumberChangeState extends State<NumberChange> {
                   FirebaseFirestore.instance
                       .collection('user')
                       .doc(widget.myuid)
-                      .update({"Phone_number": phoneupdare.text}).then((value) {
-                    List<String> phoneKeyword =
-                        keyword_phones(phones: phoneupdare.text);
+                      .update({
+                    "Phone_number": phoneNumberController.value
+                  }).then((value) {
+                    List<String> phoneKeyword = keyword_phones(
+                        phones: phoneNumberController.value.toString());
                     FirebaseFirestore.instance
                         .collection("user")
                         .doc(widget.myuid)
@@ -113,70 +117,63 @@ class _NumberChangeState extends State<NumberChange> {
                 }
               },
               child: Center(
-                  child: isphonenumber == true
-                      ? TextField(
-                          controller: otp,
-                          textInputAction: TextInputAction.send,
-                          keyboardType: TextInputType.phone,
-                          cursorColor: Theme.of(context).iconTheme.color,
-                          style: TextStyle(
-                              fontSize: 15.sp,
-                              color: Theme.of(context).iconTheme.color),
-                          decoration: InputDecoration(
-                              hintText: "Enter your code",
-                              suffixIcon: IconButton(
-                                  onPressed: () {
-                                    context
-                                        .read<PhoneupdateCubit>()
-                                        .OTP_Verify(code: otp.text);
-                                  },
-                                  icon: Icon(
-                                    CupertinoIcons.arrow_right,
-                                    color: Theme.of(context).iconTheme.color,
-                                  )),
-                              filled: true,
-                              fillColor: isDarkMode
-                                  ? HexColor.fromHex("#1a1a1c")
-                                  : HexColor.fromHex("#ffffff"),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10.sp))),
-                        )
-                      : TextField(
-                          controller: phoneupdare,
-                          onSubmitted: (value) {
-                            context
-                                .read<PhoneupdateCubit>()
-                                .Phone_number_Change(number: value);
-                          },
-                          textInputAction: TextInputAction.send,
-                          keyboardType: TextInputType.phone,
-                          cursorColor: Theme.of(context).iconTheme.color,
-                          style: TextStyle(
-                              fontSize: 15.sp,
-                              color: Theme.of(context).iconTheme.color),
-                          decoration: InputDecoration(
-                              hintText: "Enter your number",
-                              suffixIcon: IconButton(
-                                  onPressed: () {
-                                    context
-                                        .read<PhoneupdateCubit>()
-                                        .Phone_number_Change(
-                                            number: phoneupdare.text);
-                                  },
-                                  icon: Icon(
-                                    CupertinoIcons.arrow_right,
-                                    color: Theme.of(context).iconTheme.color,
-                                  )),
-                              filled: true,
-                              fillColor: isDarkMode
-                                  ? HexColor.fromHex("#1a1a1c")
-                                  : HexColor.fromHex("#ffffff"),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10.sp))),
-                        ))),
-        ),
+                child: isphonenumber == true
+                    ? TextField(
+                        controller: otp,
+                        textInputAction: TextInputAction.send,
+                        keyboardType: TextInputType.phone,
+                        cursorColor: Theme.of(context).iconTheme.color,
+                        style: TextStyle(
+                            fontSize: 15.sp,
+                            color: Theme.of(context).iconTheme.color),
+                        decoration: InputDecoration(
+                            hintText: "Enter your code",
+                            suffixIcon: IconButton(
+                                onPressed: () {
+                                  context
+                                      .read<PhoneupdateCubit>()
+                                      .OTP_Verify(code: otp.text);
+                                },
+                                icon: Icon(
+                                  CupertinoIcons.arrow_right,
+                                  color: Theme.of(context).iconTheme.color,
+                                )),
+                            filled: true,
+                            fillColor: isDarkMode
+                                ? HexColor.fromHex("#1a1a1c")
+                                : HexColor.fromHex("#ffffff"),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.circular(10.sp))),
+                      )
+
+                    // context.read<PhoneupdateCubit>().Phone_number_Change(
+                    //       number: phoneNumberController.text);
+
+                    : PhoneFormField(
+                        key: Key('phone-field'),
+                        autofocus: true,
+                        controller: phoneNumberController,
+                        initialValue: null,
+                        shouldFormat: true,
+                        defaultCountry: IsoCode.CA,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Theme.of(context).iconTheme.color)),
+                        ),
+                        validator: PhoneValidator.validMobile(),
+                        countrySelectorNavigator:
+                            CountrySelectorNavigator.bottomSheet(),
+                        showFlagInInput: true,
+                        flagSize: 16,
+                        autofillHints: [AutofillHints.telephoneNumber],
+                        enabled: true,
+                        autovalidateMode: AutovalidateMode.always,
+                      ),
+              ),
+            )),
       ),
     );
   }
