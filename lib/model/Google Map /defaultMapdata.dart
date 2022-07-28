@@ -1,4 +1,4 @@
-class DefaultMapdata {
+class DefaultMapdatas {
   String businessId;
   String businessName;
   String address;
@@ -6,7 +6,7 @@ class DefaultMapdata {
   String latitude;
   String longitude;
 
-  DefaultMapdata(
+  DefaultMapdatas(
       {this.businessId,
       this.businessName,
       this.address,
@@ -14,7 +14,7 @@ class DefaultMapdata {
       this.latitude,
       this.longitude});
 
-  DefaultMapdata.fromJson(Map<String, dynamic> json) {
+  DefaultMapdatas.fromJson(Map<String, dynamic> json) {
     businessId = json['Business_Id'];
     businessName = json['Business_Name'];
     address = json['address'];

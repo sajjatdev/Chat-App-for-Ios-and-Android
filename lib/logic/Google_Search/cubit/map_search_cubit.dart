@@ -34,9 +34,10 @@ class MapSearchCubit extends Cubit<MapSearchState> {
   Future<void> DefaultMapDataFirebase() async {
     print("Default Map Marker data");
     try {
-      List<DefaultMapdata> defaultdata =
-          mapsearch.defaultMapdata() as List<DefaultMapdata>;
+      List<DefaultMapdatas> defaultdata =
+          await mapsearch.defaultMapdata() ;
       if (defaultdata.isNotEmpty) {
+        print(defaultdata.length);
         emit(DefaultMapdata(defaultdata: defaultdata));
       }
     } catch (e) {}

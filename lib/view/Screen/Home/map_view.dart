@@ -85,7 +85,7 @@ class _Map_viewState extends State<Map_view> {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
-    context.read<MapSearchCubit>().DefaultMapDataFirebase();
+    BlocProvider.of<MapSearchCubit>(context).DefaultMapDataFirebase();
     return LoadingOverlay(
       isLoading: isloading,
       progressIndicator:
@@ -105,7 +105,88 @@ class _Map_viewState extends State<Map_view> {
                                 BlocConsumer<MapSearchCubit, MapSearchState>(
                                   listener: ((context, state) async {
                                     if (state is DefaultMapdata) {
-                                      print(state.defaultdata.length);
+                                      for (var i = 0;
+                                          i < state.defaultdata.length;
+                                          i++) {
+                                        await checkbusiness(
+                                                id: state
+                                                    .defaultdata[i].businessId)
+                                            .then((value) async {
+                                          final marker = Marker(
+                                            onTap: (() {
+                                              setState(() async {
+                                                oldindex = i;
+                                                hiden_show = true;
+                                                await checkbusiness(
+                                                        id: state.defaultdata[i]
+                                                            .businessId)
+                                                    .then((value) async {
+                                                  print(value);
+                                                  final GoogleMapController
+                                                      controller =
+                                                      await _controller.future;
+                                                  controller.animateCamera(
+                                                      CameraUpdate
+                                                          .newCameraPosition(
+                                                              CameraPosition(
+                                                    target: LatLng(
+                                                        double.parse(state
+                                                            .defaultdata[i]
+                                                            .latitude),
+                                                        double.parse(state
+                                                            .defaultdata[i]
+                                                            .longitude)),
+                                                    zoom: 14.4746,
+                                                  )));
+                                                  final marker = Marker(
+                                                    onTap: (() {
+                                                      setState(() {
+                                                        oldindex = i;
+                                                        hiden_show = true;
+                                                      });
+                                                    }),
+                                                    markerId:
+                                                        MarkerId(i.toString()),
+                                                    position: LatLng(
+                                                        double.parse(state
+                                                            .defaultdata[i]
+                                                            .latitude),
+                                                        double.parse(state
+                                                            .defaultdata[i]
+                                                            .longitude)),
+                                                    icon: await MarkerIcon.svgAsset(
+                                                        assetName: value
+                                                            ? "assets/markerIcon/se.svg"
+                                                            : "assets/markerIcon/ese.svg",
+                                                        context: context,
+                                                        size: 12.w),
+                                                  );
+
+                                                  setState(() {
+                                                    _markers[i] = marker;
+                                                  });
+                                                });
+                                              });
+                                            }),
+                                            markerId: MarkerId(i.toString()),
+                                            position: LatLng(
+                                                double.parse(state
+                                                    .defaultdata[i].latitude),
+                                                double.parse(state
+                                                    .defaultdata[i].longitude)),
+                                            icon: await MarkerIcon.svgAsset(
+                                                assetName: value
+                                                    ? "assets/markerIcon/un.svg"
+                                                    : "assets/markerIcon/eun.svg",
+                                                context: context,
+                                                size: 12.w),
+                                          );
+
+                                          setState(() {
+                                            _markers.add(marker);
+                                          });
+                                        });
+                                      }
                                     }
                                     if (state is GetDataformGoogle) {
                                       setState(() {
@@ -380,6 +461,7 @@ class _Map_viewState extends State<Map_view> {
                                         onCameraMove: ((position) {
                                           print(position.target.latitude);
                                         }),
+                                        markers: Set.from(_markers),
                                         mapType: MapType.normal,
                                         myLocationButtonEnabled: true,
                                         myLocationEnabled: true,
@@ -397,7 +479,27 @@ class _Map_viewState extends State<Map_view> {
                                         },
                                       );
                                     } else {
-                                      return Container();
+                                      return GoogleMap(
+                                        onCameraMove: ((position) {
+                                          print(position.target.latitude);
+                                        }),
+                                        markers: Set.from(_markers),
+                                        mapType: MapType.normal,
+                                        myLocationButtonEnabled: true,
+                                        myLocationEnabled: true,
+                                        zoomControlsEnabled: false,
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(snapshot.data.latitude,
+                                              snapshot.data.longitude),
+                                          zoom: 14.4746,
+                                        ),
+                                        onMapCreated:
+                                            (GoogleMapController controller) {
+                                          _controller.complete(controller);
+                                          controller.setMapStyle(
+                                              isDarkMode ? dark : light);
+                                        },
+                                      );
                                     }
                                   },
                                 ),

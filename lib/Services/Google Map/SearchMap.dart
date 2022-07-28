@@ -50,11 +50,11 @@ class MapServices {
     }
   }
 
-  Future<List<DefaultMapdata>> defaultMapdata() async {
+  Future<List<DefaultMapdatas>> defaultMapdata() async {
     return FirebaseFirestore.instance.collection("marker").get().then((value) =>
         value.docs
             .map((QueryDocumentSnapshot documentSnapshot) =>
-                DefaultMapdata.fromJson(documentSnapshot.data()))
+                DefaultMapdatas.fromJson(documentSnapshot.data()))
             .toList());
   }
 

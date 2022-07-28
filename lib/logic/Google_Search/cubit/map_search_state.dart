@@ -8,7 +8,7 @@ abstract class MapSearchState extends Equatable {
 }
 
 class DefaultMapdata extends MapSearchState {
-  final List<DefaultMapdata> defaultdata;
+  final List<DefaultMapdatas> defaultdata;
 
   DefaultMapdata({this.defaultdata});
 

@@ -66,16 +66,29 @@ class _Auth_phoneState extends State<Auth_phone> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               child: InternationalPhoneNumberInput(
+                  cursorColor: Theme.of(context).iconTheme.color,
                   initialValue: number,
+                  autoFocus: true,
                   textFieldController: phoneNumberController,
                   countries: const ['CA', 'US', 'BD'],
                   formatInput: true,
                   selectorConfig: const SelectorConfig(
                     selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      signed: true, decimal: true),
-                  inputBorder: const OutlineInputBorder(),
+                  inputDecoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.sp),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).iconTheme.color)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.sp),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).iconTheme.color))),
+                  keyboardType: const TextInputType.numberWithOptions(),
+                  inputBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.sp),
+                      borderSide:
+                          BorderSide(color: Theme.of(context).iconTheme.color)),
                   onInputChanged: (number) {
                     setState(() {
                       phone_number = number.toString();
@@ -98,11 +111,11 @@ class _Auth_phoneState extends State<Auth_phone> {
               buttonenable: buttonanable,
               onpress: () async {
                 if (phone_number.isNotEmpty) {
-                  BlocProvider.of<PhoneauthBloc>(context).add(PhoneNumberVerify(
-                      phoneNumber: phone_number));
+                  BlocProvider.of<PhoneauthBloc>(context)
+                      .add(PhoneNumberVerify(phoneNumber: phone_number));
                   Navigator.of(context)
                       .pushNamed('/otp', arguments: phone_number);
-                } 
+                }
               },
               Texts: "SEND OTP",
               widths: 80,

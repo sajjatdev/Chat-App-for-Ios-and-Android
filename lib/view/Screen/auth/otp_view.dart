@@ -121,30 +121,42 @@ class _OTPState extends State<OTP> {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 40, vertical: 20),
-                    child: PinPut(
-                      textInputAction: TextInputAction.done,
-                      fieldsCount: 6,
-                      controller: _pinPutController,
-                      onChanged: (value) {
-                        if (value.length <= 5) {
-                          setState(() {
-                            buttonEnable = false;
-                          });
-                        } else {
-                          setState(() {
-                            buttonEnable = true;
-                          });
-                        }
-                      },
-                      focusNode: _pinPutFocusNode,
-                      selectedFieldDecoration: _pinPutDecoration,
-                      submittedFieldDecoration: _pinPutDecoration.copyWith(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      followingFieldDecoration: _pinPutDecoration.copyWith(
-                        borderRadius: BorderRadius.circular(5.0),
-                        border: Border.all(
-                          color: Theme.of(context).primaryColor,
+                    child: Theme(
+                      data: ThemeData(),
+                      child: PinPut(
+                        textInputAction: TextInputAction.done,
+                        fieldsCount: 6,
+                        cursorColor: Theme.of(context).iconTheme.color,
+                        controller: _pinPutController,
+                        onChanged: (value) {
+                          if (value.length <= 5) {
+                            setState(() {
+                              buttonEnable = false;
+                            });
+                          } else {
+                            setState(() {
+                              buttonEnable = true;
+                            });
+                          }
+                        },
+                        focusNode: _pinPutFocusNode,
+                        selectedFieldDecoration: _pinPutDecoration.copyWith(
+                          borderRadius: BorderRadius.circular(20.0),
+                          border: Border.all(
+                              color: Theme.of(context).iconTheme.color,
+                              width: 2),
+                        ),
+                        submittedFieldDecoration: _pinPutDecoration.copyWith(
+                          borderRadius: BorderRadius.circular(20.0),
+                          border: Border.all(
+                            color: Theme.of(context).iconTheme.color,
+                          ),
+                        ),
+                        followingFieldDecoration: _pinPutDecoration.copyWith(
+                          borderRadius: BorderRadius.circular(5.0),
+                          border: Border.all(
+                            color: Theme.of(context).iconTheme.color,
+                          ),
                         ),
                       ),
                     ),
@@ -160,10 +172,10 @@ class _OTPState extends State<OTP> {
                       });
                       BlocProvider.of<PhoneauthBloc>(context)
                           .add(VerifySMSCode(smscode: _pinPutController.text));
-                      CheckAccount(number: widget.number).then((bool value) {
-                        if (value == true) {
+                      CheckAccount(number: widget.number).then((String value) {
+                        if (value != "") {
                           setState(() {
-                            sharedPreferences.setString('uid', widget.number);
+                            sharedPreferences.setString('uid', value);
                             sharedPreferences
                                 .setString('number', widget.number)
                                 .then((value) {
@@ -192,8 +204,8 @@ class _OTPState extends State<OTP> {
     );
   }
 
-  Future<bool> CheckAccount({String number}) async {
-    bool status = false;
+  Future<String> CheckAccount({String number}) async {
+    String status = "";
     await FirebaseFirestore.instance
         .collection("user")
         .where("Phone_number", isEqualTo: number)
@@ -201,7 +213,8 @@ class _OTPState extends State<OTP> {
         .then((QuerySnapshot snapshot) {
       if (snapshot.docs.isNotEmpty) {
         setState(() {
-          status = true;
+          Map<String, dynamic> data = snapshot.docs[0].data();
+          status = data["uid"];
         });
       }
     });
