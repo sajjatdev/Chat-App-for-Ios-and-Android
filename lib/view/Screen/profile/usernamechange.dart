@@ -78,7 +78,7 @@ class _usernamechangeState extends State<usernamechange> {
                 fontSize: 15.sp, color: Theme.of(context).iconTheme.color),
             decoration: InputDecoration(
                 errorText:
-                    isextingusername ? "This username already exting" : null,
+                    isextingusername ? "This username already exist" : null,
                 hintText: "Enter your Username",
                 suffixIcon: IconButton(
                     onPressed: isextingusername && username.text.isNotEmpty

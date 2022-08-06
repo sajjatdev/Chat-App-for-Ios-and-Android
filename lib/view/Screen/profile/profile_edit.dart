@@ -13,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:sizer/sizer.dart';
@@ -155,16 +156,21 @@ class _Profile_editState extends State<Profile_edit> {
                     style: TextButton.styleFrom(
                         primary: Theme.of(context).iconTheme.color),
                     onPressed: () async {
-                      final result = await FilePicker.platform.pickFiles(
-                          allowMultiple: false,
-                          type: FileType.custom,
-                          allowedExtensions: ['png', 'jpg', 'gif']);
-
-                      if (result != null) {
-                        setState(() {
-                          path = File(result.files.single.path);
-                        });
-                      }
+                      try {
+                        final picker = ImagePicker();
+                        final pickedFile =
+                            await picker.getImage(source: ImageSource.gallery);
+                        // final result = await FilePicker.platform.pickFiles(
+                        //     allowMultiple: false,
+                        //     type: FileType.image,
+                        //     allowedExtensions: ['png', 'jpg']);
+                        print(pickedFile.path);
+                        if (pickedFile.path != null) {
+                          setState(() {
+                            path = File(pickedFile.path);
+                          });
+                        }
+                      } catch (e) {}
                     },
                     child: Text(
                       "Set New Photo",
@@ -270,7 +276,7 @@ class _Profile_editState extends State<Profile_edit> {
                                     }
                                   }),
                               title: Text(
-                                'Chanage Number',
+                                'Change Number',
                                 style: TextStyle(fontSize: 15.sp),
                               ),
                             ),

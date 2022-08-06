@@ -140,7 +140,7 @@ class _setting_viewState extends State<setting_view> {
                         tiles: <SettingsTile>[
                           SettingsTile.navigation(
                             onPressed: (BuildContext) {
-                              print("Welcome");
+                              print(uid);
                             },
                             leading: SvgPicture.asset(
                                 "assets/setting_icon/notificationSetting.svg"),

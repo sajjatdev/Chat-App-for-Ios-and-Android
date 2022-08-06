@@ -3,10 +3,11 @@ import 'package:chatting/view/widget/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_place/google_place.dart';
 import 'package:sizer/sizer.dart';
+import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 
 class BusinessIntro extends StatelessWidget {
   const BusinessIntro({Key key, this.business}) : super(key: key);
-  final SearchResult business;
+  final BusinessDetails business;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +20,6 @@ class BusinessIntro extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-           
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.w),
                 child: Container(
@@ -131,29 +131,39 @@ class BusinessIntro extends StatelessWidget {
               Button(
                 buttonenable: true,
                 onpress: () {
-                  Navigator.of(context)
-                      .pushNamed("/create_business", arguments: business);
-                 
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => SetupBusiness(
+                            business: business,
+                          )));
                 },
-                widths: 50,
+                widths: 70,
                 Texts: "Proceed",
               ),
               SizedBox(
                 height: 5.w,
               ),
-              Theme(
-                  data:
-                      ThemeData(splashColor: Theme.of(context).iconTheme.color),
-                  child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        "Cancel",
-                        style: TextStyle(
-                            fontSize: 15.sp,
-                            color: Theme.of(context).iconTheme.color),
-                      )))
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 70.w,
+                  height: 5.h,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.sp),
+                      border: Border.all(
+                          width: 2, color: Theme.of(context).iconTheme.color)),
+                  child: Text(
+                    "Cancel",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

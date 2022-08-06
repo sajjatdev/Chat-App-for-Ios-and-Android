@@ -7,8 +7,8 @@ class business_model {
   String description;
   List customer;
   String type;
-  String latitude;
-  String longitude;
+  double latitude;
+  double longitude;
   String address;
   bool business_status;
   String lastTime;

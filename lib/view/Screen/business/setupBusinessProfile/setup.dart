@@ -2,15 +2,14 @@ import 'package:chatting/logic/business_create/business_create_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/view/widget/button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_place/google_place.dart';
+
 import 'package:sizer/sizer.dart';
+import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 
 class SetupBusiness extends StatefulWidget {
   const SetupBusiness({Key key, this.business}) : super(key: key);
-  final SearchResult business;
+  final BusinessDetails business;
   @override
   State<SetupBusiness> createState() => _SetupBusinessState();
 }
@@ -22,6 +21,7 @@ class _SetupBusinessState extends State<SetupBusiness> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getmyUID();
   }
 
   void getmyUID() {
@@ -57,8 +57,7 @@ class _SetupBusinessState extends State<SetupBusiness> {
                 CircleAvatar(
                   radius: 30.sp,
                   backgroundColor: Theme.of(context).iconTheme.color,
-                  backgroundImage: NetworkImage(
-                      "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${widget.business.photos[0].photoReference}&key=AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw"),
+                  backgroundImage: NetworkImage(widget.business.imageUrl),
                 ),
                 SizedBox(
                   height: 10.w,
@@ -75,7 +74,9 @@ class _SetupBusinessState extends State<SetupBusiness> {
                   height: 2.5.w,
                 ),
                 Text(
-                  widget.business.formattedAddress,
+                  widget.business.location.displayAddress[0] +
+                      " " +
+                      widget.business.location.displayAddress[1],
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 15.sp,
@@ -133,26 +134,27 @@ class _SetupBusinessState extends State<SetupBusiness> {
                 GestureDetector(
                   onTap: () {
                     if (widget.business.photos != null) {
+                      print(myuid);
                       context
                           .read<BusinessCreateCubit>()
                           .Create_Business(
-                            address: widget.business.formattedAddress,
+                            address:
+                                widget.business.location.displayAddress[0] +
+                                    " " +
+                                    widget.business.location.displayAddress[1],
                             description: "",
-                            latitude: double.parse(
-                                "${widget.business.geometry.location.lat}"),
-                            longitude: double.parse(
-                                "${widget.business.geometry.location.lng}"),
-                            imageURl:
-                                "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${widget.business.photos[0].photoReference}&key=AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw",
+                            latitude: widget.business.coordinates.latitude,
+                            longitude: widget.business.coordinates.longitude,
+                            imageURl: widget.business.imageUrl,
                             Business_Name: widget.business.name,
-                            Business_Id: widget.business.placeId,
+                            Business_Id: widget.business.id,
                             owner: myuid,
                             type: 'business',
                           )
                           .then((value) {
                         Navigator.of(context)
                             .pushReplacementNamed('/messageing', arguments: {
-                          'otheruid': widget.business.placeId,
+                          'otheruid': widget.business.id,
                           'type': 'business',
                         });
                       });
@@ -160,7 +162,7 @@ class _SetupBusinessState extends State<SetupBusiness> {
                   },
                   child: Container(
                     alignment: Alignment.center,
-                    width: 60.w,
+                    width: 65.w,
                     height: 5.h,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.sp),
@@ -183,7 +185,7 @@ class _SetupBusinessState extends State<SetupBusiness> {
                 Button(
                   onpress: () {},
                   buttonenable: true,
-                  widths: 60,
+                  widths: 65,
                   Texts: "I am NOT Business Owner",
                 ),
                 SizedBox(

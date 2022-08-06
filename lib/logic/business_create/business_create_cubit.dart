@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:chatting/Services/business/business.dart';
 import 'package:equatable/equatable.dart';
+import 'package:google_place/google_place.dart';
 
 part 'business_create_state.dart';
 
@@ -18,6 +19,7 @@ class BusinessCreateCubit extends Cubit<BusinessCreateState> {
       String owner,
       String description,
       List customer,
+      SearchResult BusinessHours,
       String type}) async {
     try {
       await business_services.create_business(
@@ -25,6 +27,7 @@ class BusinessCreateCubit extends Cubit<BusinessCreateState> {
         latitude: latitude,
         longitude: longitude,
         imageURl: imageURl,
+        BusinessHours:BusinessHours ,
         description: description,
         Business_Id: Business_Id,
         Business_Name: Business_Name,

@@ -174,6 +174,7 @@ class _OTPState extends State<OTP> {
                           .add(VerifySMSCode(smscode: _pinPutController.text));
                       CheckAccount(number: widget.number).then((String value) {
                         if (value != "") {
+                          print(value);
                           setState(() {
                             sharedPreferences.setString('uid', value);
                             sharedPreferences
@@ -215,6 +216,7 @@ class _OTPState extends State<OTP> {
         setState(() {
           Map<String, dynamic> data = snapshot.docs[0].data();
           status = data["uid"];
+          print(status);
         });
       }
     });

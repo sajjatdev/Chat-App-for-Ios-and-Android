@@ -1,5 +1,6 @@
 import 'package:chatting/model/business_hours.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_place/google_place.dart';
 
 class Business_Services {
   final FirebaseFirestore firebaseFirestore;
@@ -17,15 +18,16 @@ class Business_Services {
       String owner,
       String description,
       List customer,
+      SearchResult BusinessHours,
       String type}) async {
     List days = [
-      'Monday',
+      "Monday",
       "Tuesday",
       "Wednesday",
       "Thursday",
-      "Friday",
+      "Friday:",
       "Saturday",
-      "Sunday"
+      "Sunday",
     ];
 
     await firebaseFirestore.collection('chat').doc(Business_Id).set({
@@ -44,13 +46,16 @@ class Business_Services {
       "business_status": true,
       "Last_Time": DateTime.now().millisecondsSinceEpoch.toString(),
     }).then((value) {
-      for (var i = 0; i < days.length; i++) {
-        FirebaseFirestore.instance
-            .collection('chat')
-            .doc(Business_Id)
-            .collection("Business_Hours")
-            .doc(days[i])
-            .set({"ID": days[i], 'open': "24 Hours", 'cls': "24 Hours"});
+      for (var i = 0; i < BusinessHours.openingHours.weekdayText.length; i++) {
+        if (BusinessHours.openingHours.weekdayText[i].split(":")[1].trim() !=
+            "Closed") {
+          FirebaseFirestore.instance
+              .collection('chat')
+              .doc(Business_Id)
+              .collection("Business_Hours")
+              .doc(days[i])
+              .set({"open":BusinessHours.openingHours.periods[i].open.time});
+        }
       }
       firebaseFirestore
           .collection('chat')
@@ -84,10 +89,10 @@ class Business_Services {
     });
   }
 
-  Stream<business_hours> get_business_hours({String Room_ID}) {
-    CollectionReference data = firebaseFirestore.collection('chat');
+  // Stream<business_hours> get_business_hours({String Room_ID}) {
+  //   CollectionReference data = firebaseFirestore.collection('chat');
 
-    return data.doc(Room_ID).snapshots().map((DocumentSnapshot snapshot) =>
-        business_hours.fromJson(snapshot.data()));
-  }
+  //   return data.doc(Room_ID).snapshots().map((DocumentSnapshot snapshot) =>
+  //       business_hours.fromJson(snapshot.data()));
+  // }
 }

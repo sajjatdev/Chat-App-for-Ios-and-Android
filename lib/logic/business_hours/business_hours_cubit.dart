@@ -12,11 +12,11 @@ class BusinessHoursCubit extends Cubit<BusinessHoursState> {
   StreamSubscription subscription;
   BusinessHoursCubit(this.business_services) : super(BusinessHoursInitial());
 
-  Future<void> get_business_hours({String RoomId}) {
-    subscription = business_services
-        .get_business_hours(Room_ID: "REDSHOP")
-        .listen((event) {
-      print(event.businessName);
-    });
-  }
+  // Future<void> get_business_hours({String RoomId}) {
+  //   subscription = business_services
+  //       .get_business_hours(Room_ID: "REDSHOP")
+  //       .listen((event) {
+  //     print(event.businessName);
+  //   });
+  // }
 }

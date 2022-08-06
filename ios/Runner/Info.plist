@@ -60,8 +60,6 @@
 	<string>microphone</string>
 	<key>NSMotionUsageDescription</key>
 	<string>motion</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>photos</string>
 	<key>NSRemindersUsageDescription</key>
 	<string>reminders</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
@@ -104,5 +102,10 @@
     <string>qqmap</string>
     <string>here-location</string>
 </array>
+
+
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Chatter Profile photos</string>
 </dict>
 </plist>

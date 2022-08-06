@@ -2,6 +2,7 @@ import 'package:chatting/Loading_page.dart';
 import 'package:chatting/view/Screen/auth/loading_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_place/google_place.dart';
+import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 
 import '../view/Screen/Screen.dart';
 
@@ -37,7 +38,7 @@ class Routers {
             imageurl: settings.arguments as String);
       case Create_business.routeName:
         return Create_business.route(
-            BUSINESSDATA: settings.arguments as SearchResult);
+            BUSINESSDATA: settings.arguments as BusinessDetails);
       case privacy_policy.routeName:
         return privacy_policy.route();
       case UsernameCreate.routeName:

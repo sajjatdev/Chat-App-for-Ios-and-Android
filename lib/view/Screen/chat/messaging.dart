@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_composer/chat_composer.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
@@ -5,6 +7,8 @@ import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/logic/send_message/send_message_cubit.dart';
 
 import 'package:chatting/main.dart';
+import 'package:chatting/model/business_hours.dart';
+import 'package:dio/dio.dart';
 
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:chatting/view/widget/widget.dart';
@@ -17,6 +21,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:google_place/google_place.dart';
 import 'package:intl/intl.dart';
 
 import 'package:sizer/sizer.dart';
@@ -241,15 +246,47 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
       ),
     );
 
-    return Builder(builder: (context) {
-      final getdatadate = context.watch<ReadDataCubit>().state;
-
+    return BlocBuilder<ReadDataCubit, ReadDataState>(
+        builder: (context, getdatadate) {
       if (getdatadate is Loadingstate) {
         return Center(
           child: CupertinoActivityIndicator(
               color: Theme.of(context).iconTheme.color),
         );
       } else if (getdatadate is GroupData) {
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///Group Chat Start
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
         return Container(
           decoration: BoxDecoration(
               image: DecorationImage(
@@ -459,10 +496,11 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                           .updateData(path, name, name)
                                           .then(
                                         (value) async {
-                                          String imagurl = await firebase_storage
-                                              .FirebaseStorage.instance
-                                              .ref('userimage/${name}/${name}')
-                                              .getDownloadURL();
+                                          String imagurl =
+                                              await firebase_storage
+                                                  .FirebaseStorage.instance
+                                                  .ref('userimage/${name}/')
+                                                  .getDownloadURL();
 
                                           if (imagurl != null) {
                                             setState(() {
@@ -482,7 +520,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                     child: FocusScope(
                                       child: Focus(
                                         onFocusChange: (focus) =>
-                                            print("focus: $focus"),
+                                            print("focus: "),
                                         child: ChatComposer(
                                           controller: messaage,
                                           padding: const EdgeInsets.symmetric(
@@ -521,8 +559,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                               String voiceurl =
                                                   await firebase_storage
                                                       .FirebaseStorage.instance
-                                                      .ref(
-                                                          'userimage/${name}/${name}')
+                                                      .ref('userimage//')
                                                       .getDownloadURL();
                                               print(voiceurl);
                                               if (voiceurl != null) {
@@ -568,394 +605,418 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                     }
                   })),
         );
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///BUSINESS CHAT START
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
       } else if (getdatadate is BusinessData) {
         var brightness = MediaQuery.of(context).platformBrightness;
         bool isDarkMode = brightness == Brightness.dark;
-        DateTime now = DateTime.now();
-        DateFormat formatter = DateFormat('EEEE');
-        DateFormat current_time = DateFormat('H:mm');
-        String formatted = formatter.format(now);
-        String now_time = current_time.format(now);
-        var currarry = now_time.split(":");
-        int curr_Hour = int.parse(currarry[0]);
-        int curr_min = int.parse(currarry[1]);
-
-        print(now_time);
         return Container(
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: isDarkMode
-                      ? const AssetImage('assets/image/Black_Background.png')
-                      : const AssetImage('assets/image/White_Background.png'),
-                  fit: BoxFit.cover)),
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                elevation: 0,
-                shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
-                automaticallyImplyLeading: false,
-                backgroundColor: Theme.of(context).secondaryHeaderColor,
-                leading: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacementNamed('/home');
-                  },
-                  icon: SvgPicture.asset(
-                    'assets/svg/left-chevron.svg',
-                    color: Theme.of(context).iconTheme.color,
-                  ),
-                ),
-                centerTitle: true,
-                title: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      getdatadate.business.businessName,
-                      style: TextStyle(
-                          color: Theme.of(context).iconTheme.color,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      getdatadate.business.address,
-                      style: TextStyle(
-                          color: Colors.grey.shade500, fontSize: 10.sp),
-                    ),
-                  ],
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context)
-                            .pushNamed('/admin_profile', arguments: frienduid);
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: isDarkMode
+                          ? const AssetImage('assets/image/Black_Background.png')
+                          : const AssetImage('assets/image/White_Background.png'),
+                      fit: BoxFit.cover)),
+              child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  ///
+                  ///
+                  ///
+                  ///
+                  ///AppBar
+                  ///
+                  ///
+                  ///
+                  ///
+                  appBar: AppBar(
+                    elevation: 0,
+                    shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
+                    automaticallyImplyLeading: false,
+                    backgroundColor: Theme.of(context).secondaryHeaderColor,
+                    leading: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacementNamed('/home');
                       },
-                      child: Stack(
-                        children: [
-                          if (getdatadate.business.imageURl
-                              .contains("https://")) ...[
-                            CircleAvatar(
-                              backgroundImage:
-                                  NetworkImage(getdatadate.business.imageURl),
-                              maxRadius: 15.sp,
-                            ),
-                          ] else ...[
-                            ProfilePicture(
-                              name: getdatadate.business.imageURl,
-                              fontsize: 15.sp,
-                            )
-                          ],
-                        ],
+                      icon: SvgPicture.asset(
+                        'assets/svg/left-chevron.svg',
+                        color: Theme.of(context).iconTheme.color,
                       ),
                     ),
+                    centerTitle: true,
+                    title: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          getdatadate.business.businessName,
+                          style: TextStyle(
+                              color: Theme.of(context).iconTheme.color,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          getdatadate.business.address,
+                          style: TextStyle(
+                              color: Colors.grey.shade500, fontSize: 10.sp),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      ///
+                      ///
+                      ///
+                      ///
+                      ///Profile 
+                      ///
+                      ///
+                      ///
+                      ///
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushNamed('/admin_profile', arguments: frienduid);
+                          },
+                          child: Stack(
+                            children: [
+                              if (getdatadate.business.imageURl
+                                  .contains("https://")) ...[
+                                CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(getdatadate.business.imageURl),
+                                  maxRadius: 15.sp,
+                                ),
+                              ] else ...[
+                                ProfilePicture(
+                                  name: getdatadate.business.imageURl,
+                                  fontsize: 15.sp,
+                                )
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      ///
+                      ///
+                      ///
+                      ///
+                      ///
+                      ///Profiel END
+                    ],
                   ),
-                ],
-              ),
-              body: Container(
-                child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('chat')
-                        .doc(frienduid)
-                        .collection('Business_Hours')
-                        .doc(formatted)
-                        .snapshots(),
-                    builder: (context,
-                        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
-                            snapshot) {
-                      if (snapshot.hasData) {
-                        Map<String, dynamic> hours = snapshot.data.data();
-                        // Open and Time Format Start
-
-                        DateTime op = DateFormat('hh:mm a').parseLoose(
-                            hours['open'] == "off" ||
-                                    hours['open'] == '24 Hours'
-                                ? "00:00 AM"
-                                : hours['open']);
-                        DateFormat openformat = DateFormat('H:mm');
-                        String openHours = openformat.format(op);
-
-                        var opsarry = openHours.split(":");
-                        int Open_Hour = int.parse(opsarry[0]);
-                        int Open_min = int.parse(opsarry[1]);
-                        // Open and Time Format End
-                        // Open and Time Format Start
-                        DateTime cls = DateFormat('hh:mm a').parseLoose(
-                            hours['cls'] == "off" || hours['cls'] == '24 Hours'
-                                ? "00:00 AM"
-                                : hours['cls']);
-                        DateFormat clsformat = DateFormat('H:mm');
-                        String clsHours = openformat.format(cls);
-                        var clsarry = clsHours.split(":");
-                        int cls_Hour = int.parse(clsarry[0]);
-                        int cls_min = int.parse(clsarry[1]);
-                        // Open and Time Format End
-
-                        if (((Open_Hour <= curr_Hour &&
-                                    cls_Hour >= curr_Hour) ||
-                                (Open_Hour == 0 || cls_Hour == 0) ||
-                                (hours['open'] == "24 Hours" ||
-                                    hours['cls'] == "24 Hours")) &&
-                            (hours['open'] != 'off' || hours['cls'] != 'off')) {
-                          if ((Open_Hour == curr_Hour
-                                  ? Open_min <= curr_min
-                                  : true) ||
-                              (cls_Hour == curr_Hour
-                                  ? cls_min <= curr_min
-                                  : true)) {
-                            return StreamBuilder<
-                                    DocumentSnapshot<Map<String, dynamic>>>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('user')
-                                    .doc(myUID)
-                                    .collection("Friends")
-                                    .doc(frienduid.trim())
-                                    .snapshots(),
-                                builder: (context,
-                                    AsyncSnapshot<
-                                            DocumentSnapshot<
-                                                Map<String, dynamic>>>
-                                        getuserRoomID) {
-                                  if (getuserRoomID.hasData) {
-                                    final room_id = getuserRoomID.data.data();
-                                    return Column(
+                  body: Container(
+                      child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                          future: FirebaseFirestore.instance
+                              .collection('user')
+                              .doc(myUID)
+                              .collection("Friends")
+                              .doc(frienduid)
+                              .get(),
+                          builder: (context,
+                              AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                                  getuserRoomID) {
+                            if (getuserRoomID.hasData) {
+                              final room_id = getuserRoomID.data.data();
+                              return Column(
+                                children: [
+                                  Expanded(
+                                    flex: 6,
+                                    child: FutureBuilder<QuerySnapshot>(
+                                      future: get_message
+                                          .doc(room_id['Room_ID'] ?? "")
+                                          .collection('message')
+                                          .orderBy('time', descending: true)
+                                          .get(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          return business_chat(
+                                              Room_Id: room_id['Room_ID'],
+                                              isDarkMode: isDarkMode,
+                                              myUID: myUID,
+                                              snapshot: snapshot);
+                                        } else {
+                                          return Container();
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  ///
+                                  ///
+                                  ///
+                                  ///
+                                  ///File Update Start
+                                  ///
+                                  ///
+                                  ///
+                                  ///
+                                  ///
+                                  Container(
+                                    height: 20.w,
+                                    //color: Theme.of(context).secondaryHeaderColor,
+                                    child: Row(
                                       children: [
-                                        Expanded(
-                                          flex: 6,
-                                          child: StreamBuilder<QuerySnapshot>(
-                                            stream: get_message
-                                                .doc(room_id['Room_ID'])
-                                                .collection('message')
-                                                .orderBy('time',
-                                                    descending: true)
-                                                .snapshots(),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.hasData) {
-                                                return business_chat(
-                                                    Room_Id: room_id['Room_ID'],
-                                                    isDarkMode: isDarkMode,
-                                                    myUID: myUID,
-                                                    snapshot: snapshot);
-                                              } else {
-                                                return Container();
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                        Container(
-                                          height: 20.w,
-                                          color: Theme.of(context)
-                                              .secondaryHeaderColor,
-                                          child: Row(
-                                            children: [
-                                              CupertinoButton(
-                                                padding: EdgeInsets.zero,
-                                                child: SvgPicture.asset(
-                                                    "assets/svg/add_message.svg"),
-                                                onPressed: () async {
-                                                  final result = await FilePicker
-                                                      .platform
-                                                      .pickFiles(
-                                                          allowMultiple: false,
-                                                          type: FileType.custom,
-                                                          allowedExtensions: [
-                                                        'png',
-                                                        'jpg',
-                                                        'gif'
-                                                      ]);
-
-                                                  if (result != null) {
-                                                    final path = result
-                                                        .files.single.path;
-                                                    final name = result
-                                                        .files.single.name;
-                                                    context
-                                                        .read<
-                                                            PhotouploadCubit>()
-                                                        .updateData(
-                                                            path, name, name)
-                                                        .then(
-                                                      (value) async {
-                                                        String imagurl =
-                                                            await firebase_storage
-                                                                .FirebaseStorage
-                                                                .instance
-                                                                .ref(
-                                                                    'userimage/${name}/${name}')
-                                                                .getDownloadURL();
-
-                                                        if (imagurl != null) {
-                                                          setState(() {
-                                                            messagesend(
-                                                                message:
-                                                                    imagurl,
-                                                                message_type:
-                                                                    'image');
-                                                          });
-                                                        }
-                                                      },
-                                                    );
+                                        CupertinoButton(
+                                          padding: EdgeInsets.zero,
+                                          child: SvgPicture.asset(
+                                              "assets/svg/add_message.svg"),
+                                          onPressed: () async {
+                                            final result = await FilePicker.platform
+                                                .pickFiles(
+                                                    allowMultiple: false,
+                                                    type: FileType.custom,
+                                                    allowedExtensions: [
+                                                  'png',
+                                                  'jpg',
+                                                  'gif'
+                                                ]);
+        
+                                            if (result != null) {
+                                              final path = result.files.single.path;
+                                              final name = result.files.single.name;
+                                              context
+                                                  .read<PhotouploadCubit>()
+                                                  .updateData(path, name, name)
+                                                  .then(
+                                                (value) async {
+                                                  String imagurl =
+                                                      await firebase_storage
+                                                          .FirebaseStorage.instance
+                                                          .ref('userimage//')
+                                                          .getDownloadURL();
+        
+                                                  if (imagurl != null) {
+                                                    setState(() {
+                                                      messagesend(
+                                                          message: imagurl,
+                                                          message_type: 'image');
+                                                    });
                                                   }
                                                 },
-                                              ),
-                                              Expanded(
-                                                child: Theme(
-                                                  data: ThemeData(),
-                                                  child: ChatComposer(
-                                                    controller: messaage,
-                                                    padding: const EdgeInsets
-                                                            .symmetric(
-                                                        vertical: 10),
-                                                    onReceiveText: (str) {
-                                                      setState(() {
-                                                        messagesend(
-                                                            message: str,
-                                                            message_type:
-                                                                "text");
-
-                                                        WidgetsBinding.instance
-                                                            .addPostFrameCallback(
-                                                                (_) =>
-                                                                    _scrollDown());
-                                                        messaage.clear();
-                                                      });
-                                                    },
-                                                    onRecordEnd: (String path) {
-                                                      String name =
-                                                          path.split('/').last;
-
-                                                      context
-                                                          .read<
-                                                              PhotouploadCubit>()
-                                                          .updateData(
-                                                              path, name, name)
-                                                          .then((value) async {
-                                                        print("Done");
-                                                        String voiceurl =
-                                                            await firebase_storage
-                                                                .FirebaseStorage
-                                                                .instance
-                                                                .ref(
-                                                                    'userimage/${name}/${name}')
-                                                                .getDownloadURL();
-                                                        print(voiceurl);
-                                                        if (voiceurl != null) {
-                                                          setState(() {
-                                                            messagesend(
-                                                                message:
-                                                                    voiceurl,
-                                                                message_type:
-                                                                    'voice');
-                                                          });
-                                                        }
-                                                      });
-                                                    },
-                                                    recordIconColor:
-                                                        Theme.of(context)
-                                                            .iconTheme
-                                                            .color,
-                                                    sendButtonColor:
-                                                        Theme.of(context)
-                                                            .iconTheme
-                                                            .color,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    sendButtonBackgroundColor:
-                                                        Colors.transparent,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        ///
+                                        ///
+                                        ///
+                                        ///
+                                        ///
+                                        ///Text Input Bar Start
+                                        ///
+                                        ///
+                                        ///
+                                        Expanded(
+                                          child: Theme(
+                                            data: ThemeData(),
+                                            child: ChatComposer(
+                                              controller: messaage,
+                                              padding: const EdgeInsets.symmetric(
+                                                  vertical: 10),
+                                              onReceiveText: (str) {
+                                                setState(() {
+                                                  messagesend(
+                                                      message: str,
+                                                      message_type: "text");
+        
+                                                  WidgetsBinding.instance
+                                                      .addPostFrameCallback(
+                                                          (_) => _scrollDown());
+                                                  messaage.clear();
+                                                });
+                                              },
+                                              onRecordEnd: (String path) {
+                                                String name = path.split('/').last;
+        
+                                                context
+                                                    .read<PhotouploadCubit>()
+                                                    .updateData(path, name, name)
+                                                    .then((value) async {
+                                                  print("Done");
+                                                  String voiceurl =
+                                                      await firebase_storage
+                                                          .FirebaseStorage.instance
+                                                          .ref('userimage//')
+                                                          .getDownloadURL();
+                                                  print(voiceurl);
+                                                  if (voiceurl != null) {
+                                                    setState(() {
+                                                      messagesend(
+                                                          message: voiceurl,
+                                                          message_type: 'voice');
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                              recordIconColor:
+                                                  Theme.of(context).iconTheme.color,
+                                              sendButtonColor:
+                                                  Theme.of(context).iconTheme.color,
+                                              backgroundColor: Colors.transparent,
+                                              sendButtonBackgroundColor:
+                                                  Colors.transparent,
+                                            ),
                                           ),
                                         ),
+                                        ///
+                                        ///
+                                        ///
+                                        ///
+                                        ///END
+                                        ///
+                                        ///
+                                        ///
+                                        ///
                                       ],
-                                    );
-                                  } else {
-                                    return Center(
-                                      child: CupertinoActivityIndicator(
-                                          color: Theme.of(context)
-                                              .iconTheme
-                                              .color),
-                                    );
-                                  }
-                                });
-                          } else {
-                            return Container(
-                              height: double.infinity,
-                              width: double.infinity,
-                              color: Theme.of(context).secondaryHeaderColor,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 10.w,
                                     ),
-                                    Text(
-                                      "We’re closed,\nsorry! ",
-                                      style: TextStyle(
-                                          fontSize: 25.sp,
-                                          color:
-                                              Theme.of(context).iconTheme.color,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      height: 20.w,
-                                    ),
-                                    Center(
-                                      child: SvgPicture.asset(
-                                          'assets/svg/closed_sign.svg'),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
-                          }
-                        } else {
-                          return Container(
-                            height: double.infinity,
-                            width: double.infinity,
-                            color: Theme.of(context).secondaryHeaderColor,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    height: 10.w,
                                   ),
-                                  Text(
-                                    "We’re closed,\nsorry! ",
-                                    style: TextStyle(
-                                        fontSize: 25.sp,
-                                        color:
-                                            Theme.of(context).iconTheme.color,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 20.w,
-                                  ),
-                                  Center(
-                                    child: SvgPicture.asset(
-                                        'assets/svg/closed_sign.svg'),
-                                  )
                                 ],
-                              ),
-                            ),
-                          );
-                        }
-                      } else {
-                        return Center(
-                          child: CupertinoActivityIndicator(
-                              color: Theme.of(context).iconTheme.color),
-                        );
-                      }
-                    }),
-              )),
+                              );
+                            } else {
+                              return Center(
+                                child: CupertinoActivityIndicator(
+                                    color: Theme.of(context).iconTheme.color),
+                              );
+                            }
+                          }))),
+      
+     
         );
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///PROFILE CHAT START
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
+        ///
       } else if (getdatadate is getprofileData) {
         return Scaffold(
           backgroundColor: Colors.transparent,
@@ -1177,7 +1238,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                       (value) async {
                                         String imagurl = await firebase_storage
                                             .FirebaseStorage.instance
-                                            .ref('userimage/${name}/${name}')
+                                            .ref('userimage//')
                                             .getDownloadURL();
 
                                         if (imagurl != null) {
@@ -1219,7 +1280,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                                         print("Done");
                                         String voiceurl = await firebase_storage
                                             .FirebaseStorage.instance
-                                            .ref('userimage/${name}/${name}')
+                                            .ref('userimage//')
                                             .getDownloadURL();
                                         print(voiceurl);
                                         if (voiceurl != null) {
@@ -1259,5 +1320,17 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
         return Container();
       }
     });
+  }
+
+  Future<BusinessHours> GetBusinessStaus({String businessId}) async {
+    var response = await Dio().get(
+        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$businessId&key=AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
+    if (response.statusCode == 200) {
+      print("200");
+      BusinessHours data = BusinessHours.fromJson(response.data);
+      print(data.openingHours.periods[0].close.day);
+      print(data);
+      return data;
+    }
   }
 }

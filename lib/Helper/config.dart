@@ -1,6 +1,4 @@
 const String GOOGLEMAPAPI = "AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw";
 
-const String AccessToken =
-    "pk.eyJ1IjoieW1vaGFtbWEiLCJhIjoiY2w1b2FtdmMyMWJyNzNvcGp5dG5pNnN2ZCJ9.KxrDItenUn0DVreNxN1gfQ";
-
-const String MapStyle = "mapbox/dark-v10";
+const String YELPAPIKEY =
+    "LG_z_QZOz4VXWamKZ1QHU9gCoYJkP_a-b3KVYYjf2406yaf4peBhZTuwYF5SRLD8Z1Gvcpb4YsLsbNHxGGCZbTMvoPyWsad2Z3k8bEqqYN0D-z60dZ9bkjpOKbnmYnYx";

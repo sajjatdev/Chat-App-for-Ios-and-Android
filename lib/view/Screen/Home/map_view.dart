@@ -1,11 +1,17 @@
 import 'dart:async';
+import 'package:chatting/Helper/config.dart';
 import 'package:chatting/Helper/enum.dart';
+import 'package:chatting/logic/YelpSearch/yelp_search_cubit.dart';
+
+import 'package:chatting/model/yelp/yelp_model.dart';
+
+import 'package:getwidget/getwidget.dart';
 import 'package:map_launcher/map_launcher.dart' as direction;
-import "dart:math" show pi;
+
+import 'package:http/http.dart' as http;
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/Helper/mapstyle/light.dart';
 import 'package:chatting/logic/BusinessInfoGet/business_info_get_cubit.dart';
-import 'package:chatting/logic/Google_Search/cubit/map_search_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/view/Screen/business/businessintro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,16 +22,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:galleryimage/galleryimage.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:getwidget/components/rating/gf_rating.dart';
 import 'package:google_geocoding/google_geocoding.dart' as geocode;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:latlong2/latlong.dart' as latlng;
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:lottie/lottie.dart' as lottic;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
+import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 
 class Map_view extends StatefulWidget {
   const Map_view({Key key}) : super(key: key);
@@ -36,10 +41,11 @@ class Map_view extends StatefulWidget {
 
 class _Map_viewState extends State<Map_view> {
   TextEditingController search = TextEditingController();
+  TextEditingController address = TextEditingController();
   List<Marker> _markers = [];
   Completer<GoogleMapController> _controller = Completer();
   List<String> valueadd = [];
-  List<SearchResult> MarkerDataList;
+  List<Businesses> MarkerDataList;
   bool hiden_show = false;
   bool isloading = false;
   int list_item;
@@ -48,7 +54,7 @@ class _Map_viewState extends State<Map_view> {
   String myID;
   Filtermap fileterzoom = Filtermap.None;
   Position position = Position();
-  int markerIdCounter = 1;
+
   List<String> Image = [];
   List<AutocompletePrediction> predictions = [];
   bool connectionChecker = false;
@@ -56,14 +62,15 @@ class _Map_viewState extends State<Map_view> {
   int oldindex = 0;
   int radius = 2;
   int clickindex = 0;
+  bool Termclearhideshow = false;
+  bool Addressclearhideshow = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    BlocProvider.of<MapSearchCubit>(context).DefaultMapDataFirebase();
     getmyuid();
-    Permission.location.request().isGranted;
   }
 
   void getmyuid() async {
@@ -85,7 +92,7 @@ class _Map_viewState extends State<Map_view> {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
-    BlocProvider.of<MapSearchCubit>(context).DefaultMapDataFirebase();
+
     return LoadingOverlay(
       isLoading: isloading,
       progressIndicator:
@@ -98,8 +105,8 @@ class _Map_viewState extends State<Map_view> {
                 return Scaffold(
                     body: FutureBuilder<Position>(
                         future: determinePosition(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
+                        builder: (context, locationLatLng) {
+                          if (locationLatLng.hasData) {
                             return Stack(
                               children: [
                                 BlocConsumer<MapSearchCubit, MapSearchState>(
@@ -192,165 +199,121 @@ class _Map_viewState extends State<Map_view> {
                                       setState(() {
                                         isloading = false;
                                         MarkerDataList =
-                                            state.GetDataFormGoogle;
+                                            state.GetDataFormGoogle.businesses;
                                       });
 
-                                      if (fileterzoom == Filtermap.None) {
-                                        final GoogleMapController controller =
-                                            await _controller.future;
-                                        controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                          target: LatLng(
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lat,
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lng),
-                                          zoom: 14.4746,
-                                        )));
-                                      } else if (fileterzoom ==
-                                          Filtermap.Nearme) {
-                                        final GoogleMapController controller =
-                                            await _controller.future;
-                                        controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                          target: LatLng(
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lat,
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lng),
-                                          zoom: 14.4746,
-                                        )));
-                                      } else if (fileterzoom ==
-                                          Filtermap.city) {
-                                        final GoogleMapController controller =
-                                            await _controller.future;
-                                        controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                          target: LatLng(
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lat,
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lng),
-                                          zoom: 8.4746,
-                                        )));
-                                      } else if (fileterzoom ==
-                                          Filtermap.Country) {
-                                        final GoogleMapController controller =
-                                            await _controller.future;
-                                        controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                          target: LatLng(
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lat,
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lng),
-                                          zoom: 5.4746,
-                                        )));
-                                      } else if (fileterzoom ==
-                                          Filtermap.NoLimit) {
-                                        final GoogleMapController controller =
-                                            await _controller.future;
-                                        controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                          target: LatLng(
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lat,
-                                              state.GetDataFormGoogle[0]
-                                                  .geometry.location.lng),
-                                          zoom: .5,
-                                        )));
-                                      }
-
                                       for (var i = 1;
-                                          i < state.GetDataFormGoogle.length;
+                                          i <
+                                              state.GetDataFormGoogle.businesses
+                                                  .length;
                                           i++) {
-                                        print(
-                                            state.GetDataFormGoogle[i].placeId);
                                         await checkbusiness(
-                                                id: state.GetDataFormGoogle[i]
-                                                    .placeId)
+                                                id: state.GetDataFormGoogle
+                                                    .businesses[i].id)
                                             .then((value) async {
+                                          if (state.ismoveSearch == false) {
+                                            final GoogleMapController
+                                                controller =
+                                                await _controller.future;
+                                            controller.animateCamera(
+                                                CameraUpdate.newCameraPosition(
+                                                    CameraPosition(
+                                              target: LatLng(
+                                                  state
+                                                      .GetDataFormGoogle
+                                                      .businesses[0]
+                                                      .coordinates
+                                                      .latitude,
+                                                  state
+                                                      .GetDataFormGoogle
+                                                      .businesses[0]
+                                                      .coordinates
+                                                      .longitude),
+                                              zoom: 14.4746,
+                                            )));
+                                          }
+
                                           final marker = Marker(
                                             onTap: (() {
-                                              setState(() async {
-                                                oldindex = i;
-                                                hiden_show = true;
-                                                await checkbusiness(
-                                                        id: state
-                                                            .GetDataFormGoogle[
-                                                                i]
-                                                            .placeId)
-                                                    .then((value) async {
-                                                  print(value);
-                                                  final GoogleMapController
-                                                      controller =
-                                                      await _controller.future;
-                                                  controller.animateCamera(
-                                                      CameraUpdate
-                                                          .newCameraPosition(
-                                                              CameraPosition(
-                                                    target: LatLng(
-                                                        state
-                                                            .GetDataFormGoogle[
-                                                                i]
-                                                            .geometry
-                                                            .location
-                                                            .lat,
-                                                        state
-                                                            .GetDataFormGoogle[
-                                                                i]
-                                                            .geometry
-                                                            .location
-                                                            .lng),
-                                                    zoom: 14.4746,
-                                                  )));
-                                                  final marker = Marker(
-                                                    onTap: (() {
-                                                      setState(() {
-                                                        oldindex = i;
-                                                        hiden_show = true;
-                                                      });
-                                                    }),
-                                                    markerId:
-                                                        MarkerId(i.toString()),
-                                                    position: LatLng(
-                                                        state
-                                                            .GetDataFormGoogle[
-                                                                i]
-                                                            .geometry
-                                                            .location
-                                                            .lat,
-                                                        state
-                                                            .GetDataFormGoogle[
-                                                                i]
-                                                            .geometry
-                                                            .location
-                                                            .lng),
-                                                    icon: await MarkerIcon.svgAsset(
-                                                        assetName: value
-                                                            ? "assets/markerIcon/se.svg"
-                                                            : "assets/markerIcon/ese.svg",
-                                                        context: context,
-                                                        size: 12.w),
-                                                  );
+                                              try {
+                                                setState(() async {
+                                                  oldindex = i;
+                                                  hiden_show = true;
+                                                  await checkbusiness(
+                                                          id: state
+                                                              .GetDataFormGoogle
+                                                              .businesses[i]
+                                                              .id)
+                                                      .then((value) async {
+                                                    print(value);
+                                                    final GoogleMapController
+                                                        controller =
+                                                        await _controller
+                                                            .future;
+                                                    controller.animateCamera(
+                                                        CameraUpdate
+                                                            .newCameraPosition(
+                                                                CameraPosition(
+                                                      target: LatLng(
+                                                          state
+                                                              .GetDataFormGoogle
+                                                              .businesses[i]
+                                                              .coordinates
+                                                              .latitude,
+                                                          state
+                                                              .GetDataFormGoogle
+                                                              .businesses[i]
+                                                              .coordinates
+                                                              .longitude),
+                                                      zoom: 18.4746,
+                                                    )));
+                                                    final marker = Marker(
+                                                      onTap: (() {
+                                                        setState(() {
+                                                          oldindex = i;
+                                                          hiden_show = true;
+                                                        });
+                                                      }),
+                                                      markerId: MarkerId(
+                                                          i.toString()),
+                                                      position: LatLng(
+                                                          state
+                                                              .GetDataFormGoogle
+                                                              .businesses[i]
+                                                              .coordinates
+                                                              .latitude,
+                                                          state
+                                                              .GetDataFormGoogle
+                                                              .businesses[i]
+                                                              .coordinates
+                                                              .longitude),
+                                                      icon: await MarkerIcon.svgAsset(
+                                                          assetName: value
+                                                              ? "assets/markerIcon/se.svg"
+                                                              : "assets/markerIcon/ese.svg",
+                                                          context: context,
+                                                          size: 12.w),
+                                                    );
 
-                                                  setState(() {
-                                                    _markers[i] = marker;
+                                                    setState(() {
+                                                      _markers[i] = marker;
+                                                    });
                                                   });
                                                 });
-                                              });
+                                              } catch (e) {}
                                             }),
                                             markerId: MarkerId(i.toString()),
                                             position: LatLng(
-                                                state.GetDataFormGoogle[i]
-                                                    .geometry.location.lat,
-                                                state.GetDataFormGoogle[i]
-                                                    .geometry.location.lng),
+                                                state
+                                                    .GetDataFormGoogle
+                                                    .businesses[i]
+                                                    .coordinates
+                                                    .latitude,
+                                                state
+                                                    .GetDataFormGoogle
+                                                    .businesses[i]
+                                                    .coordinates
+                                                    .longitude),
                                             icon: await MarkerIcon.svgAsset(
                                                 assetName: value
                                                     ? "assets/markerIcon/un.svg"
@@ -365,35 +328,7 @@ class _Map_viewState extends State<Map_view> {
                                         });
                                       }
                                     }
-                                    if (state is MoveSearch) {
-                                      for (var i = 0;
-                                          i < state.MoveSearchs.length;
-                                          i++) {
-                                        await checkbusiness(
-                                                id: state
-                                                    .MoveSearchs[i].placeId)
-                                            .then((value) async {
-                                          final markers = Marker(
-                                            markerId: MarkerId(i.toString()),
-                                            position: LatLng(
-                                                state.MoveSearchs[i].geometry
-                                                    .location.lat,
-                                                state.MoveSearchs[i].geometry
-                                                    .location.lng),
-                                            icon: await MarkerIcon.svgAsset(
-                                                assetName: value
-                                                    ? "assets/markerIcon/un.svg"
-                                                    : "assets/markerIcon/eun.svg",
-                                                context: context,
-                                                size: 12.w),
-                                          );
 
-                                          setState(() {
-                                            _markers.add(markers);
-                                          });
-                                        });
-                                      }
-                                    }
                                     if (state is error) {
                                       setState(() {
                                         isloading = false;
@@ -401,33 +336,6 @@ class _Map_viewState extends State<Map_view> {
                                     }
                                   }),
                                   builder: (context, state) {
-                                    if (state is MoveSearch) {
-                                      return GoogleMap(
-                                        onCameraMove: ((position) {
-                                          setState(() {
-                                            lat = position.target.latitude;
-                                            lng = position.target.longitude;
-                                            areaSearch = true;
-                                          });
-                                        }),
-                                        markers: Set.from(_markers),
-                                        myLocationButtonEnabled: true,
-                                        myLocationEnabled: true,
-                                        zoomControlsEnabled: false,
-                                        mapType: MapType.normal,
-                                        initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
-                                          zoom: 14.4746,
-                                        ),
-                                        onMapCreated:
-                                            (GoogleMapController controller) {
-                                          _controller.complete(controller);
-                                          controller.setMapStyle(
-                                              isDarkMode ? dark : light);
-                                        },
-                                      );
-                                    }
                                     if (state is GetDataformGoogle) {
                                       return GoogleMap(
                                         onCameraMove: ((position) {
@@ -439,12 +347,13 @@ class _Map_viewState extends State<Map_view> {
                                         }),
                                         markers: Set.from(_markers),
                                         mapType: MapType.normal,
-                                        myLocationButtonEnabled: true,
+                                        myLocationButtonEnabled: false,
                                         myLocationEnabled: true,
                                         zoomControlsEnabled: false,
                                         initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
+                                          target: LatLng(
+                                              locationLatLng.data.latitude,
+                                              locationLatLng.data.longitude),
                                           zoom: 14.4746,
                                         ),
                                         onMapCreated:
@@ -463,12 +372,13 @@ class _Map_viewState extends State<Map_view> {
                                         }),
                                         markers: Set.from(_markers),
                                         mapType: MapType.normal,
-                                        myLocationButtonEnabled: true,
+                                        myLocationButtonEnabled: false,
                                         myLocationEnabled: true,
                                         zoomControlsEnabled: false,
                                         initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
+                                          target: LatLng(
+                                              locationLatLng.data.latitude,
+                                              locationLatLng.data.longitude),
                                           zoom: 14.4746,
                                         ),
                                         onMapCreated:
@@ -485,12 +395,13 @@ class _Map_viewState extends State<Map_view> {
                                         }),
                                         markers: Set.from(_markers),
                                         mapType: MapType.normal,
-                                        myLocationButtonEnabled: true,
+                                        myLocationButtonEnabled: false,
                                         myLocationEnabled: true,
                                         zoomControlsEnabled: false,
                                         initialCameraPosition: CameraPosition(
-                                          target: LatLng(snapshot.data.latitude,
-                                              snapshot.data.longitude),
+                                          target: LatLng(
+                                              locationLatLng.data.latitude,
+                                              locationLatLng.data.longitude),
                                           zoom: 14.4746,
                                         ),
                                         onMapCreated:
@@ -511,7 +422,7 @@ class _Map_viewState extends State<Map_view> {
                                 ///area Search
                                 if (areaSearch) ...[
                                   Positioned(
-                                      top: 30.w,
+                                      top: 50.w,
                                       left: 0,
                                       right: 0,
                                       child: Padding(
@@ -523,7 +434,7 @@ class _Map_viewState extends State<Map_view> {
                                               context
                                                   .read<MapSearchCubit>()
                                                   .MapMoveSearchdata(
-                                                    Address: search.text,
+                                                    Categoery: search.text,
                                                     lat: lat,
                                                     lng: lng,
                                                   )
@@ -580,7 +491,7 @@ class _Map_viewState extends State<Map_view> {
 
                                 if (predictions.isNotEmpty) ...[
                                   Positioned(
-                                    top: 30.w,
+                                    top: 35.w,
                                     left: 0,
                                     right: 0,
                                     child: Padding(
@@ -610,27 +521,10 @@ class _Map_viewState extends State<Map_view> {
                                                 ),
                                                 onTap: () {
                                                   setState(() {
-                                                    hiden_show = true;
-
-                                                    context
-                                                        .read<MapSearchCubit>()
-                                                        .MapSearchdata(
-                                                            address:
-                                                                predictions[
-                                                                        index]
-                                                                    .description
-                                                                    .replaceAll(
-                                                                        " ",
-                                                                        "%"),
-                                                            lat:
-                                                                snapshot.data
-                                                                    .latitude,
-                                                            lng: snapshot
-                                                                .data.longitude,
-                                                            radius: radius)
-                                                        .then((value) {
-                                                      predictions = [];
-                                                    });
+                                                    address.text =
+                                                        predictions[index]
+                                                            .description;
+                                                    predictions = [];
                                                   });
                                                 },
                                                 title: Text(
@@ -665,413 +559,311 @@ class _Map_viewState extends State<Map_view> {
                                 ///
 
                                 Positioned(
-                                  top: 25.sp,
-                                  left: 0,
-                                  right: 0,
+                                  top: 30.sp,
+                                  left: 8.sp,
+                                  right: 8.sp,
                                   child: Container(
-                                      height: 25.w,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 30,
-                                            bottom: 10,
-                                            left: 20,
-                                            right: 20),
-                                        child: TextFormField(
-                                          cursorColor:
-                                              Theme.of(context).iconTheme.color,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              hiden_show = false;
-                                            });
-                                            if (value.isNotEmpty) {
+                                    height: 35.w,
+                                    width: 100.w,
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor,
+                                        borderRadius:
+                                            BorderRadius.circular(10.sp)),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8.sp, vertical: 8.sp),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          TextFormField(
+                                            cursorColor: Theme.of(context)
+                                                .iconTheme
+                                                .color,
+                                            onChanged: (value) {
                                               setState(() {
-                                                autoCompleteSearch(value);
+                                                hiden_show = false;
                                               });
-                                            } else {
-                                              if (predictions.length > 0 &&
-                                                  mounted) {
+                                              if (value.isNotEmpty) {
                                                 setState(() {
-                                                  predictions = [];
+                                                  autoCompleteSearch(value);
                                                 });
-                                              }
-                                            }
-                                          },
-                                          controller: search,
-                                          validator: (value) => value.isEmpty
-                                              ? "Name can't be blank"
-                                              : null,
-                                          onFieldSubmitted: (value) {
-                                            setState(() {
-                                              hiden_show = false;
-                                              isloading = true;
-                                              String searchkey = value;
-                                              _markers = [];
-                                              predictions = [];
-                                              markerIdCounter = 0;
-                                              BlocProvider.of<
-                                                          BusinessInfoGetCubit>(
-                                                      context)
-                                                  .isClosed;
-                                              context
-                                                  .read<MapSearchCubit>()
-                                                  .MapSearchdata(
-                                                      address: searchkey
-                                                          .replaceAll(" ", "%"),
-                                                      lat: snapshot
-                                                          .data.latitude,
-                                                      lng: snapshot
-                                                          .data.longitude,
-                                                      radius: radius);
-                                            });
-                                          },
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
-                                              fontSize: 12.sp),
-                                          decoration: InputDecoration(
-                                            suffixIcon: IconButton(
-                                                onPressed: () {
-                                                  showModalBottomSheet(
-                                                      backgroundColor: Theme.of(
-                                                              context)
-                                                          .secondaryHeaderColor,
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: <Widget>[
-                                                            SizedBox(
-                                                              height: 2.w,
-                                                            ),
-                                                            GestureDetector(
-                                                                onTap: search
-                                                                        .text
-                                                                        .isEmpty
-                                                                    ? null
-                                                                    : () {
-                                                                        setState(
-                                                                            () {
-                                                                          isloading =
-                                                                              true;
-                                                                        });
-                                                                        context
-                                                                            .read<
-                                                                                MapSearchCubit>()
-                                                                            .FilterMap(
-                                                                                address: search.text.replaceAll(" ", "%"),
-                                                                                radius: 30)
-                                                                            .then((value) {
-                                                                          setState(
-                                                                              () {
-                                                                            fileterzoom =
-                                                                                Filtermap.Nearme;
-                                                                          });
-                                                                          Navigator.of(context)
-                                                                              .pop();
-                                                                        });
-                                                                      },
-                                                                child:
-                                                                    Container(
-                                                                  height: 10.w,
-                                                                  width: 50.w,
-                                                                  decoration: fileterzoom !=
-                                                                          Filtermap
-                                                                              .Nearme
-                                                                      ? BoxDecoration()
-                                                                      : BoxDecoration(
-                                                                          border: Border.all(
-                                                                              width: 1,
-                                                                              color: Colors.grey),
-                                                                          borderRadius: BorderRadius.circular(5.sp)),
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  child: Text(
-                                                                    "Near me",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .blue,
-                                                                        fontSize: 15
-                                                                            .sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                )),
-                                                            SizedBox(
-                                                              height: 2.w,
-                                                            ),
-                                                            GestureDetector(
-                                                                onTap: search
-                                                                        .text
-                                                                        .isEmpty
-                                                                    ? null
-                                                                    : () {
-                                                                        setState(
-                                                                            () {
-                                                                          isloading =
-                                                                              true;
-                                                                        });
-                                                                        context
-                                                                            .read<
-                                                                                MapSearchCubit>()
-                                                                            .FilterMap(
-                                                                                address: search.text.replaceAll(" ", "%"),
-                                                                                radius: 1000 * pi.toInt())
-                                                                            .then((value) {
-                                                                          setState(
-                                                                              () {
-                                                                            fileterzoom =
-                                                                                Filtermap.city;
-                                                                          });
-                                                                          Navigator.of(context)
-                                                                              .pop();
-                                                                        });
-                                                                      },
-                                                                child:
-                                                                    Container(
-                                                                  height: 10.w,
-                                                                  width: 50.w,
-                                                                  decoration: fileterzoom !=
-                                                                          Filtermap
-                                                                              .city
-                                                                      ? BoxDecoration()
-                                                                      : BoxDecoration(
-                                                                          border: Border.all(
-                                                                              width: 1,
-                                                                              color: Colors.grey),
-                                                                          borderRadius: BorderRadius.circular(5.sp)),
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  child: Text(
-                                                                    "City",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .blue,
-                                                                        fontSize: 15
-                                                                            .sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                )),
-                                                            SizedBox(
-                                                              height: 2.w,
-                                                            ),
-                                                            GestureDetector(
-                                                                onTap: search
-                                                                        .text
-                                                                        .isEmpty
-                                                                    ? null
-                                                                    : () {
-                                                                        setState(
-                                                                            () {
-                                                                          isloading =
-                                                                              true;
-                                                                        });
-                                                                        context
-                                                                            .read<
-                                                                                MapSearchCubit>()
-                                                                            .FilterMap(
-                                                                                address: search.text.replaceAll(" ", "%"),
-                                                                                radius: 100000 * pi.toInt())
-                                                                            .then((value) {
-                                                                          setState(
-                                                                              () {
-                                                                            fileterzoom =
-                                                                                Filtermap.Country;
-                                                                          });
-                                                                          Navigator.of(context)
-                                                                              .pop();
-                                                                        });
-                                                                      },
-                                                                child:
-                                                                    Container(
-                                                                  height: 10.w,
-                                                                  width: 50.w,
-                                                                  decoration: fileterzoom !=
-                                                                          Filtermap
-                                                                              .Country
-                                                                      ? BoxDecoration()
-                                                                      : BoxDecoration(
-                                                                          border: Border.all(
-                                                                              width: 1,
-                                                                              color: Colors.grey),
-                                                                          borderRadius: BorderRadius.circular(5.sp)),
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  child: Text(
-                                                                    "Country",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .blue,
-                                                                        fontSize: 15
-                                                                            .sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                )),
-                                                            SizedBox(
-                                                              height: 2.w,
-                                                            ),
-                                                            GestureDetector(
-                                                                onTap: search
-                                                                        .text
-                                                                        .isEmpty
-                                                                    ? null
-                                                                    : () {
-                                                                        setState(
-                                                                            () {
-                                                                          isloading =
-                                                                              true;
-                                                                        });
-                                                                        context
-                                                                            .read<
-                                                                                MapSearchCubit>()
-                                                                            .FilterMap(
-                                                                                address: search.text.replaceAll(" ", "%"),
-                                                                                radius: 10000000 * pi.toInt())
-                                                                            .then((value) {
-                                                                          setState(
-                                                                              () {
-                                                                            fileterzoom =
-                                                                                Filtermap.NoLimit;
-                                                                          });
-                                                                          Navigator.of(context)
-                                                                              .pop();
-                                                                        });
-                                                                      },
-                                                                child:
-                                                                    Container(
-                                                                  height: 10.w,
-                                                                  width: 50.w,
-                                                                  decoration: fileterzoom !=
-                                                                          Filtermap
-                                                                              .NoLimit
-                                                                      ? BoxDecoration()
-                                                                      : BoxDecoration(
-                                                                          border: Border.all(
-                                                                              width: 1,
-                                                                              color: Colors.grey),
-                                                                          borderRadius: BorderRadius.circular(5.sp)),
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  child: Text(
-                                                                    "No Limit",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .blue,
-                                                                        fontSize: 15
-                                                                            .sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                )),
-                                                            SizedBox(
-                                                              height: 2.w,
-                                                            ),
-                                                            TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                },
-                                                                child: Text(
-                                                                  "Cancel",
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .red,
-                                                                      fontSize:
-                                                                          15.sp,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500),
-                                                                )),
-                                                            SizedBox(
-                                                              height: 5.w,
-                                                            )
-                                                          ],
-                                                        );
-                                                      });
-                                                },
-                                                icon: SvgPicture.asset(
-                                                    'assets/svg/fi-rr-settings-sliders.svg',
-                                                    color: Theme.of(context)
-                                                        .iconTheme
-                                                        .color)),
-                                            prefixIcon: IconButton(
-                                                onPressed: () {
+                                              } else {
+                                                if (predictions.length > 0 &&
+                                                    mounted) {
                                                   setState(() {
-                                                    hiden_show = false;
-                                                    isloading = true;
-                                                    String searchkey =
-                                                        search.text;
-                                                    _markers = [];
                                                     predictions = [];
-                                                    BlocProvider.of<
-                                                                BusinessInfoGetCubit>(
-                                                            context)
-                                                        .close();
-
-                                                    context
-                                                        .read<MapSearchCubit>()
-                                                        .MapSearchdata(
-                                                            address: searchkey
-                                                                .replaceAll(
-                                                                    " ", "%"),
-                                                            lat: snapshot
-                                                                .data.latitude,
-                                                            lng: snapshot
-                                                                .data.longitude,
-                                                            radius: radius);
                                                   });
-                                                },
-                                                icon: Icon(
-                                                  Icons.search,
-                                                  color: Theme.of(context)
-                                                      .iconTheme
-                                                      .color,
-                                                )),
-                                            hintText: "Search around",
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 5),
-                                            hintStyle: TextStyle(
+                                                }
+                                              }
+                                            },
+                                            controller: address,
+                                            validator: (value) => value.isEmpty
+                                                ? "Name can't be blank"
+                                                : null,
+                                            style: TextStyle(
                                                 color: Theme.of(context)
                                                     .iconTheme
                                                     .color,
                                                 fontSize: 12.sp),
-                                            fillColor: isDarkMode
-                                                ? HexColor.fromHex("#696969")
-                                                : HexColor.fromHex("#EEEEEF"),
-                                            filled: true,
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                              borderSide: BorderSide.none,
+                                            decoration: InputDecoration(
+                                              prefixIcon: IconButton(
+                                                  onPressed: () async {
+                                                    await Geolocator
+                                                            .getCurrentPosition(
+                                                                desiredAccuracy:
+                                                                    LocationAccuracy
+                                                                        .high)
+                                                        .then((Position
+                                                            latlng) async {
+                                                      print(latlng.latitude);
+                                                      final GoogleMapController
+                                                          controller =
+                                                          await _controller
+                                                              .future;
+                                                      controller.animateCamera(
+                                                          CameraUpdate
+                                                              .newCameraPosition(
+                                                        CameraPosition(
+                                                          bearing: 0,
+                                                          target: LatLng(
+                                                              latlng.latitude,
+                                                              latlng.longitude),
+                                                          zoom: 16.0,
+                                                        ),
+                                                      ));
+                                                      controller.setMapStyle(
+                                                          isDarkMode
+                                                              ? dark
+                                                              : light);
+                                                    });
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.location_on_outlined,
+                                                    color: Theme.of(context)
+                                                        .iconTheme
+                                                        .color,
+                                                    size: 20.sp,
+                                                  )),
+                                              hintText: "Current Location",
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 5),
+                                              hintStyle: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .iconTheme
+                                                      .color,
+                                                  fontSize: 12.sp),
+                                              fillColor: isDarkMode
+                                                  ? HexColor.fromHex("#696969")
+                                                  : HexColor.fromHex("#EEEEEF"),
+                                              filled: true,
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5.sp),
+                                                      borderSide:
+                                                          BorderSide.none),
+                                              errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5.sp),
+                                                  borderSide: BorderSide.none),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5.sp),
+                                                  borderSide: BorderSide.none),
                                             ),
-                                            focusedErrorBorder:
-                                                OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.0),
-                                                    borderSide:
-                                                        BorderSide.none),
-                                            errorBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
-                                                borderSide: BorderSide.none),
-                                            enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
-                                                borderSide: BorderSide.none),
                                           ),
-                                        ),
-                                      )),
+
+                                          // Search Box Start
+                                          TextFormField(
+                                            cursorColor: Theme.of(context)
+                                                .iconTheme
+                                                .color,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                hiden_show = false;
+                                                Termclearhideshow = true;
+                                              });
+                                            },
+                                            controller: search,
+                                            validator: (value) => value.isEmpty
+                                                ? "Name can't be blank"
+                                                : null,
+                                            onFieldSubmitted: (value) async {
+                                              setState(() {
+                                                hiden_show = false;
+                                                isloading = true;
+                                                String searchkey = value;
+                                                _markers = [];
+                                                predictions = [];
+
+                                                if (address.text.isNotEmpty) {
+                                                  BlocProvider.of<
+                                                              BusinessInfoGetCubit>(
+                                                          context)
+                                                      .isClosed;
+                                                  context
+                                                      .read<MapSearchCubit>()
+                                                      .MapSearchdata(
+                                                        address: address.text,
+                                                        Categoery: value,
+                                                      );
+                                                } else {
+                                                  Geolocator.getCurrentPosition(
+                                                          desiredAccuracy:
+                                                              LocationAccuracy
+                                                                  .high)
+                                                      .then((Position lanLat) {
+                                                    BlocProvider.of<
+                                                                BusinessInfoGetCubit>(
+                                                            context)
+                                                        .isClosed;
+                                                    context
+                                                        .read<MapSearchCubit>()
+                                                        .MapSearchWithLatLng(
+                                                          lat: lanLat.latitude,
+                                                          lng: lanLat.longitude,
+                                                          term: value,
+                                                        );
+                                                  });
+                                                }
+                                              });
+                                            },
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .iconTheme
+                                                    .color,
+                                                fontSize: 12.sp),
+                                            decoration: InputDecoration(
+                                              suffixIcon: Termclearhideshow
+                                                  ? IconButton(
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          search.clear();
+                                                          predictions = [];
+                                                          Termclearhideshow =
+                                                              false;
+                                                        });
+                                                      },
+                                                      icon: Icon(
+                                                        CupertinoIcons.clear,
+                                                        color: Theme.of(context)
+                                                            .iconTheme
+                                                            .color,
+                                                      ))
+                                                  : null,
+                                              prefixIcon: IconButton(
+                                                  onPressed: search.text.isEmpty
+                                                      ? null
+                                                      : () {
+                                                          setState(() {
+                                                            hiden_show = false;
+                                                            isloading = true;
+                                                            String searchkey =
+                                                                search.text;
+                                                            _markers = [];
+                                                            predictions = [];
+                                                            if (address.text
+                                                                    .isNotEmpty &&
+                                                                search.text
+                                                                    .isNotEmpty) {
+                                                              BlocProvider.of<
+                                                                          BusinessInfoGetCubit>(
+                                                                      context)
+                                                                  .isClosed;
+                                                              context
+                                                                  .read<
+                                                                      MapSearchCubit>()
+                                                                  .MapSearchdata(
+                                                                    address:
+                                                                        address
+                                                                            .text,
+                                                                    Categoery:
+                                                                        search
+                                                                            .text,
+                                                                  );
+                                                            } else {
+                                                              BlocProvider.of<
+                                                                          BusinessInfoGetCubit>(
+                                                                      context)
+                                                                  .isClosed;
+                                                              context
+                                                                  .read<
+                                                                      MapSearchCubit>()
+                                                                  .MapSearchWithLatLng(
+                                                                    lat: locationLatLng
+                                                                        .data
+                                                                        .latitude,
+                                                                    lng: locationLatLng
+                                                                        .data
+                                                                        .longitude,
+                                                                    term: search
+                                                                        .text,
+                                                                  );
+                                                            }
+                                                          });
+                                                        },
+                                                  icon: Icon(
+                                                    Icons.search,
+                                                    color: Theme.of(context)
+                                                        .iconTheme
+                                                        .color,
+                                                  )),
+                                              hintText: "Search around",
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 5),
+                                              hintStyle: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .iconTheme
+                                                      .color,
+                                                  fontSize: 12.sp),
+                                              fillColor: isDarkMode
+                                                  ? HexColor.fromHex("#696969")
+                                                  : HexColor.fromHex("#EEEEEF"),
+                                              filled: true,
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(5.sp),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5.sp),
+                                                      borderSide:
+                                                          BorderSide.none),
+                                              errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5.sp),
+                                                  borderSide: BorderSide.none),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5.sp),
+                                                  borderSide: BorderSide.none),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 ////
                                 ///
@@ -1099,11 +891,17 @@ class _Map_viewState extends State<Map_view> {
                                         },
                                         builder: (context, state) {
                                           if (state is GetDataformGoogle) {
-                                            return Positioned(
+                                            return AnimatedPositioned(
+                                              curve: Curves.easeInBack,
+                                              duration: const Duration(
+                                                  milliseconds: 300),
                                               bottom: 20.sp,
                                               left: 0,
                                               right: 0,
-                                              child: Container(
+                                              child: AnimatedContainer(
+                                                curve: Curves.easeInBack,
+                                                duration: const Duration(
+                                                    milliseconds: 300),
                                                 height: 75.w,
                                                 child: Padding(
                                                   padding: EdgeInsets.symmetric(
@@ -1115,6 +913,7 @@ class _Map_viewState extends State<Map_view> {
                                                         viewportFraction: 1),
                                                     itemCount: state
                                                         .GetDataFormGoogle
+                                                        .businesses
                                                         .length,
                                                     scrollDirection:
                                                         Axis.horizontal,
@@ -1129,9 +928,10 @@ class _Map_viewState extends State<Map_view> {
                                                         });
                                                         await checkbusiness(
                                                                 id: state
-                                                                    .GetDataFormGoogle[
+                                                                    .GetDataFormGoogle
+                                                                    .businesses[
                                                                         oldindex]
-                                                                    .placeId)
+                                                                    .id)
                                                             .then(
                                                                 (value) async {
                                                           final marker = Marker(
@@ -1148,17 +948,17 @@ class _Map_viewState extends State<Map_view> {
                                                                     .toString()),
                                                             position: LatLng(
                                                                 state
-                                                                    .GetDataFormGoogle[
+                                                                    .GetDataFormGoogle
+                                                                    .businesses[
                                                                         oldindex]
-                                                                    .geometry
-                                                                    .location
-                                                                    .lat,
+                                                                    .coordinates
+                                                                    .latitude,
                                                                 state
-                                                                    .GetDataFormGoogle[
+                                                                    .GetDataFormGoogle
+                                                                    .businesses[
                                                                         oldindex]
-                                                                    .geometry
-                                                                    .location
-                                                                    .lng),
+                                                                    .coordinates
+                                                                    .longitude),
                                                             icon: await MarkerIcon.svgAsset(
                                                                 assetName: value
                                                                     ? "assets/markerIcon/un.svg"
@@ -1177,9 +977,10 @@ class _Map_viewState extends State<Map_view> {
 
                                                       await checkbusiness(
                                                               id: state
-                                                                  .GetDataFormGoogle[
+                                                                  .GetDataFormGoogle
+                                                                  .businesses[
                                                                       index]
-                                                                  .placeId)
+                                                                  .id)
                                                           .then((value) async {
                                                         print(value);
                                                         final GoogleMapController
@@ -1192,18 +993,18 @@ class _Map_viewState extends State<Map_view> {
                                                                     CameraPosition(
                                                           target: LatLng(
                                                               state
-                                                                  .GetDataFormGoogle[
+                                                                  .GetDataFormGoogle
+                                                                  .businesses[
                                                                       index]
-                                                                  .geometry
-                                                                  .location
-                                                                  .lat,
+                                                                  .coordinates
+                                                                  .latitude,
                                                               state
-                                                                  .GetDataFormGoogle[
+                                                                  .GetDataFormGoogle
+                                                                  .businesses[
                                                                       index]
-                                                                  .geometry
-                                                                  .location
-                                                                  .lng),
-                                                          zoom: 14.4746,
+                                                                  .coordinates
+                                                                  .longitude),
+                                                          zoom: 18.4746,
                                                         )));
                                                         final marker = Marker(
                                                           onTap: (() {
@@ -1216,17 +1017,17 @@ class _Map_viewState extends State<Map_view> {
                                                               index.toString()),
                                                           position: LatLng(
                                                               state
-                                                                  .GetDataFormGoogle[
+                                                                  .GetDataFormGoogle
+                                                                  .businesses[
                                                                       index]
-                                                                  .geometry
-                                                                  .location
-                                                                  .lat,
+                                                                  .coordinates
+                                                                  .latitude,
                                                               state
-                                                                  .GetDataFormGoogle[
+                                                                  .GetDataFormGoogle
+                                                                  .businesses[
                                                                       index]
-                                                                  .geometry
-                                                                  .location
-                                                                  .lng),
+                                                                  .coordinates
+                                                                  .longitude),
                                                           icon: await MarkerIcon.svgAsset(
                                                               assetName: value
                                                                   ? "assets/markerIcon/se.svg"
@@ -1250,250 +1051,249 @@ class _Map_viewState extends State<Map_view> {
                                                             MainAxisAlignment
                                                                 .end,
                                                         children: [
-                                                          Container(
-                                                            width: 90.w,
-                                                            child: Card(
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            15.0),
-                                                              ),
-                                                              child: Padding(
-                                                                padding: EdgeInsets
-                                                                    .symmetric(
-                                                                        vertical:
-                                                                            2.w),
-                                                                child: Column(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      if (state
-                                                                              .GetDataFormGoogle[index]
-                                                                              .photos !=
-                                                                          null) ...[
-                                                                        Padding(
-                                                                          padding: EdgeInsets.symmetric(
-                                                                              horizontal: 2.w,
-                                                                              vertical: 0),
-                                                                          child:
-                                                                              Theme(
-                                                                            data:
-                                                                                ThemeData(progressIndicatorTheme: ProgressIndicatorThemeData(color: Theme.of(context).iconTheme.color)),
-                                                                            child:
-                                                                                GalleryImage(
-                                                                              numOfShowImages: imagelen(state.GetDataFormGoogle[index].photos.length),
-                                                                              imageUrls: List.from(state.GetDataFormGoogle[index].photos.map((e) => "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${e.photoReference}&key=AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw")),
-                                                                              titleGallery: "Photo",
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                      ListTile(
-                                                                          dense:
-                                                                              true,
-                                                                          minVerticalPadding:
-                                                                              0,
-                                                                          visualDensity: const VisualDensity(
-                                                                              horizontal:
-                                                                                  0,
-                                                                              vertical:
-                                                                                  -4),
-                                                                          trailing:
-                                                                              Column(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.start,
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.end,
-                                                                            children: [
-                                                                              SizedBox(
-                                                                                height: 2.w,
-                                                                              ),
-                                                                              if (state.GetDataFormGoogle[index].openingHours != null) ...[
-                                                                                if (state.GetDataFormGoogle[index].openingHours.openNow) ...[
-                                                                                  Text(
-                                                                                    "open",
-                                                                                    style: TextStyle(fontSize: 12.sp, color: Colors.green),
-                                                                                  )
-                                                                                ] else ...[
-                                                                                  Text(
-                                                                                    "close",
-                                                                                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
-                                                                                  )
-                                                                                ]
-                                                                              ]
-                                                                            ],
-                                                                          ),
-                                                                          title:
-                                                                              Text(
-                                                                            state.GetDataFormGoogle[index].name,
-                                                                            style: TextStyle(
-                                                                                fontSize: 15.sp,
-                                                                                color: Theme.of(context).iconTheme.color,
-                                                                                fontWeight: FontWeight.bold),
-                                                                          ),
-                                                                          subtitle:
-                                                                              Row(
-                                                                            children: [
-                                                                              if (state.GetDataFormGoogle[index].rating != null) ...[
-                                                                                GFRating(
-                                                                                  size: 12.sp,
-                                                                                  value: double.parse(state.GetDataFormGoogle[index].rating.toString() ?? "0.0"),
-                                                                                  color: Colors.orange,
-                                                                                ),
-                                                                              ] else ...[
-                                                                                GFRating(
-                                                                                  size: 12.sp,
-                                                                                  value: 0.0,
-                                                                                  color: Colors.orange,
-                                                                                ),
-                                                                              ],
-                                                                              SizedBox(
-                                                                                width: 2.sp,
-                                                                              ),
-                                                                              Text(
-                                                                                "${state.GetDataFormGoogle[index].userRatingsTotal ?? "0"} review",
-                                                                                style: TextStyle(color: Theme.of(context).iconTheme.color),
-                                                                              )
-                                                                            ],
-                                                                          )),
-                                                                      Padding(
+                                                          FutureBuilder<
+                                                                  BusinessDetails>(
+                                                              future: YelpBusinessDetailsFutuer(
+                                                                  BusinessId: state
+                                                                      .GetDataFormGoogle
+                                                                      .businesses[
+                                                                          index]
+                                                                      .id),
+                                                              builder: (context,
+                                                                  YelpBusines_Snapshot) {
+                                                                if (YelpBusines_Snapshot
+                                                                    .hasData) {
+                                                                  return Container(
+                                                                    width: 90.w,
+                                                                    child: Card(
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(15.0),
+                                                                      ),
+                                                                      child:
+                                                                          Padding(
                                                                         padding:
-                                                                            EdgeInsets.symmetric(
-                                                                          horizontal:
-                                                                              4.w,
-                                                                        ),
-                                                                        child:
-                                                                            Row(
-                                                                          children: [
-                                                                            Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.start,
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              children: [
-                                                                                Icon(
-                                                                                  Icons.location_on,
-                                                                                  size: 12.sp,
-                                                                                ),
-                                                                                SizedBox(
-                                                                                  width: 70.w,
-                                                                                  child: Text(
-                                                                                    state.GetDataFormGoogle[index].formattedAddress,
-                                                                                    overflow: TextOverflow.ellipsis,
-                                                                                    style: TextStyle(
-                                                                                      fontSize: 12.sp,
-                                                                                      color: Theme.of(context).iconTheme.color,
+                                                                            EdgeInsets.symmetric(vertical: 2.w),
+                                                                        child: Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.center,
+                                                                            children: [
+                                                                              if (YelpBusines_Snapshot.data.photos != null) ...[
+                                                                                Padding(
+                                                                                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0),
+                                                                                  child: Theme(
+                                                                                    data: ThemeData(progressIndicatorTheme: ProgressIndicatorThemeData(color: Theme.of(context).iconTheme.color)),
+                                                                                    child: GalleryImage(
+                                                                                      numOfShowImages: imagelen(YelpBusines_Snapshot.data.photos.length),
+                                                                                      imageUrls: List.from(YelpBusines_Snapshot.data.photos.map((e) => e)),
+                                                                                      titleGallery: "Photo",
                                                                                     ),
                                                                                   ),
                                                                                 ),
                                                                               ],
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            2.w,
-                                                                      ),
-                                                                      Row(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.spaceAround,
-                                                                        children: [
-                                                                          StreamBuilder<QuerySnapshot>(
-                                                                              stream: FirebaseFirestore.instance.collection("marker").where("Business_Id", isEqualTo: state.GetDataFormGoogle[index].placeId).snapshots(),
-                                                                              builder: (context, snapshot) {
-                                                                                if (snapshot.hasData) {
-                                                                                  if (snapshot.data.docs.isNotEmpty) {
-                                                                                    return Padding(
-                                                                                      padding: EdgeInsets.symmetric(horizontal: 2.w),
-                                                                                      child: GestureDetector(
-                                                                                        onTap: () {},
-                                                                                        child: AnimatedContainer(
-                                                                                          duration: Duration(milliseconds: 300),
-                                                                                          height: 30.sp,
-                                                                                          width: 60.w,
-                                                                                          alignment: Alignment.center,
-                                                                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.sp), border: Border.all(color: Theme.of(context).iconTheme.color)),
-                                                                                          child: Text(
-                                                                                            "Connect Hangout",
-                                                                                            style: TextStyle(fontSize: 12.sp, color: Theme.of(context).iconTheme.color),
-                                                                                          ),
+                                                                              ListTile(
+                                                                                  dense: true,
+                                                                                  minVerticalPadding: 0,
+                                                                                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                                                                                  trailing: Column(
+                                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                                                                    children: [
+                                                                                      SizedBox(
+                                                                                        height: 2.w,
+                                                                                      ),
+                                                                                      if (YelpBusines_Snapshot.data.isClosed) ...[
+                                                                                        Text(
+                                                                                          "open",
+                                                                                          style: TextStyle(fontSize: 12.sp, color: Colors.green),
+                                                                                        )
+                                                                                      ] else ...[
+                                                                                        Text(
+                                                                                          "close",
+                                                                                          style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                                                                                        )
+                                                                                      ]
+                                                                                    ],
+                                                                                  ),
+                                                                                  title: Text(
+                                                                                    state.GetDataFormGoogle.businesses[index].name,
+                                                                                    style: TextStyle(fontSize: 15.sp, color: Theme.of(context).iconTheme.color, fontWeight: FontWeight.bold),
+                                                                                  ),
+                                                                                  subtitle: Row(
+                                                                                    children: [
+                                                                                      if (state.GetDataFormGoogle.businesses[index].rating != null) ...[
+                                                                                        GFRating(
+                                                                                          size: 12.sp,
+                                                                                          value: double.parse(state.GetDataFormGoogle.businesses[index].rating.toString() ?? "0.0"),
+                                                                                          color: Colors.orange,
                                                                                         ),
-                                                                                      ),
-                                                                                    );
-                                                                                  } else {
-                                                                                    return Padding(
-                                                                                      padding: EdgeInsets.symmetric(horizontal: 2.w),
-                                                                                      child: GestureDetector(
-                                                                                        onTap: () {
-                                                                                          Navigator.of(context).push(MaterialPageRoute(
-                                                                                              builder: (context) => BusinessIntro(
-                                                                                                    business: state.GetDataFormGoogle[index],
-                                                                                                  )));
-                                                                                        },
-                                                                                        child: AnimatedContainer(
-                                                                                          duration: Duration(milliseconds: 300),
-                                                                                          height: 30.sp,
-                                                                                          width: 60.w,
-                                                                                          alignment: Alignment.center,
-                                                                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.sp), border: Border.all(color: Colors.grey, width: 1)),
-                                                                                          child: Text(
-                                                                                            "Create Hangout",
-                                                                                            style: TextStyle(fontSize: 12.sp, color: Theme.of(context).iconTheme.color),
-                                                                                          ),
+                                                                                      ] else ...[
+                                                                                        GFRating(
+                                                                                          size: 12.sp,
+                                                                                          value: 0.0,
+                                                                                          color: Colors.orange,
                                                                                         ),
+                                                                                      ],
+                                                                                      SizedBox(
+                                                                                        width: 2.sp,
                                                                                       ),
-                                                                                    );
-                                                                                  }
-                                                                                } else {
-                                                                                  return CupertinoActivityIndicator();
-                                                                                }
-                                                                              }),
-                                                                          Padding(
-                                                                            padding:
-                                                                                EdgeInsets.only(right: 2.w),
-                                                                            child:
-                                                                                GestureDetector(
-                                                                              onTap: () {
-                                                                                MapsSheet.show(
-                                                                                  context: context,
-                                                                                  onMapTap: (map) {
-                                                                                    map.showDirections(
-                                                                                      destination: direction.Coords(
-                                                                                        state.GetDataFormGoogle[index].geometry.location.lat,
-                                                                                        state.GetDataFormGoogle[index].geometry.location.lng,
-                                                                                      ),
-                                                                                      destinationTitle: state.GetDataFormGoogle[index].name,
-                                                                                      origin: direction.Coords(snapshot.data.latitude, snapshot.data.longitude),
-                                                                                      originTitle: "Me",
-                                                                                      directionsMode: direction.DirectionsMode.driving,
-                                                                                    );
-                                                                                  },
-                                                                                );
-                                                                              },
-                                                                              child: Container(
-                                                                                height: 30.sp,
-                                                                                width: 15.w,
-                                                                                alignment: Alignment.center,
-                                                                                decoration: BoxDecoration(
-                                                                                  color: Colors.blue,
-                                                                                  borderRadius: BorderRadius.circular(8.sp),
+                                                                                      Text(
+                                                                                        "${YelpBusines_Snapshot.data.reviewCount ?? "0"} review",
+                                                                                        style: TextStyle(color: Theme.of(context).iconTheme.color),
+                                                                                      )
+                                                                                    ],
+                                                                                  )),
+                                                                              Padding(
+                                                                                padding: EdgeInsets.symmetric(
+                                                                                  horizontal: 4.w,
                                                                                 ),
-                                                                                child: Icon(
-                                                                                  Icons.directions_run,
-                                                                                  color: Colors.white,
-                                                                                  size: 18.sp,
+                                                                                child: Row(
+                                                                                  children: [
+                                                                                    Row(
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Icon(
+                                                                                          Icons.location_on,
+                                                                                          size: 12.sp,
+                                                                                        ),
+                                                                                        SizedBox(
+                                                                                          width: 70.w,
+                                                                                          child: Text(
+                                                                                            YelpBusines_Snapshot.data.location.displayAddress[0] + " " + YelpBusines_Snapshot.data.location.displayAddress[1],
+                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                            style: TextStyle(
+                                                                                              fontSize: 12.sp,
+                                                                                              color: Theme.of(context).iconTheme.color,
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ],
                                                                                 ),
                                                                               ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
+                                                                              SizedBox(
+                                                                                height: 2.w,
+                                                                              ),
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                children: [
+                                                                                  StreamBuilder<QuerySnapshot>(
+                                                                                      stream: FirebaseFirestore.instance.collection("marker").where("Business_Id", isEqualTo: YelpBusines_Snapshot.data.id).snapshots(),
+                                                                                      builder: (context, snapshot) {
+                                                                                        if (snapshot.hasData) {
+                                                                                          if (snapshot.data.docs.isNotEmpty) {
+                                                                                            return Padding(
+                                                                                              padding: EdgeInsets.symmetric(horizontal: 2.w),
+                                                                                              child: GestureDetector(
+                                                                                                onTap: () {},
+                                                                                                child: AnimatedContainer(
+                                                                                                  duration: Duration(milliseconds: 300),
+                                                                                                  height: 30.sp,
+                                                                                                  width: 60.w,
+                                                                                                  alignment: Alignment.center,
+                                                                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.sp), border: Border.all(color: Theme.of(context).iconTheme.color)),
+                                                                                                  child: Text(
+                                                                                                    "Connect Hangout",
+                                                                                                    style: TextStyle(fontSize: 12.sp, color: Theme.of(context).iconTheme.color),
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ),
+                                                                                            );
+                                                                                          } else {
+                                                                                            return Padding(
+                                                                                              padding: EdgeInsets.symmetric(horizontal: 2.w),
+                                                                                              child: GestureDetector(
+                                                                                                onTap: () {
+                                                                                                  Navigator.of(context).push(MaterialPageRoute(
+                                                                                                      builder: (context) => BusinessIntro(
+                                                                                                            business: YelpBusines_Snapshot.data,
+                                                                                                          )));
+                                                                                                },
+                                                                                                child: AnimatedContainer(
+                                                                                                  duration: Duration(milliseconds: 300),
+                                                                                                  height: 30.sp,
+                                                                                                  width: 60.w,
+                                                                                                  alignment: Alignment.center,
+                                                                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.sp), border: Border.all(color: Colors.grey, width: 1)),
+                                                                                                  child: Text(
+                                                                                                    "Create Hangout",
+                                                                                                    style: TextStyle(fontSize: 12.sp, color: Theme.of(context).iconTheme.color),
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ),
+                                                                                            );
+                                                                                          }
+                                                                                        } else {
+                                                                                          return CupertinoActivityIndicator();
+                                                                                        }
+                                                                                      }),
+                                                                                  Padding(
+                                                                                    padding: EdgeInsets.only(right: 2.w),
+                                                                                    child: GestureDetector(
+                                                                                      onTap: () {
+                                                                                        MapsSheet.show(
+                                                                                          
+                                                                                          context: context,
+                                                                                          onMapTap: (map) {
+                                                                                            map.showDirections(
+                                                                                              
+                                                                                              destination: direction.Coords(
+                                                                                                YelpBusines_Snapshot.data.coordinates.latitude,
+                                                                                                YelpBusines_Snapshot.data.coordinates.longitude,
+                                                                                              ),
+                                                                                              destinationTitle: YelpBusines_Snapshot.data.name,
+                                                                                              origin: direction.Coords(
+                                                                                                YelpBusines_Snapshot.data.coordinates.latitude,
+                                                                                                YelpBusines_Snapshot.data.coordinates.longitude,
+                                                                                              ),
+                                                                                              originTitle: "Me",
+                                                                                              directionsMode: direction.DirectionsMode.driving,
+                                                                                            );
+                                                                                          },
+                                                                                        );
+                                                                                      },
+                                                                                      child: Container(
+                                                                                        height: 30.sp,
+                                                                                        width: 15.w,
+                                                                                        alignment: Alignment.center,
+                                                                                        decoration: BoxDecoration(
+                                                                                          color: Colors.blue,
+                                                                                          borderRadius: BorderRadius.circular(8.sp),
+                                                                                        ),
+                                                                                        child: Icon(
+                                                                                          Icons.directions_run,
+                                                                                          color: Colors.white,
+                                                                                          size: 18.sp,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ]),
                                                                       ),
-                                                                    ]),
-                                                              ),
-                                                            ),
-                                                          ),
+                                                                    ),
+                                                                  );
+                                                                } else {
+                                                                  return GFShimmer(
+                                                                      child:
+                                                                          Container(
+                                                                    height:
+                                                                        63.w,
+                                                                    width:
+                                                                        100.w,
+                                                                    decoration: BoxDecoration(
+                                                                        color: Theme.of(context)
+                                                                            .iconTheme
+                                                                            .color,
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(10.sp)),
+                                                                  ));
+                                                                }
+                                                              }),
                                                         ],
                                                       );
                                                     },
@@ -1539,6 +1339,18 @@ class _Map_viewState extends State<Map_view> {
     );
   }
 
+  Future<BusinessDetails> YelpBusinessDetailsFutuer({String BusinessId}) async {
+    try {
+      var res = await http.get(
+          Uri.parse(
+            "https://api.yelp.com/v3/businesses/${BusinessId}",
+          ),
+          headers: {"Authorization": 'bearer $YELPAPIKEY'});
+
+      return BusinessDetails.fromJson(res.body);
+    } catch (e) {}
+  }
+
   ///
   ///
   ///
@@ -1566,8 +1378,7 @@ class _Map_viewState extends State<Map_view> {
   void MaponTap(value) async {
     _markers = [];
     //Get Place Id Form Google
-    var googleGeocoding =
-        geocode.GoogleGeocoding("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
+    var googleGeocoding = geocode.GoogleGeocoding(GOOGLEMAPAPI);
     var risult = await googleGeocoding.geocoding
         .getReverse(geocode.LatLon(value.latitude, value.longitude));
 
@@ -1576,8 +1387,7 @@ class _Map_viewState extends State<Map_view> {
 
   void autoCompleteSearch(String value) async {
     try {
-      final googlePlace =
-          GooglePlace("AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
+      final googlePlace = GooglePlace(GOOGLEMAPAPI);
 
       var result = await googlePlace.queryAutocomplete.get(value);
 
@@ -1623,7 +1433,8 @@ class _Map_viewState extends State<Map_view> {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    return await Geolocator.getCurrentPosition();
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 }
 

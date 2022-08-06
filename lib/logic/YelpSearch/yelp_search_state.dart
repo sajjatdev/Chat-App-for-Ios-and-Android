@@ -1,4 +1,4 @@
-part of 'map_search_cubit.dart';
+part of 'yelp_search_cubit.dart';
 
 abstract class MapSearchState extends Equatable {
   const MapSearchState();
@@ -22,9 +22,9 @@ class MapSearchInitial extends MapSearchState {}
 class Loading extends MapSearchState {}
 
 class GetDataformGoogle extends MapSearchState {
-  final List<SearchResult> GetDataFormGoogle;
-
-  GetDataformGoogle({this.GetDataFormGoogle});
+  final YelpSearchModel GetDataFormGoogle;
+  final bool ismoveSearch;
+  GetDataformGoogle({this.ismoveSearch, this.GetDataFormGoogle});
 
   @override
   // TODO: implement props
@@ -32,7 +32,7 @@ class GetDataformGoogle extends MapSearchState {
 }
 
 class MoveSearch extends MapSearchState {
-  final List<SearchResult> MoveSearchs;
+  final YelpSearchModel MoveSearchs;
 
   MoveSearch({this.MoveSearchs});
 
