@@ -50,8 +50,6 @@ class Routers {
         return Admin_Profile.route(Room_ID: settings.arguments as String);
       case group_profile.routeName:
         return group_profile.route(UIDuser: settings.arguments as String);
-      case Create_business_Profile.routeName:
-        return Create_business_Profile.route(data: settings.arguments as Map);
       case create_group.routeName:
         return create_group.route(member_list: settings.arguments as List);
       case Seleted_list.routeName:

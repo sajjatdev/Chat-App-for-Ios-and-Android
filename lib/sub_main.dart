@@ -30,7 +30,6 @@ import 'package:sizer/sizer.dart';
 import 'package:chatting/Helper/theme_data.dart';
 import 'Services/Contact/Firebase_contact.dart';
 import 'Services/business/getMarker.dart';
-import 'logic/BusinessInfoGet/business_info_get_cubit.dart';
 import 'logic/Business_profile/business_profile_cubit.dart';
 import 'logic/Contact/contact_cubit.dart';
 import 'logic/Profile_data_get/read_data_cubit.dart';
@@ -101,8 +100,7 @@ class _ChattingState extends State<Chatting> {
           BlocProvider(
               create: (context) => MapSearchCubit(mapsearch: MapServices())
                 ..DefaultMapDataFirebase()),
-          BlocProvider(
-              create: (context) => BusinessInfoGetCubit(MapServices())),
+        
           BlocProvider(
               create: (context) =>
                   PhoneupdateCubit(AuthProvider(FirebaseAuth.instance))),

@@ -49,7 +49,7 @@ class messageing {
       FirebaseFirestore.instance
           .collection('user')
           .doc(myuid)
-          .collection('Friends')
+          .collection('Friend')
           .doc(other_uid)
           .set({
         'uid': other_uid,
@@ -60,7 +60,7 @@ class messageing {
       FirebaseFirestore.instance
           .collection('user')
           .doc(other_uid)
-          .collection('Friends')
+          .collection('Friend')
           .doc(myuid)
           .set({
         'uid': myuid,
@@ -106,7 +106,7 @@ class messageing {
         FirebaseFirestore.instance
             .collection('user')
             .doc(item)
-            .collection('Friends')
+            .collection('Friend')
             .doc(RoomID)
             .set({
           'uid': item,
@@ -121,7 +121,7 @@ class messageing {
             FirebaseFirestore.instance
                 .collection('user')
                 .doc(item)
-                .collection('Friends')
+                .collection('Friend')
                 .doc(RoomID)
                 .set({
               'uid': item,
@@ -175,7 +175,7 @@ class messageing {
           FirebaseFirestore.instance
               .collection('user')
               .doc(item)
-              .collection('Friends')
+              .collection('Friend')
               .doc(RoomID)
               .set({
             'uid': item,
@@ -211,7 +211,7 @@ class messageing {
         FirebaseFirestore.instance
             .collection('user')
             .doc(data)
-            .collection("Friends")
+            .collection("Friend")
             .doc(group_username)
             .set({
           "Room_ID": group_username,
@@ -229,7 +229,7 @@ class messageing {
     final ref = FirebaseFirestore.instance
         .collection('user')
         .doc(myuid)
-        .collection("Friends");
+        .collection("Friend");
 
     if (ischeck) {
       return ref.orderBy('time', descending: true).snapshots().map(

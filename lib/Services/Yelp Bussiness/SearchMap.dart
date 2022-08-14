@@ -10,10 +10,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
 class MapServices {
-  Dio dio = Dio();
-  Options options = Options();
-  final String SearchURL = "https://api.yelp.com/v3/businesses/search";
-
   Future<YelpSearchModel> YelpMapSearchFunction(
       {String Categoery,
       int radius,
@@ -24,7 +20,7 @@ class MapServices {
     try {
       var res = await http.get(
           Uri.parse(
-              "https://api.yelp.com/v3/businesses/search?categories=$Categoery&location=$Address&radius=500&limit=30"),
+              "https://api.yelp.com/v3/businesses/search?term=$Categoery&location=$Address&radius=500&limit=30"),
           headers: {"Authorization": "bearer $YELPAPIKEY"});
 
       if (res.statusCode == 200) {
@@ -45,7 +41,7 @@ class MapServices {
     try {
       var res = await http.get(
           Uri.parse(
-              "https://api.yelp.com/v3/businesses/search?categories=$term&latitude=$lat&longitude=$lng&radius=500&limit=30"),
+              "https://api.yelp.com/v3/businesses/search?term=$term&latitude=$lat&longitude=$lng&radius=500&limit=30"),
           headers: {"Authorization": "bearer $YELPAPIKEY"});
 
       if (res.statusCode == 200) {
@@ -64,7 +60,7 @@ class MapServices {
       try {
         var res = await http.get(
             Uri.parse(
-                "https://api.yelp.com/v3/businesses/search?categories=$Categoery&latitude=$lat&longitude=$lng&radius=500&limit=50"),
+                "https://api.yelp.com/v3/businesses/search?term=$Categoery&latitude=$lat&longitude=$lng&radius=500&limit=50"),
             headers: {"Authorization": "bearer $YELPAPIKEY"});
 
         if (res.statusCode == 200) {

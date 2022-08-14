@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 class profile_model {
+  String id;
   String fullName;
   String username;
   String imageUrl;
@@ -12,16 +13,19 @@ class profile_model {
       this.username,
       this.imageUrl,
       this.phone,
+      this.id,
       this.userStatus,
       this.lastname});
 
-  profile_model.fromJson(Map<String, dynamic> json) {
+  profile_model.fromJson(Map<String, dynamic> json, {String id}) {
     lastname = json["last_name"];
     fullName = json['first_name'];
     phone = json['Phone_number'];
     username = json['username'];
     userStatus = json['userStatus'];
     imageUrl = json['imageUrl'];
+    // ignore: prefer_initializing_formals
+    this.id = id;
   }
 
   Map<String, dynamic> toJson() {

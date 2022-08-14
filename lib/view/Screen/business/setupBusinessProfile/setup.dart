@@ -133,32 +133,19 @@ class _SetupBusinessState extends State<SetupBusiness> {
                 Spacer(),
                 GestureDetector(
                   onTap: () {
-                    if (widget.business.photos != null) {
-                      print(myuid);
-                      context
-                          .read<BusinessCreateCubit>()
-                          .Create_Business(
-                            address:
-                                widget.business.location.displayAddress[0] +
-                                    " " +
-                                    widget.business.location.displayAddress[1],
-                            description: "",
-                            latitude: widget.business.coordinates.latitude,
-                            longitude: widget.business.coordinates.longitude,
-                            imageURl: widget.business.imageUrl,
-                            Business_Name: widget.business.name,
-                            Business_Id: widget.business.id,
-                            owner: myuid,
-                            type: 'business',
-                          )
-                          .then((value) {
-                        Navigator.of(context)
-                            .pushReplacementNamed('/messageing', arguments: {
-                          'otheruid': widget.business.id,
-                          'type': 'business',
-                        });
+                    context
+                        .read<BusinessCreateCubit>()
+                        .Create_Business(
+                            isowner: true,
+                            myuid: myuid,
+                            businessDetails: widget.business)
+                        .then((value) {
+                      Navigator.of(context)
+                          .pushReplacementNamed('/messageing', arguments: {
+                        'otheruid': widget.business.id,
+                        'type': 'business',
                       });
-                    }
+                    });
                   },
                   child: Container(
                     alignment: Alignment.center,
@@ -183,7 +170,22 @@ class _SetupBusinessState extends State<SetupBusiness> {
                   height: 5.w,
                 ),
                 Button(
-                  onpress: () {},
+                  onpress: () {
+                    print(myuid);
+                    context
+                        .read<BusinessCreateCubit>()
+                        .Create_Business(
+                          isowner: false,
+                          myuid: myuid,
+                        )
+                        .then((value) {
+                      Navigator.of(context)
+                          .pushReplacementNamed('/messageing', arguments: {
+                        'otheruid': widget.business.id,
+                        'type': 'business',
+                      });
+                    });
+                  },
                   buttonenable: true,
                   widths: 65,
                   Texts: "I am NOT Business Owner",

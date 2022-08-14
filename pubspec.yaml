@@ -87,6 +87,7 @@ dependencies:
   widget_marker_google_map: ^0.0.2
   map_launcher: ^2.2.3
   phone_form_field: ^7.0.0
+  google_fonts: ^3.0.1
 
 
  

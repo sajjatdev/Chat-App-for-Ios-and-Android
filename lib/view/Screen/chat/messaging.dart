@@ -1,14 +1,12 @@
-import 'dart:convert';
-
 import 'package:chat_composer/chat_composer.dart';
 import 'package:chatting/Helper/color.dart';
+import 'package:chatting/Helper/config.dart';
 import 'package:chatting/logic/Profile_data_get/read_data_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/logic/send_message/send_message_cubit.dart';
 
 import 'package:chatting/main.dart';
-import 'package:chatting/model/business_hours.dart';
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:chatting/view/widget/widget.dart';
@@ -25,6 +23,7 @@ import 'package:google_place/google_place.dart';
 import 'package:intl/intl.dart';
 
 import 'package:sizer/sizer.dart';
+import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 
 class Messageing extends StatefulWidget {
   static const String routeName = '/messageing';
@@ -61,6 +60,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
   List mamberList;
   bool message_seen;
   bool michide = false, texthide = false;
+  String _DayName = '';
 
   @override
   void initState() {
@@ -85,6 +85,15 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
     message_status();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    try {
+      messaage.dispose();
+    } catch (e) {}
+    super.dispose();
+  }
+
   void message_status() async {
     String Room_ID = widget.data['Single_Room_ID'] ?? widget.data['otheruid'];
     try {
@@ -95,6 +104,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
           .where("sender", isNotEqualTo: myUID)
           .get()
           .then((QuerySnapshot snapshot) {
+        print(frienduid);
         setState(() {
           for (var element in snapshot.docs) {
             bool read_dara = element['read'];
@@ -114,15 +124,6 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
         print(e.toString());
       });
     }
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    try {
-      messaage.dispose();
-    } catch (e) {}
-    super.dispose();
   }
 
   void getUID() async {
@@ -605,6 +606,7 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
                     }
                   })),
         );
+
         ///
         ///
         ///
@@ -684,277 +686,160 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
         var brightness = MediaQuery.of(context).platformBrightness;
         bool isDarkMode = brightness == Brightness.dark;
         return Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: isDarkMode
-                          ? const AssetImage('assets/image/Black_Background.png')
-                          : const AssetImage('assets/image/White_Background.png'),
-                      fit: BoxFit.cover)),
-              child: Scaffold(
-                  backgroundColor: Colors.transparent,
-                  ///
-                  ///
-                  ///
-                  ///
-                  ///AppBar
-                  ///
-                  ///
-                  ///
-                  ///
-                  appBar: AppBar(
-                    elevation: 0,
-                    shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
-                    automaticallyImplyLeading: false,
-                    backgroundColor: Theme.of(context).secondaryHeaderColor,
-                    leading: IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacementNamed('/home');
-                      },
-                      icon: SvgPicture.asset(
-                        'assets/svg/left-chevron.svg',
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                    ),
-                    centerTitle: true,
-                    title: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          getdatadate.business.businessName,
-                          style: TextStyle(
-                              color: Theme.of(context).iconTheme.color,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          getdatadate.business.address,
-                          style: TextStyle(
-                              color: Colors.grey.shade500, fontSize: 10.sp),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      ///
-                      ///
-                      ///
-                      ///
-                      ///Profile 
-                      ///
-                      ///
-                      ///
-                      ///
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushNamed('/admin_profile', arguments: frienduid);
-                          },
-                          child: Stack(
-                            children: [
-                              if (getdatadate.business.imageURl
-                                  .contains("https://")) ...[
-                                CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(getdatadate.business.imageURl),
-                                  maxRadius: 15.sp,
-                                ),
-                              ] else ...[
-                                ProfilePicture(
-                                  name: getdatadate.business.imageURl,
-                                  fontsize: 15.sp,
-                                )
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                      ///
-                      ///
-                      ///
-                      ///
-                      ///
-                      ///Profiel END
-                    ],
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: isDarkMode
+                      ? const AssetImage('assets/image/Black_Background.png')
+                      : const AssetImage('assets/image/White_Background.png'),
+                  fit: BoxFit.cover)),
+          child: Scaffold(
+              backgroundColor: Colors.transparent,
+
+              ///
+              ///
+              ///
+              ///
+              ///AppBar
+              ///
+              ///
+              ///
+              ///
+              appBar: AppBar(
+                elevation: 0,
+                shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
+                automaticallyImplyLeading: false,
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
+                leading: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/home');
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/svg/left-chevron.svg',
+                    color: Theme.of(context).iconTheme.color,
                   ),
-                  body: Container(
-                      child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                          future: FirebaseFirestore.instance
-                              .collection('user')
-                              .doc(myUID)
-                              .collection("Friends")
-                              .doc(frienduid)
-                              .get(),
-                          builder: (context,
-                              AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
-                                  getuserRoomID) {
-                            if (getuserRoomID.hasData) {
-                              final room_id = getuserRoomID.data.data();
-                              return Column(
-                                children: [
-                                  Expanded(
-                                    flex: 6,
-                                    child: FutureBuilder<QuerySnapshot>(
-                                      future: get_message
-                                          .doc(room_id['Room_ID'] ?? "")
-                                          .collection('message')
-                                          .orderBy('time', descending: true)
-                                          .get(),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasData) {
-                                          return business_chat(
-                                              Room_Id: room_id['Room_ID'],
-                                              isDarkMode: isDarkMode,
-                                              myUID: myUID,
-                                              snapshot: snapshot);
-                                        } else {
-                                          return Container();
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  ///
-                                  ///
-                                  ///
-                                  ///
-                                  ///File Update Start
-                                  ///
-                                  ///
-                                  ///
-                                  ///
-                                  ///
-                                  Container(
-                                    height: 20.w,
-                                    //color: Theme.of(context).secondaryHeaderColor,
-                                    child: Row(
-                                      children: [
-                                        CupertinoButton(
-                                          padding: EdgeInsets.zero,
-                                          child: SvgPicture.asset(
-                                              "assets/svg/add_message.svg"),
-                                          onPressed: () async {
-                                            final result = await FilePicker.platform
-                                                .pickFiles(
-                                                    allowMultiple: false,
-                                                    type: FileType.custom,
-                                                    allowedExtensions: [
-                                                  'png',
-                                                  'jpg',
-                                                  'gif'
-                                                ]);
-        
-                                            if (result != null) {
-                                              final path = result.files.single.path;
-                                              final name = result.files.single.name;
-                                              context
-                                                  .read<PhotouploadCubit>()
-                                                  .updateData(path, name, name)
-                                                  .then(
-                                                (value) async {
-                                                  String imagurl =
-                                                      await firebase_storage
-                                                          .FirebaseStorage.instance
-                                                          .ref('userimage//')
-                                                          .getDownloadURL();
-        
-                                                  if (imagurl != null) {
-                                                    setState(() {
-                                                      messagesend(
-                                                          message: imagurl,
-                                                          message_type: 'image');
-                                                    });
-                                                  }
-                                                },
-                                              );
-                                            }
-                                          },
-                                        ),
-                                        ///
-                                        ///
-                                        ///
-                                        ///
-                                        ///
-                                        ///Text Input Bar Start
-                                        ///
-                                        ///
-                                        ///
-                                        Expanded(
-                                          child: Theme(
-                                            data: ThemeData(),
-                                            child: ChatComposer(
-                                              controller: messaage,
-                                              padding: const EdgeInsets.symmetric(
-                                                  vertical: 10),
-                                              onReceiveText: (str) {
-                                                setState(() {
-                                                  messagesend(
-                                                      message: str,
-                                                      message_type: "text");
-        
-                                                  WidgetsBinding.instance
-                                                      .addPostFrameCallback(
-                                                          (_) => _scrollDown());
-                                                  messaage.clear();
-                                                });
-                                              },
-                                              onRecordEnd: (String path) {
-                                                String name = path.split('/').last;
-        
-                                                context
-                                                    .read<PhotouploadCubit>()
-                                                    .updateData(path, name, name)
-                                                    .then((value) async {
-                                                  print("Done");
-                                                  String voiceurl =
-                                                      await firebase_storage
-                                                          .FirebaseStorage.instance
-                                                          .ref('userimage//')
-                                                          .getDownloadURL();
-                                                  print(voiceurl);
-                                                  if (voiceurl != null) {
-                                                    setState(() {
-                                                      messagesend(
-                                                          message: voiceurl,
-                                                          message_type: 'voice');
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                              recordIconColor:
-                                                  Theme.of(context).iconTheme.color,
-                                              sendButtonColor:
-                                                  Theme.of(context).iconTheme.color,
-                                              backgroundColor: Colors.transparent,
-                                              sendButtonBackgroundColor:
-                                                  Colors.transparent,
-                                            ),
-                                          ),
-                                        ),
-                                        ///
-                                        ///
-                                        ///
-                                        ///
-                                        ///END
-                                        ///
-                                        ///
-                                        ///
-                                        ///
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return Center(
-                                child: CupertinoActivityIndicator(
-                                    color: Theme.of(context).iconTheme.color),
-                              );
-                            }
-                          }))),
-      
-     
+                ),
+                centerTitle: true,
+                title: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      getdatadate.business.businessName,
+                      style: TextStyle(
+                          color: Theme.of(context).iconTheme.color,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      getdatadate.business.address,
+                      style: TextStyle(
+                          color: Colors.grey.shade500, fontSize: 10.sp),
+                    ),
+                  ],
+                ),
+                actions: [
+                  ///
+                  ///
+                  ///
+                  ///
+                  ///Profile
+                  ///
+                  ///
+                  ///
+                  ///
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/admin_profile', arguments: frienduid);
+                      },
+                      child: Stack(
+                        children: [
+                          if (getdatadate.business.imageURl
+                              .contains("https://")) ...[
+                            CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(getdatadate.business.imageURl),
+                              maxRadius: 15.sp,
+                            ),
+                          ] else ...[
+                            ProfilePicture(
+                              name: getdatadate.business.imageURl,
+                              fontsize: 15.sp,
+                            )
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  ///
+                  ///
+                  ///
+                  ///
+                  ///
+                  ///Profiel END
+                ],
+              ),
+              body: Container(
+                  child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      future: FirebaseFirestore.instance
+                          .collection('user')
+                          .doc(myUID)
+                          .collection("Friend")
+                          .doc(frienduid)
+                          .get(),
+                      builder: (context,
+                          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                              getuserRoomID) {
+                        if (getuserRoomID.hasData) {
+                          final room_id = getuserRoomID.data.data();
+                          return Column(
+                            children: [
+                              Expanded(
+                                flex: 6,
+                                child: FutureBuilder<QuerySnapshot>(
+                                  future: get_message
+                                      .doc(room_id['Room_ID'])
+                                      .collection('message')
+                                      .orderBy('time', descending: true)
+                                      .get(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return business_chat(
+                                          Room_Id: room_id['Room_ID'],
+                                          isDarkMode: isDarkMode,
+                                          myUID: myUID,
+                                          snapshot: snapshot);
+                                    } else {
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ),
+
+                              ///
+                              ///
+                              ///
+                              ///
+                              ///File Update Start
+                              ///
+                              ///
+                              ///
+                              ///
+                              ///
+                            ],
+                          );
+                        } else {
+                          return Center(
+                            child: CupertinoActivityIndicator(
+                                color: Theme.of(context).iconTheme.color),
+                          );
+                        }
+                      }))),
         );
+
         ///
         ///
         ///
@@ -1320,17 +1205,5 @@ class _MessageingState extends State<Messageing> with WidgetsBindingObserver {
         return Container();
       }
     });
-  }
-
-  Future<BusinessHours> GetBusinessStaus({String businessId}) async {
-    var response = await Dio().get(
-        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$businessId&key=AIzaSyBuXdZID9cJRjTQ_DKW6rMIBsWYHSDIFjw");
-    if (response.statusCode == 200) {
-      print("200");
-      BusinessHours data = BusinessHours.fromJson(response.data);
-      print(data.openingHours.periods[0].close.day);
-      print(data);
-      return data;
-    }
   }
 }

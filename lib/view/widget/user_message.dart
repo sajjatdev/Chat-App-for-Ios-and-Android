@@ -1,5 +1,6 @@
 import 'package:chatting/Helper/Shimmer.dart';
 import 'package:chatting/Helper/time.dart';
+import 'package:chatting/view/Screen/business/chat/ChatView.dart';
 import 'package:chatting/view/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +14,11 @@ import '../../model/get_message_list.dart';
 class Message_user_list extends StatelessWidget {
   const Message_user_list({
     Key key,
-    @required this.data,
+    @required this.data, this.uid,
   }) : super(key: key);
 
   final Get_message_list data;
+  final String uid;
 
   @override
   Widget build(BuildContext context) {
@@ -114,11 +116,16 @@ class Message_user_list extends StatelessWidget {
                 String imagecheck = Room_Data['imageURl'];
                 return ListTile(
                   onTap: () {
-                    Navigator.of(context).pushNamed('/messageing', arguments: {
-                      'mamber_list': Room_Data['customer'],
-                      'type': Room_Data['type'],
-                      'otheruid': Room_Data['Business_Id'],
-                    });
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ChatView(
+                              roomId: Room_Data['Business_Id'],
+                              uid: uid,
+                            )));
+                    // Navigator.of(context).pushNamed('/messageing', arguments: {
+                    //   'mamber_list': Room_Data['customer'],
+                    //   'type': Room_Data['type'],
+                    //   'otheruid': Room_Data['Business_Id'],
+                    // });
                   },
                   title: Text(
                     Room_Data['Business_Name'],

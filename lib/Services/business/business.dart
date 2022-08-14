@@ -1,6 +1,7 @@
 import 'package:chatting/model/business_hours.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_place/google_place.dart';
+import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 
 class Business_Services {
   final FirebaseFirestore firebaseFirestore;
@@ -8,84 +9,118 @@ class Business_Services {
   Business_Services(FirebaseFirestore firestore)
       : firebaseFirestore = firestore ?? FirebaseFirestore.instance;
 
-  Future<void> create_business(
-      {String address,
-      var latitude,
-      var longitude,
-      String imageURl,
-      String Business_Name,
-      String Business_Id,
-      String owner,
-      String description,
-      List customer,
-      SearchResult BusinessHours,
-      String type}) async {
+  Future<void> create_business({
+    bool isowner,
+    String myuid,
+    BusinessDetails businessDetails,
+  }) async {
+    print(businessDetails.name);
     List days = [
       "Monday",
       "Tuesday",
       "Wednesday",
       "Thursday",
-      "Friday:",
+      "Friday",
       "Saturday",
       "Sunday",
     ];
 
-    await firebaseFirestore.collection('chat').doc(Business_Id).set({
-      'Business_Name': Business_Name,
-      "Business_Id": Business_Id,
-      "imageURl": imageURl,
-      "owner": [owner],
+    await firebaseFirestore.collection('chat').doc(businessDetails.id).set({
+      'Business_Name': businessDetails.name,
+      "Business_Id": businessDetails.id,
+      "imageURl": businessDetails.imageUrl ?? businessDetails.name,
+      "owner": isowner ? [myuid] : [],
+      "admin": [myuid],
       "business_date_and_time": DateTime.now().millisecondsSinceEpoch,
-      "description": description,
-      "customer": customer,
+      "description": "",
+      "customer": [myuid],
       "message_type": null,
-      "type": type,
-      "latitude": latitude,
-      "longitude": longitude,
-      "address": address,
+      "type": "business",
+      "latitude": businessDetails.coordinates.latitude,
+      "longitude": businessDetails.coordinates.longitude,
+      "address": businessDetails.location.displayAddress[0] +
+          " " +
+          businessDetails.location.displayAddress[1],
       "business_status": true,
       "Last_Time": DateTime.now().millisecondsSinceEpoch.toString(),
     }).then((value) {
-      for (var i = 0; i < BusinessHours.openingHours.weekdayText.length; i++) {
-        if (BusinessHours.openingHours.weekdayText[i].split(":")[1].trim() !=
-            "Closed") {
-          FirebaseFirestore.instance
-              .collection('chat')
-              .doc(Business_Id)
-              .collection("Business_Hours")
-              .doc(days[i])
-              .set({"open":BusinessHours.openingHours.periods[i].open.time});
-        }
-      }
-      firebaseFirestore
-          .collection('chat')
-          .doc(Business_Id)
-          .collection("Request_notification")
-          .doc("re");
-      firebaseFirestore
-          .collection('user')
-          .doc(owner)
-          .collection("Friends")
-          .doc(Business_Id)
-          .set({
-        "Room_ID": Business_Id,
-        "time": DateTime.now().millisecondsSinceEpoch.toString(),
-        "type": type,
-        "uid": Business_Id,
-      });
+      print("Business Create Start");
 
-      firebaseFirestore.collection('marker').doc(Business_Id).set({
-        'Business_Name': Business_Name,
-        "Business_Id": Business_Id,
-        "imageURl": imageURl,
-        "owner": owner,
-        "description": description,
-        "customer": customer,
-        "type": type,
-        "latitude": latitude,
-        "longitude": longitude,
-        "address": address,
-      });
+      try {
+        for (var i = 0; i < businessDetails.hours.hours[0].open.length; i++) {
+          print(businessDetails.hours.hours[0].open[i].day == i
+              ? days[i]
+              : "Close");
+
+          if (businessDetails.hours.hours[0].open[i].day == i) {
+            FirebaseFirestore.instance
+                .collection('chat')
+                .doc(businessDetails.id)
+                .collection("Business_Hours")
+                .doc(days[businessDetails.hours.hours[0].open[i].day])
+                .set({
+              "day": days[businessDetails.hours.hours[0].open[i].day],
+              "open": businessDetails.hours.hours[0].open[i].start,
+              "close": businessDetails.hours.hours[0].open[i].end,
+              "isOvernight": businessDetails.hours.hours[0].open[i].isOvernight
+            });
+          } else {
+            print("Off");
+            FirebaseFirestore.instance
+                .collection('chat')
+                .doc(businessDetails.id)
+                .collection("Business_Hours")
+                .doc(days[businessDetails.hours.hours[0].open[i].day])
+                .set({
+              "day": days[businessDetails.hours.hours[0].open[i].day],
+              "Status": "Off",
+            });
+          }
+        }
+        // Notification Request Database Start
+        firebaseFirestore
+            .collection('chat')
+            .doc(businessDetails.id)
+            .collection("Request_notification")
+            .doc("re");
+        // END
+
+        // User Add Business
+        FirebaseFirestore.instance
+            .collection('user')
+            .doc(myuid)
+            .collection("Friend")
+            .doc(businessDetails.id)
+            .set({
+          "Room_ID": businessDetails.id,
+          "time": DateTime.now().millisecondsSinceEpoch.toString(),
+          "type": "business",
+          "uid": businessDetails.id,
+        });
+
+        // END
+
+        // Google Marker Add Database
+        firebaseFirestore.collection('marker').doc(businessDetails.id).set({
+          'Business_Name': businessDetails.name,
+          "Business_Id": businessDetails.id,
+          "imageURl": businessDetails.photos ?? businessDetails.name,
+          "business_date_and_time": DateTime.now().millisecondsSinceEpoch,
+          "description": "",
+          "customer": [myuid],
+          "message_type": null,
+          "type": "business",
+          "latitude": businessDetails.coordinates.latitude,
+          "longitude": businessDetails.coordinates.longitude,
+          "address": businessDetails.location.displayAddress[0] +
+              " " +
+              businessDetails.location.displayAddress[1],
+          "business_status": true,
+          "Last_Time": DateTime.now().millisecondsSinceEpoch.toString(),
+        });
+      } catch (e) {}
+
+      //END
     });
   }
 

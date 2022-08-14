@@ -162,10 +162,17 @@ class _senderState extends State<sender> {
                   SizedBox(
                     width: 1.w,
                   ),
-                  SvgPicture.asset(
-                    "assets/svg/see.svg",
-                    width: 6.w,
-                  )
+                  if (widget.Room_Data["read"] == true) ...[
+                    SvgPicture.asset(
+                      "assets/svg/see.svg",
+                      width: 6.w,
+                    )
+                  ] else ...[
+                    SvgPicture.asset(
+                      "assets/svg/unsee.svg",
+                      width: 6.w,
+                    )
+                  ],
                 ],
               ),
             ),

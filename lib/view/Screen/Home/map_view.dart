@@ -11,7 +11,6 @@ import 'package:map_launcher/map_launcher.dart' as direction;
 import 'package:http/http.dart' as http;
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/Helper/mapstyle/light.dart';
-import 'package:chatting/logic/BusinessInfoGet/business_info_get_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/view/Screen/business/businessintro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,7 +51,7 @@ class _Map_viewState extends State<Map_view> {
   double lat = 0;
   double lng = 0;
   String myID;
-  Filtermap fileterzoom = Filtermap.None;
+
   Position position = Position();
 
   List<String> Image = [];
@@ -143,7 +142,7 @@ class _Map_viewState extends State<Map_view> {
                                                         double.parse(state
                                                             .defaultdata[i]
                                                             .longitude)),
-                                                    zoom: 14.4746,
+                                                    zoom: 17.4746,
                                                   )));
                                                   final marker = Marker(
                                                     onTap: (() {
@@ -612,6 +611,8 @@ class _Map_viewState extends State<Map_view> {
                                             decoration: InputDecoration(
                                               prefixIcon: IconButton(
                                                   onPressed: () async {
+                                                    address.clear();
+                                                    
                                                     await Geolocator
                                                             .getCurrentPosition(
                                                                 desiredAccuracy:
@@ -619,7 +620,6 @@ class _Map_viewState extends State<Map_view> {
                                                                         .high)
                                                         .then((Position
                                                             latlng) async {
-                                                      print(latlng.latitude);
                                                       final GoogleMapController
                                                           controller =
                                                           await _controller
@@ -711,10 +711,7 @@ class _Map_viewState extends State<Map_view> {
                                                 predictions = [];
 
                                                 if (address.text.isNotEmpty) {
-                                                  BlocProvider.of<
-                                                              BusinessInfoGetCubit>(
-                                                          context)
-                                                      .isClosed;
+                                             
                                                   context
                                                       .read<MapSearchCubit>()
                                                       .MapSearchdata(
@@ -727,10 +724,7 @@ class _Map_viewState extends State<Map_view> {
                                                               LocationAccuracy
                                                                   .high)
                                                       .then((Position lanLat) {
-                                                    BlocProvider.of<
-                                                                BusinessInfoGetCubit>(
-                                                            context)
-                                                        .isClosed;
+                                               
                                                     context
                                                         .read<MapSearchCubit>()
                                                         .MapSearchWithLatLng(
@@ -780,10 +774,7 @@ class _Map_viewState extends State<Map_view> {
                                                                     .isNotEmpty &&
                                                                 search.text
                                                                     .isNotEmpty) {
-                                                              BlocProvider.of<
-                                                                          BusinessInfoGetCubit>(
-                                                                      context)
-                                                                  .isClosed;
+                                                        
                                                               context
                                                                   .read<
                                                                       MapSearchCubit>()
@@ -796,10 +787,7 @@ class _Map_viewState extends State<Map_view> {
                                                                             .text,
                                                                   );
                                                             } else {
-                                                              BlocProvider.of<
-                                                                          BusinessInfoGetCubit>(
-                                                                      context)
-                                                                  .isClosed;
+                                                            
                                                               context
                                                                   .read<
                                                                       MapSearchCubit>()
@@ -1235,11 +1223,9 @@ class _Map_viewState extends State<Map_view> {
                                                                                     child: GestureDetector(
                                                                                       onTap: () {
                                                                                         MapsSheet.show(
-                                                                                          
                                                                                           context: context,
                                                                                           onMapTap: (map) {
                                                                                             map.showDirections(
-                                                                                              
                                                                                               destination: direction.Coords(
                                                                                                 YelpBusines_Snapshot.data.coordinates.latitude,
                                                                                                 YelpBusines_Snapshot.data.coordinates.longitude,

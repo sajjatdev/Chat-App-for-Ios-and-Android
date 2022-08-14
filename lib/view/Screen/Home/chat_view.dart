@@ -227,7 +227,7 @@ class _chat_viewState extends State<chat_view> with WidgetsBindingObserver {
                       itemBuilder: (context, index) {
                         final data = state.contact_list[index];
 
-                        return Message_user_list(data: data);
+                        return Message_user_list(data: data,uid:myuid);
                       }),
                 );
               } else {
