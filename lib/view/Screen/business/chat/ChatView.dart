@@ -1,8 +1,12 @@
+import 'package:any_link_preview/any_link_preview.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_composer/chat_composer.dart';
 import 'package:chatting/Helper/color.dart';
 import 'package:chatting/Helper/config.dart';
+import 'package:chatting/Helper/time.dart';
 import 'package:chatting/logic/Business_profile/business_profile_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
+import 'package:chatting/logic/send_message/send_message_cubit.dart';
 import 'package:chatting/model/profile_model.dart';
 import 'package:chatting/view/Screen/business/chat/model/messagemodel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +19,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:getwidget/components/shimmer/gf_shimmer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
+import 'package:voice_message_package/voice_message_package.dart';
 import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
 import 'package:http/http.dart' as http;
 
@@ -57,7 +62,7 @@ class _ChatViewState extends State<ChatView> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          elevation: 0,
+          elevation: 2.sp,
           shadowColor: Theme.of(context).iconTheme.color.withOpacity(0.5),
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           centerTitle: true,
@@ -194,7 +199,8 @@ class _ChatViewState extends State<ChatView> {
                               return Align(
                                 alignment: Alignment.centerLeft,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1.w, vertical: 3.w),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment:
@@ -232,290 +238,38 @@ class _ChatViewState extends State<ChatView> {
                                       SizedBox(
                                         width: 5.sp,
                                       ),
-                                      Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MessageContainerWidth(
-                                                    length: MessageSnapshot
-                                                        .data[index]
-                                                        .message
-                                                        .length)
-                                                .w,
-                                            minHeight: 10.w,
-                                          ),
-                                          decoration: BoxDecoration(
-                                              color:
-                                                  HexColor.fromHex("#2D7CFE"),
-                                              borderRadius: BorderRadius.only(
-                                                  bottomRight:
-                                                      Radius.circular(10.sp),
-                                                  bottomLeft:
-                                                      Radius.circular(10.sp),
-                                                  topRight:
-                                                      Radius.circular(10.sp))),
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 3.5.w,
-                                                vertical: 3.5.w),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                StreamBuilder<profile_model>(
-                                                    stream: profileInfo(
-                                                        uid: MessageSnapshot
-                                                            .data[index]
-                                                            .sender),
-                                                    builder:
-                                                        (context, ProfileInfo) {
-                                                      if (ProfileInfo.hasData) {
-                                                        return Text(
-                                                          "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
-                                                          textAlign:
-                                                              TextAlign.start,
-                                                          style: TextStyle(
-                                                              fontSize: 12.sp,
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        );
-                                                      } else {
-                                                        return Container();
-                                                      }
-                                                    }),
-                                                SizedBox(
-                                                  height: 5.sp,
-                                                ),
-                                                Text(
-                                                  MessageSnapshot
-                                                      .data[index].message,
-                                                  textAlign: TextAlign.start,
-                                                  style: GoogleFonts.openSans(
-                                                      fontSize: 15.sp,
-                                                      color: Colors.white),
-                                                ),
-                                                SizedBox(
-                                                  height: 4.w,
-                                                ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        InkWell(
-                                                          onTap: () {
-                                                            if (MessageSnapshot
-                                                                .data[index]
-                                                                .like
-                                                                .contains(widget
-                                                                    .uid)) {
-                                                              FirebaseFirestore
-                                                                  .instance
-                                                                  .collection(
-                                                                      'chat')
-                                                                  .doc(widget
-                                                                      .roomId)
-                                                                  .collection(
-                                                                      'message')
-                                                                  .doc(MessageSnapshot
-                                                                      .data[
-                                                                          index]
-                                                                      .id)
-                                                                  .update({
-                                                                "Like": FieldValue
-                                                                    .arrayRemove([
-                                                                  widget.uid
-                                                                ])
-                                                              });
-                                                            } else {
-                                                              FirebaseFirestore
-                                                                  .instance
-                                                                  .collection(
-                                                                      'chat')
-                                                                  .doc(widget
-                                                                      .roomId)
-                                                                  .collection(
-                                                                      'message')
-                                                                  .doc(MessageSnapshot
-                                                                      .data[
-                                                                          index]
-                                                                      .id)
-                                                                  .update({
-                                                                "Like": FieldValue
-                                                                    .arrayUnion([
-                                                                  widget.uid
-                                                                ])
-                                                              });
-                                                            }
-                                                          },
-                                                          child: Container(
-                                                            height: 6.w,
-                                                            width: MessageSnapshot
-                                                                    .data[index]
-                                                                    .like
-                                                                    .isEmpty
-                                                                ? 12.w
-                                                                : 15.w,
-                                                            decoration: BoxDecoration(
-                                                                color: HexColor
-                                                                    .fromHex(
-                                                                        "#E5F2FE"),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.sp)),
-                                                            child: Row(
-                                                              children: [
-                                                                SizedBox(
-                                                                  width: 3.w,
-                                                                ),
-                                                                Expanded(
-                                                                  child:
-                                                                      SvgPicture
-                                                                          .asset(
-                                                                    "assets/svg/likechat.svg",
-                                                                    width: MessageSnapshot
-                                                                            .data[index]
-                                                                            .like
-                                                                            .isEmpty
-                                                                        ? 8.w
-                                                                        : 15.w,
-                                                                  ),
-                                                                ),
-                                                                if (MessageSnapshot
-                                                                    .data[index]
-                                                                    .like
-                                                                    .isNotEmpty) ...[
-                                                                  Expanded(
-                                                                      child:
-                                                                          Text(
-                                                                    "${MessageSnapshot.data[index].like.length}",
-                                                                    style: GoogleFonts.openSans(
-                                                                        color: HexColor.fromHex(
-                                                                            "#2C7AFF"),
-                                                                        fontWeight:
-                                                                            FontWeight.bold),
-                                                                  )),
-                                                                ]
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          width: 5.w,
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pushNamed(
-                                                                    '/comment',
-                                                                    arguments: {
-                                                                  "message_id":
-                                                                      MessageSnapshot
-                                                                          .data[
-                                                                              index]
-                                                                          .id,
-                                                                  "Room_Id":
-                                                                      widget
-                                                                          .roomId
-                                                                });
-                                                          },
-                                                          child: StreamBuilder<
-                                                                  QuerySnapshot>(
-                                                              stream: FirebaseFirestore
-                                                                  .instance
-                                                                  .collection(
-                                                                      'chat')
-                                                                  .doc(widget
-                                                                      .roomId)
-                                                                  .collection(
-                                                                      'message')
-                                                                  .doc(MessageSnapshot
-                                                                      .data[
-                                                                          index]
-                                                                      .id)
-                                                                  .collection(
-                                                                      'comment')
-                                                                  .snapshots(),
-                                                              builder: (context,
-                                                                  Commentsnapshot) {
-                                                                if (Commentsnapshot
-                                                                    .hasData) {
-                                                                  return Container(
-                                                                    height: 6.w,
-                                                                    width: Commentsnapshot
-                                                                            .data
-                                                                            .docs
-                                                                            .isEmpty
-                                                                        ? 12.w
-                                                                        : 15.w,
-                                                                    decoration: BoxDecoration(
-                                                                        color: HexColor.fromHex(
-                                                                            "#E5F2FE"),
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(8.sp)),
-                                                                    child: Row(
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width:
-                                                                              3.w,
-                                                                        ),
-                                                                        Expanded(
-                                                                          child:
-                                                                              SvgPicture.asset(
-                                                                            "assets/svg/commentcht.svg",
-                                                                            width: Commentsnapshot.data.docs.isEmpty
-                                                                                ? 8.w
-                                                                                : 15.w,
-                                                                          ),
-                                                                        ),
-                                                                        if (Commentsnapshot
-                                                                            .data
-                                                                            .docs
-                                                                            .isNotEmpty) ...[
-                                                                          Expanded(
-                                                                              child: Text(
-                                                                            "${Commentsnapshot.data.docs.length}",
-                                                                            style:
-                                                                                GoogleFonts.openSans(color: HexColor.fromHex("#2C7AFF"), fontWeight: FontWeight.bold),
-                                                                          )),
-                                                                        ]
-                                                                      ],
-                                                                    ),
-                                                                  );
-                                                                } else {
-                                                                  return Container();
-                                                                }
-                                                              }),
-                                                        )
-                                                      ],
-                                                    ),
-                                                    Text(
-                                                      "12:30 PM",
-                                                      style:
-                                                          GoogleFonts.openSans(
-                                                              fontSize: 12.sp,
-                                                              color:
-                                                                  Colors.white),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                          )),
+
+                                      ////Text Message Container
+
+                                      if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          'text') ...[
+                                        if (MessageSnapshot.data[index].message
+                                            .contains("https://")) ...[
+                                          Linkpreview(
+                                              MessageSnapshot, index, context)
+                                        ] else ...[
+                                          TextMessage(
+                                              MessageSnapshot, index, context),
+                                        ]
+                                      ] else if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          "image") ...[
+                                        // Image Message Section
+                                        Imagecontainer(
+                                            MessageSnapshot, index, context)
+                                      ] else if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          "voice") ...[
+                                        Voice_Message(
+                                            MessageSnapshot, index, context),
+                                      ],
                                     ],
                                   ),
                                 ),
                               );
                             } else {
-                              return ListTile(
+                              return const ListTile(
                                 title: Text("Client"),
                               );
                             }
@@ -578,6 +332,683 @@ class _ChatViewState extends State<ChatView> {
         ),
       ),
     );
+  }
+
+  Stack Linkpreview(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
+      int index, BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 80.w,
+          height: 64.w,
+          decoration: BoxDecoration(
+              color: HexColor.fromHex("#2D7CFE"),
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(10.sp),
+                  bottomLeft: Radius.circular(10.sp),
+                  topRight: Radius.circular(10.sp))),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(10.sp),
+                bottomLeft: Radius.circular(10.sp),
+                topRight: Radius.circular(10.sp)),
+            child: Column(
+              children: [
+                AnyLinkPreview(
+                  link: MessageSnapshot.data[index].message,
+                  displayDirection: UIDirection.uiDirectionVertical,
+                  showMultimedia: true,
+                  bodyMaxLines: 5,
+                  bodyTextOverflow: TextOverflow.ellipsis,
+                  titleStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.sp,
+                  ),
+                  bodyStyle: TextStyle(color: Colors.white, fontSize: 8.sp),
+                  backgroundColor: HexColor.fromHex("#2D7CFE"),
+
+                  removeElevation: true,
+                  borderRadius: 0,
+                  onTap: () {}, // This disables tap event
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 3.w,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        Time_Chat.readTimestamp(
+                            MessageSnapshot.data[index].time),
+                        style: GoogleFonts.openSans(
+                            fontSize: 12.sp, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -10.sp,
+          left: 8.sp,
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  if (MessageSnapshot.data[index].like.contains(widget.uid)) {
+                    FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .update({
+                      "Like": FieldValue.arrayRemove([widget.uid])
+                    });
+                  } else {
+                    FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .update({
+                      "Like": FieldValue.arrayUnion([widget.uid])
+                    });
+                  }
+                },
+                child: Container(
+                  height: 8.w,
+                  width: MessageSnapshot.data[index].like.isEmpty ? 8.w : 12.w,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2.sp),
+                      color: HexColor.fromHex("#E5F2FE"),
+                      borderRadius: BorderRadius.circular(50.sp)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: SvgPicture.asset(
+                          "assets/svg/likechat.svg",
+                          width: MessageSnapshot.data[index].like.isEmpty
+                              ? 5.w
+                              : 4.w,
+                        ),
+                      ),
+                      if (MessageSnapshot.data[index].like.isNotEmpty) ...[
+                        Expanded(
+                            child: Text(
+                          doublenumber(
+                              number: MessageSnapshot.data[index].like.length
+                                  .toString()),
+                          style: GoogleFonts.openSans(
+                              color: HexColor.fromHex("#2C7AFF"),
+                              fontWeight: FontWeight.bold),
+                        )),
+                      ]
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 5.w,
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/comment', arguments: {
+                    "message_id": MessageSnapshot.data[index].id,
+                    "Room_Id": widget.roomId
+                  });
+                },
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .collection('comment')
+                        .snapshots(),
+                    builder: (context, Commentsnapshot) {
+                      if (Commentsnapshot.hasData) {
+                        return Container(
+                          height: 8.w,
+                          width: Commentsnapshot.data.docs.isEmpty ? 8.w : 8.w,
+                          decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.sp),
+                              color: HexColor.fromHex("#E5F2FE"),
+                              borderRadius: BorderRadius.circular(50.sp)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SvgPicture.asset("assets/svg/commentcht.svg",
+                                  width: 5.5.w),
+
+                              // if (Commentsnapshot.data.docs.isNotEmpty) ...[
+                              //   Expanded(
+                              //       child: Text(
+                              //     "${Commentsnapshot.data.docs.length}",
+                              //     style: GoogleFonts.openSans(
+                              //         color: HexColor.fromHex("#2C7AFF"),
+                              //         fontWeight: FontWeight.bold),
+                              //   )),
+                              // ]
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Stack Voice_Message(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
+      int index, BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          height: 24.w,
+          width: 55.w,
+          decoration: BoxDecoration(
+              color: HexColor.fromHex("#2D7CFE"),
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(10.sp),
+                  bottomLeft: Radius.circular(10.sp),
+                  topRight: Radius.circular(10.sp))),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              VoiceMessage(
+                audioSrc: MessageSnapshot.data[index].message,
+                me: true,
+                meBgColor: HexColor.fromHex("#2D7CFE"),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      Time_Chat.readTimestamp(MessageSnapshot.data[index].time),
+                      style: GoogleFonts.openSans(
+                          fontSize: 12.sp, color: Colors.white),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+        // Like and Comment Button
+
+        Positioned(
+          bottom: -10.sp,
+          left: 8.sp,
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  if (MessageSnapshot.data[index].like.contains(widget.uid)) {
+                    FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .update({
+                      "Like": FieldValue.arrayRemove([widget.uid])
+                    });
+                  } else {
+                    FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .update({
+                      "Like": FieldValue.arrayUnion([widget.uid])
+                    });
+                  }
+                },
+                child: Container(
+                  height: 8.w,
+                  width: MessageSnapshot.data[index].like.isEmpty ? 8.w : 12.w,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2.sp),
+                      color: HexColor.fromHex("#E5F2FE"),
+                      borderRadius: BorderRadius.circular(50.sp)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: SvgPicture.asset(
+                          "assets/svg/likechat.svg",
+                          width: MessageSnapshot.data[index].like.isEmpty
+                              ? 5.w
+                              : 4.w,
+                        ),
+                      ),
+                      if (MessageSnapshot.data[index].like.isNotEmpty) ...[
+                        Expanded(
+                            child: Text(
+                          doublenumber(
+                              number: MessageSnapshot.data[index].like.length
+                                  .toString()),
+                          style: GoogleFonts.openSans(
+                              color: HexColor.fromHex("#2C7AFF"),
+                              fontWeight: FontWeight.bold),
+                        )),
+                      ]
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 5.w,
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/comment', arguments: {
+                    "message_id": MessageSnapshot.data[index].id,
+                    "Room_Id": widget.roomId
+                  });
+                },
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .collection('comment')
+                        .snapshots(),
+                    builder: (context, Commentsnapshot) {
+                      if (Commentsnapshot.hasData) {
+                        return Container(
+                          height: 8.w,
+                          width: Commentsnapshot.data.docs.isEmpty ? 8.w : 8.w,
+                          decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.sp),
+                              color: HexColor.fromHex("#E5F2FE"),
+                              borderRadius: BorderRadius.circular(50.sp)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SvgPicture.asset("assets/svg/commentcht.svg",
+                                  width: 5.5.w),
+
+                              // if (Commentsnapshot.data.docs.isNotEmpty) ...[
+                              //   Expanded(
+                              //       child: Text(
+                              //     "${Commentsnapshot.data.docs.length}",
+                              //     style: GoogleFonts.openSans(
+                              //         color: HexColor.fromHex("#2C7AFF"),
+                              //         fontWeight: FontWeight.bold),
+                              //   )),
+                              // ]
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Stack Imagecontainer(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
+      int index, BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(10.sp),
+              bottomLeft: Radius.circular(10.sp),
+              topRight: Radius.circular(10.sp)),
+          child: CachedNetworkImage(
+            imageUrl: MessageSnapshot.data[index].message,
+            width: 80.w,
+          ),
+        ),
+        Positioned(
+          right: 10.sp,
+          bottom: 5.sp,
+          child: Text(
+            Time_Chat.readTimestamp(MessageSnapshot.data[index].time),
+            style: GoogleFonts.openSans(fontSize: 12.sp, color: Colors.white),
+          ),
+        ),
+        Positioned(
+          bottom: -10.sp,
+          left: 8.sp,
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  if (MessageSnapshot.data[index].like.contains(widget.uid)) {
+                    FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .update({
+                      "Like": FieldValue.arrayRemove([widget.uid])
+                    });
+                  } else {
+                    FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .update({
+                      "Like": FieldValue.arrayUnion([widget.uid])
+                    });
+                  }
+                },
+                child: Container(
+                  height: 8.w,
+                  width: MessageSnapshot.data[index].like.isEmpty ? 8.w : 12.w,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2.sp),
+                      color: HexColor.fromHex("#E5F2FE"),
+                      borderRadius: BorderRadius.circular(50.sp)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: SvgPicture.asset(
+                          "assets/svg/likechat.svg",
+                          width: MessageSnapshot.data[index].like.isEmpty
+                              ? 5.w
+                              : 4.w,
+                        ),
+                      ),
+                      if (MessageSnapshot.data[index].like.isNotEmpty) ...[
+                        Expanded(
+                            child: Text(
+                          doublenumber(
+                              number: MessageSnapshot.data[index].like.length
+                                  .toString()),
+                          style: GoogleFonts.openSans(
+                              color: HexColor.fromHex("#2C7AFF"),
+                              fontWeight: FontWeight.bold),
+                        )),
+                      ]
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 5.w,
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/comment', arguments: {
+                    "message_id": MessageSnapshot.data[index].id,
+                    "Room_Id": widget.roomId
+                  });
+                },
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('chat')
+                        .doc(widget.roomId)
+                        .collection('message')
+                        .doc(MessageSnapshot.data[index].id)
+                        .collection('comment')
+                        .snapshots(),
+                    builder: (context, Commentsnapshot) {
+                      if (Commentsnapshot.hasData) {
+                        return Container(
+                          height: 8.w,
+                          width: 8.w,
+                          decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.sp),
+                              color: HexColor.fromHex("#E5F2FE"),
+                              borderRadius: BorderRadius.circular(50.sp)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SvgPicture.asset(
+                                "assets/svg/commentcht.svg",
+                                width: 5.5.w,
+                              ),
+
+                              // if (Commentsnapshot.data.docs.isNotEmpty) ...[
+                              //   Expanded(
+                              //       child: Text(
+                              //     "${Commentsnapshot.data.docs.length}",
+                              //     style: GoogleFonts.openSans(
+                              //         color: HexColor.fromHex("#2C7AFF"),
+                              //         fontWeight: FontWeight.bold),
+                              //   )),
+                              // ]
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Text Message Container
+  ///
+  ///
+  Container TextMessage(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
+      int index, BuildContext context) {
+    return Container(
+        constraints: BoxConstraints(
+          maxWidth: MessageContainerWidth(
+                  length: MessageSnapshot.data[index].message.length)
+              .w,
+          minHeight: 10.w,
+        ),
+        decoration: BoxDecoration(
+            color: HexColor.fromHex("#2D7CFE"),
+            borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(10.sp),
+                bottomLeft: Radius.circular(10.sp),
+                topRight: Radius.circular(10.sp))),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 3.5.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  StreamBuilder<profile_model>(
+                      stream:
+                          profileInfo(uid: MessageSnapshot.data[index].sender),
+                      builder: (context, ProfileInfo) {
+                        if (ProfileInfo.hasData) {
+                          return Text(
+                            "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          );
+                        } else {
+                          return Container();
+                        }
+                      }),
+                  SizedBox(
+                    height: 5.sp,
+                  ),
+                  //Text Message Section
+                  Text(
+                    MessageSnapshot.data[index].message,
+                    textAlign: TextAlign.start,
+                    style: GoogleFonts.openSans(
+                        fontSize: 15.sp, color: Colors.white),
+                  ),
+
+                  SizedBox(
+                    height: 4.w,
+                  ),
+                  // Message Time
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        Time_Chat.readTimestamp(
+                            MessageSnapshot.data[index].time),
+                        style: GoogleFonts.openSans(
+                            fontSize: 12.sp, color: Colors.white),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+            // Like and Comment Button
+            Positioned(
+              bottom: -10.sp,
+              left: 8.sp,
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      if (MessageSnapshot.data[index].like
+                          .contains(widget.uid)) {
+                        FirebaseFirestore.instance
+                            .collection('chat')
+                            .doc(widget.roomId)
+                            .collection('message')
+                            .doc(MessageSnapshot.data[index].id)
+                            .update({
+                          "Like": FieldValue.arrayRemove([widget.uid])
+                        });
+                      } else {
+                        FirebaseFirestore.instance
+                            .collection('chat')
+                            .doc(widget.roomId)
+                            .collection('message')
+                            .doc(MessageSnapshot.data[index].id)
+                            .update({
+                          "Like": FieldValue.arrayUnion([widget.uid])
+                        });
+                      }
+                    },
+                    child: Container(
+                      height: 8.w,
+                      width:
+                          MessageSnapshot.data[index].like.isEmpty ? 8.w : 12.w,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white, width: 2.sp),
+                          color: HexColor.fromHex("#E5F2FE"),
+                          borderRadius: BorderRadius.circular(50.sp)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: SvgPicture.asset(
+                              "assets/svg/likechat.svg",
+                              width: MessageSnapshot.data[index].like.isEmpty
+                                  ? 5.w
+                                  : 4.w,
+                            ),
+                          ),
+                          if (MessageSnapshot.data[index].like.isNotEmpty) ...[
+                            Expanded(
+                                child: Text(
+                              doublenumber(
+                                  number: MessageSnapshot
+                                      .data[index].like.length
+                                      .toString()),
+                              style: GoogleFonts.openSans(
+                                  color: HexColor.fromHex("#2C7AFF"),
+                                  fontWeight: FontWeight.bold),
+                            )),
+                          ]
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5.w,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/comment', arguments: {
+                        "message_id": MessageSnapshot.data[index].id,
+                        "Room_Id": widget.roomId
+                      });
+                    },
+                    child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('chat')
+                            .doc(widget.roomId)
+                            .collection('message')
+                            .doc(MessageSnapshot.data[index].id)
+                            .collection('comment')
+                            .snapshots(),
+                        builder: (context, Commentsnapshot) {
+                          if (Commentsnapshot.hasData) {
+                            return Container(
+                              height: 8.w,
+                              width: 8.w,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.white, width: 2.sp),
+                                  color: HexColor.fromHex("#E5F2FE"),
+                                  borderRadius: BorderRadius.circular(50.sp)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  SvgPicture.asset(
+                                    "assets/svg/commentcht.svg",
+                                    width: 5.5.w,
+                                  ),
+
+                                  // if (Commentsnapshot.data.docs.isNotEmpty) ...[
+                                  //   Expanded(
+                                  //       child: Text(
+                                  //     "${Commentsnapshot.data.docs.length}",
+                                  //     style: GoogleFonts.openSans(
+                                  //         color: HexColor.fromHex("#2C7AFF"),
+                                  //         fontWeight: FontWeight.bold),
+                                  //   )),
+                                  // ]
+                                ],
+                              ),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        }),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ));
   }
 
   ///
@@ -676,12 +1107,11 @@ class _ChatViewState extends State<ChatView> {
                       .read<PhotouploadCubit>()
                       .updateData(path, name, name)
                       .then((value) async {
-                    print("Done");
                     String voiceurl = await firebase_storage
                         .FirebaseStorage.instance
                         .ref('userimage//')
                         .getDownloadURL();
-                    print(voiceurl);
+
                     if (voiceurl != null) {
                       setState(() {
                         // messagesend(
@@ -715,7 +1145,6 @@ class _ChatViewState extends State<ChatView> {
   }
 
   int MessageContainerWidth({int length}) {
-    print(length);
     if (length <= 5) {
       return 65;
     } else if (length <= 15) {
@@ -749,6 +1178,10 @@ class _ChatViewState extends State<ChatView> {
         .toList());
   }
 
+  String doublenumber({String number}) {
+    return number.length == 1 ? "0$number" : number;
+  }
+
   Stream<BusinessDetails> YelpBusinessDetailsStream(
       {String BusinessId}) async* {
     try {
@@ -757,7 +1190,7 @@ class _ChatViewState extends State<ChatView> {
             "https://api.yelp.com/v3/businesses/${BusinessId}",
           ),
           headers: {"Authorization": 'bearer $YELPAPIKEY'});
-      print(res.body);
+
       yield BusinessDetails.fromJson(res.body);
     } catch (e) {}
   }
