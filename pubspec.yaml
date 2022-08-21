@@ -88,6 +88,7 @@ dependencies:
   map_launcher: ^2.2.3
   phone_form_field: ^7.0.0
   google_fonts: ^3.0.1
+  swipe_to: ^1.0.2
 
 
  
@@ -119,4 +120,5 @@ flutter:
     - assets/audio/
     - assets/markerIcon/
     - assets/setting_icon/
+    - assets/Business_status_icon/
 

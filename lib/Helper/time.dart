@@ -8,15 +8,15 @@ class Time_Chat {
       final diff = date2.difference(notification);
 
       if (diff.inDays > 8) {
-        return DateFormat("MMMMd").format(notification);
+        return DateFormat("MMM d").format(notification);
       } else if ((diff.inDays / 7).floor() >= 1) {
-        return DateFormat("MMMMd").format(notification);
+        return DateFormat("MMM d").format(notification);
       } else if (diff.inDays >= 2) {
-        return "${diff.inDays} d";
+        return DateFormat("MMM d").format(notification);
       } else if (diff.inDays >= 1) {
         return DateFormat("HH:mm").format(notification);
       } else if (diff.inHours >= 2) {
-        return "${diff.inHours} h";
+        return DateFormat("HH:mm").format(notification);
       } else if (diff.inDays >= 1) {
         return DateFormat("HH:mm").format(notification);
       } else if (diff.inMinutes >= 2) {
@@ -26,7 +26,7 @@ class Time_Chat {
       } else if (diff.inSeconds >= 3) {
         return "${diff.inSeconds} s";
       } else {
-        return "Just";
+        return "Now";
       }
     }
   }

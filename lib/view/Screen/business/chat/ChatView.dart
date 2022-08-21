@@ -194,7 +194,7 @@ class _ChatViewState extends State<ChatView> {
                         return SliverList(
                             delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            if (MessageSnapshot.data[index].sender ==
+                            if (MessageSnapshot.data[index].sender !=
                                 widget.uid) {
                               return Align(
                                 alignment: Alignment.centerLeft,
@@ -247,30 +247,72 @@ class _ChatViewState extends State<ChatView> {
                                         if (MessageSnapshot.data[index].message
                                             .contains("https://")) ...[
                                           Linkpreview(
-                                              MessageSnapshot, index, context)
+                                              MessageSnapshot, index, context,
+                                              is_sender: false)
                                         ] else ...[
                                           TextMessage(
-                                              MessageSnapshot, index, context),
+                                              MessageSnapshot, index, context,
+                                              is_sender: false),
                                         ]
                                       ] else if (MessageSnapshot
                                               .data[index].messageType ==
                                           "image") ...[
                                         // Image Message Section
                                         Imagecontainer(
-                                            MessageSnapshot, index, context)
+                                            MessageSnapshot, index, context,
+                                            is_sender: false)
                                       ] else if (MessageSnapshot
                                               .data[index].messageType ==
                                           "voice") ...[
                                         Voice_Message(
-                                            MessageSnapshot, index, context),
+                                            MessageSnapshot, index, context,
+                                            is_sender: false),
                                       ],
                                     ],
                                   ),
                                 ),
                               );
                             } else {
-                              return const ListTile(
-                                title: Text("Client"),
+                              return Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1.w, vertical: 3.w),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          'text') ...[
+                                        if (MessageSnapshot.data[index].message
+                                            .contains("https://")) ...[
+                                          Linkpreview(
+                                              MessageSnapshot, index, context,
+                                              is_sender: true)
+                                        ] else ...[
+                                          TextMessage(
+                                              MessageSnapshot, index, context,
+                                              is_sender: true),
+                                        ]
+                                      ] else if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          "image") ...[
+                                        // Image Message Section
+                                        Imagecontainer(
+                                            MessageSnapshot, index, context,
+                                            is_sender: true)
+                                      ] else if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          "voice") ...[
+                                        Voice_Message(
+                                            MessageSnapshot, index, context,
+                                            is_sender: true),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               );
                             }
                           },
@@ -335,24 +377,49 @@ class _ChatViewState extends State<ChatView> {
   }
 
   Stack Linkpreview(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
-      int index, BuildContext context) {
+      int index, BuildContext context,
+      {bool is_sender}) {
+    var brightness = MediaQuery.of(context).platformBrightness;
+    bool isDarkMode = brightness == Brightness.dark;
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
           width: 80.w,
-          height: 64.w,
+          height: 62.w,
           decoration: BoxDecoration(
-              color: HexColor.fromHex("#2D7CFE"),
-              borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(10.sp),
-                  bottomLeft: Radius.circular(10.sp),
-                  topRight: Radius.circular(10.sp))),
+            color: is_sender
+                ? isDarkMode
+                    ? HexColor.fromHex("#2C3333")
+                    : HexColor.fromHex("#FEFEFE")
+                : HexColor.fromHex("#2D7CFE"),
+            borderRadius: is_sender
+                ? BorderRadius.only(
+                    bottomRight: Radius.circular(10.sp),
+                    bottomLeft: Radius.circular(10.sp),
+                    topLeft: Radius.circular(10.sp))
+                : BorderRadius.only(
+                    bottomRight: Radius.circular(10.sp),
+                    bottomLeft: Radius.circular(10.sp),
+                    topRight: Radius.circular(10.sp)),
+            boxShadow: [
+              BoxShadow(
+                  spreadRadius: .5,
+                  blurRadius: .5,
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.4),
+                  offset: const Offset(0, .5))
+            ],
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(10.sp),
-                bottomLeft: Radius.circular(10.sp),
-                topRight: Radius.circular(10.sp)),
+            borderRadius: is_sender
+                ? BorderRadius.only(
+                    bottomRight: Radius.circular(10.sp),
+                    bottomLeft: Radius.circular(10.sp),
+                    topLeft: Radius.circular(10.sp))
+                : BorderRadius.only(
+                    bottomRight: Radius.circular(10.sp),
+                    bottomLeft: Radius.circular(10.sp),
+                    topRight: Radius.circular(10.sp)),
             child: Column(
               children: [
                 AnyLinkPreview(
@@ -362,12 +429,22 @@ class _ChatViewState extends State<ChatView> {
                   bodyMaxLines: 5,
                   bodyTextOverflow: TextOverflow.ellipsis,
                   titleStyle: TextStyle(
-                    color: Colors.white,
+                    color: is_sender
+                        ? Theme.of(context).iconTheme.color
+                        : Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 12.sp,
                   ),
-                  bodyStyle: TextStyle(color: Colors.white, fontSize: 8.sp),
-                  backgroundColor: HexColor.fromHex("#2D7CFE"),
+                  bodyStyle: TextStyle(
+                      color: is_sender
+                          ? Theme.of(context).iconTheme.color
+                          : Colors.white,
+                      fontSize: 8.sp),
+                  backgroundColor: is_sender
+                      ? isDarkMode
+                          ? HexColor.fromHex("#2C3333")
+                          : HexColor.fromHex("#FEFEFE")
+                      : HexColor.fromHex("#2D7CFE"),
 
                   removeElevation: true,
                   borderRadius: 0,
@@ -384,14 +461,57 @@ class _ChatViewState extends State<ChatView> {
                         Time_Chat.readTimestamp(
                             MessageSnapshot.data[index].time),
                         style: GoogleFonts.openSans(
-                            fontSize: 12.sp, color: Colors.white),
+                            fontSize: 12.sp,
+                            color: is_sender
+                                ? Theme.of(context).iconTheme.color
+                                : Colors.white),
                       ),
+                      if (is_sender) ...[
+                        SizedBox(
+                          width: 5.sp,
+                        ),
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/Business_status_icon/unsee.svg",
+                              width: 11.sp,
+                            ),
+                            SvgPicture.asset(
+                              "assets/Business_status_icon/unsee.svg",
+                              width: 11.sp,
+                            )
+                          ],
+                        )
+                      ]
                     ],
                   ),
                 )
               ],
             ),
           ),
+        ),
+        Positioned(
+          child: !is_sender
+              ? StreamBuilder<profile_model>(
+                  stream: profileInfo(uid: MessageSnapshot.data[index].sender),
+                  builder: (context, ProfileInfo) {
+                    if (ProfileInfo.hasData) {
+                      return Padding(
+                        padding: EdgeInsets.only(left: 5.w, top: 2.w),
+                        child: Text(
+                          "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  })
+              : Container(),
         ),
         Positioned(
           bottom: -10.sp,
@@ -511,28 +631,78 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
+  /// voice Message Block section
   Stack Voice_Message(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
-      int index, BuildContext context) {
+      int index, BuildContext context,
+      {bool is_sender}) {
+    var brightness = MediaQuery.of(context).platformBrightness;
+    bool isDarkMode = brightness == Brightness.dark;
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
-          height: 24.w,
+          height: !is_sender ? 30.w : 23.5.w,
           width: 55.w,
           decoration: BoxDecoration(
-              color: HexColor.fromHex("#2D7CFE"),
-              borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(10.sp),
-                  bottomLeft: Radius.circular(10.sp),
-                  topRight: Radius.circular(10.sp))),
+            color: is_sender
+                ? isDarkMode
+                    ? HexColor.fromHex("#2C3333")
+                    : HexColor.fromHex("#FEFEFE")
+                : HexColor.fromHex("#2D7CFE"),
+            borderRadius: is_sender
+                ? BorderRadius.only(
+                    bottomRight: Radius.circular(10.sp),
+                    bottomLeft: Radius.circular(10.sp),
+                    topLeft: Radius.circular(10.sp))
+                : BorderRadius.only(
+                    bottomRight: Radius.circular(10.sp),
+                    bottomLeft: Radius.circular(10.sp),
+                    topRight: Radius.circular(10.sp)),
+            boxShadow: [
+              BoxShadow(
+                  spreadRadius: .5,
+                  blurRadius: .5,
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.4),
+                  offset: const Offset(0, .5))
+            ],
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              !is_sender
+                  ? StreamBuilder<profile_model>(
+                      stream:
+                          profileInfo(uid: MessageSnapshot.data[index].sender),
+                      builder: (context, ProfileInfo) {
+                        if (ProfileInfo.hasData) {
+                          return Padding(
+                            padding: EdgeInsets.only(left: 5.w, top: 2.w),
+                            child: Text(
+                              "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        } else {
+                          return Container();
+                        }
+                      })
+                  : Container(),
               VoiceMessage(
                 audioSrc: MessageSnapshot.data[index].message,
-                me: true,
+                me: is_sender ? false : true,
                 meBgColor: HexColor.fromHex("#2D7CFE"),
+                contactFgColor: Theme.of(context).iconTheme.color,
+                contactPlayIconColor: Theme.of(context).secondaryHeaderColor,
+                contactBgColor: is_sender
+                    ? isDarkMode
+                        ? HexColor.fromHex("#2C3333")
+                        : HexColor.fromHex("#FEFEFE")
+                    : HexColor.fromHex("#2D7CFE"),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -542,8 +712,28 @@ class _ChatViewState extends State<ChatView> {
                     Text(
                       Time_Chat.readTimestamp(MessageSnapshot.data[index].time),
                       style: GoogleFonts.openSans(
-                          fontSize: 12.sp, color: Colors.white),
+                          fontSize: 12.sp,
+                          color: is_sender
+                              ? Theme.of(context).iconTheme.color
+                              : Colors.white),
                     ),
+                    if (is_sender) ...[
+                      SizedBox(
+                        width: 5.sp,
+                      ),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            "assets/Business_status_icon/unsee.svg",
+                            width: 11.sp,
+                          ),
+                          SvgPicture.asset(
+                            "assets/Business_status_icon/unsee.svg",
+                            width: 11.sp,
+                          )
+                        ],
+                      )
+                    ]
                   ],
                 ),
               )
@@ -671,7 +861,8 @@ class _ChatViewState extends State<ChatView> {
   }
 
   Stack Imagecontainer(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
-      int index, BuildContext context) {
+      int index, BuildContext context,
+      {bool is_sender}) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -686,11 +877,56 @@ class _ChatViewState extends State<ChatView> {
           ),
         ),
         Positioned(
+          child: !is_sender
+              ? StreamBuilder<profile_model>(
+                  stream: profileInfo(uid: MessageSnapshot.data[index].sender),
+                  builder: (context, ProfileInfo) {
+                    if (ProfileInfo.hasData) {
+                      return Padding(
+                        padding: EdgeInsets.only(left: 5.w, top: 2.w),
+                        child: Text(
+                          "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  })
+              : Container(),
+        ),
+        Positioned(
           right: 10.sp,
           bottom: 5.sp,
-          child: Text(
-            Time_Chat.readTimestamp(MessageSnapshot.data[index].time),
-            style: GoogleFonts.openSans(fontSize: 12.sp, color: Colors.white),
+          child: Row(
+            children: [
+              Text(
+                Time_Chat.readTimestamp(MessageSnapshot.data[index].time),
+                style:
+                    GoogleFonts.openSans(fontSize: 12.sp, color: Colors.white),
+              ),
+              if (is_sender) ...[
+                SizedBox(
+                  width: 5.sp,
+                ),
+                Row(
+                  children: [
+                    SvgPicture.asset(
+                      "assets/Business_status_icon/unsee.svg",
+                      width: 11.sp,
+                    ),
+                    SvgPicture.asset(
+                      "assets/Business_status_icon/unsee.svg",
+                      width: 11.sp,
+                    )
+                  ],
+                )
+              ]
+            ],
           ),
         ),
         Positioned(
@@ -817,7 +1053,10 @@ class _ChatViewState extends State<ChatView> {
   ///
   ///
   Container TextMessage(AsyncSnapshot<List<MessageModel>> MessageSnapshot,
-      int index, BuildContext context) {
+      int index, BuildContext context,
+      {bool is_sender}) {
+    var brightness = MediaQuery.of(context).platformBrightness;
+    bool isDarkMode = brightness == Brightness.dark;
     return Container(
         constraints: BoxConstraints(
           maxWidth: MessageContainerWidth(
@@ -826,52 +1065,77 @@ class _ChatViewState extends State<ChatView> {
           minHeight: 10.w,
         ),
         decoration: BoxDecoration(
-            color: HexColor.fromHex("#2D7CFE"),
-            borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(10.sp),
-                bottomLeft: Radius.circular(10.sp),
-                topRight: Radius.circular(10.sp))),
+          color: is_sender
+              ? isDarkMode
+                  ? HexColor.fromHex("#2C3333")
+                  : HexColor.fromHex("#FEFEFE")
+              : HexColor.fromHex("#2D7CFE"),
+          borderRadius: is_sender
+              ? BorderRadius.only(
+                  bottomRight: Radius.circular(10.sp),
+                  bottomLeft: Radius.circular(10.sp),
+                  topLeft: Radius.circular(10.sp))
+              : BorderRadius.only(
+                  bottomRight: Radius.circular(10.sp),
+                  bottomLeft: Radius.circular(10.sp),
+                  topRight: Radius.circular(10.sp)),
+          boxShadow: [
+            BoxShadow(
+                spreadRadius: .5,
+                blurRadius: .5,
+                color: Theme.of(context).iconTheme.color.withOpacity(0.4),
+                offset: const Offset(0, .5))
+          ],
+        ),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 3.5.w),
+              padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 2.w),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StreamBuilder<profile_model>(
-                      stream:
-                          profileInfo(uid: MessageSnapshot.data[index].sender),
-                      builder: (context, ProfileInfo) {
-                        if (ProfileInfo.hasData) {
-                          return Text(
-                            "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          );
-                        } else {
-                          return Container();
-                        }
-                      }),
-                  SizedBox(
-                    height: 5.sp,
-                  ),
+                  !is_sender
+                      ? StreamBuilder<profile_model>(
+                          stream: profileInfo(
+                              uid: MessageSnapshot.data[index].sender),
+                          builder: (context, ProfileInfo) {
+                            if (ProfileInfo.hasData) {
+                              return Text(
+                                "${ProfileInfo.data.fullName} ${ProfileInfo.data.lastname ?? ""}",
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: is_sender
+                                        ? Theme.of(context).iconTheme.color
+                                        : Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          })
+                      : Container(),
+                  // SizedBox(
+                  //   height: 5.sp,
+                  // ),
                   //Text Message Section
+
                   Text(
                     MessageSnapshot.data[index].message,
                     textAlign: TextAlign.start,
                     style: GoogleFonts.openSans(
-                        fontSize: 15.sp, color: Colors.white),
+                        fontSize: 15.sp,
+                        color: is_sender
+                            ? Theme.of(context).iconTheme.color
+                            : Colors.white),
                   ),
 
-                  SizedBox(
-                    height: 4.w,
-                  ),
+                  // SizedBox(
+                  //   height: 4.w,
+                  // ),
                   // Message Time
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -880,10 +1144,30 @@ class _ChatViewState extends State<ChatView> {
                         Time_Chat.readTimestamp(
                             MessageSnapshot.data[index].time),
                         style: GoogleFonts.openSans(
-                            fontSize: 12.sp, color: Colors.white),
+                            fontSize: 12.sp,
+                            color: is_sender
+                                ? Theme.of(context).iconTheme.color
+                                : Colors.white),
                       ),
+                      if (is_sender) ...[
+                        SizedBox(
+                          width: 5.sp,
+                        ),
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/Business_status_icon/unsee.svg",
+                              width: 11.sp,
+                            ),
+                            SvgPicture.asset(
+                              "assets/Business_status_icon/unsee.svg",
+                              width: 11.sp,
+                            )
+                          ],
+                        )
+                      ]
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
