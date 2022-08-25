@@ -1,10 +1,8 @@
 import 'package:chatting/Loading_page.dart';
 import 'package:chatting/view/Screen/auth/loading_view.dart';
+import 'package:chatting/view/Screen/screen.dart';
 import 'package:flutter/material.dart';
-import 'package:google_place/google_place.dart';
 import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
-
-import '../view/Screen/Screen.dart';
 
 class Routers {
   static Route onGenerateRoute(RouteSettings settings) {
@@ -17,8 +15,7 @@ class Routers {
         return Home_view.route();
       case welcome.routeName:
         return welcome.route();
-      case Feed_Home.routeName:
-        return Feed_Home.route();
+
       case profile_setup.routeName:
         return profile_setup.route();
       case Loading_view.routeName:
@@ -31,8 +28,6 @@ class Routers {
         return AddOwnerwithAdmin.route(Getadd: settings.arguments as Map);
       case owner_request.routeName:
         return owner_request.route(room_Id: settings.arguments as String);
-      case comment_page.routeName:
-        return comment_page.route(messageId: settings.arguments as Map);
       case Business_image_show.routeName:
         return Business_image_show.route(
             imageurl: settings.arguments as String);
@@ -56,8 +51,6 @@ class Routers {
         return Seleted_list.route();
       case Terms.routeName:
         return Terms.route();
-      case Messageing.routeName:
-        return Messageing.route(data: settings.arguments as Map);
       case Auth_phone.routeName:
         return Auth_phone.route();
       case OTP.routeName:

@@ -1,12 +1,9 @@
 import 'package:chatting/Helper/color.dart';
-
 import 'package:chatting/logic/Phone_Update/phoneupdate_cubit.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:sizer/sizer.dart';

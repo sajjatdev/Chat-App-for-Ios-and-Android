@@ -2,7 +2,6 @@ import 'package:chatting/Helper/color.dart';
 import 'package:chatting/logic/group_profile/group_profile_cubit.dart';
 import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/main.dart';
-import 'package:chatting/view/Screen/Group_Chat/add%20member%20and%20admin/add.dart';
 import 'package:chatting/view/Screen/Group_Chat/Profile/group_edit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,6 +13,8 @@ import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 import 'package:strings/strings.dart';
+
+import '../addmemberandadmin/add.dart';
 
 
 class group_profile extends StatefulWidget {
