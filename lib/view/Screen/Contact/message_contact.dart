@@ -50,7 +50,7 @@ class _Message_contactState extends State<Message_contact> {
 
   void getUID() {
     setState(() {
-      myuid = sharedPreferences.getString('uid');
+      myuid = sharedPreferences.getString('number');
       get_contact_number_list =
           sharedPreferences.getStringList("contact_number_list");
     });

@@ -1,9 +1,10 @@
 import 'package:chatting/Helper/color.dart';
-import 'package:chatting/view/Screen/Screen.dart';
+import 'package:chatting/view/Screen/Dashboard/chat_view.dart';
+import 'package:chatting/view/Screen/Dashboard/map_view.dart';
+import 'package:chatting/view/Screen/Dashboard/setting_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 
