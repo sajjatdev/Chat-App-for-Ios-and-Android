@@ -18,6 +18,7 @@ import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:getwidget/components/shimmer/gf_shimmer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
 import 'package:voice_message_package/voice_message_package.dart';
 import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
@@ -35,16 +36,36 @@ class ChatView extends StatefulWidget {
 }
 
 class _ChatViewState extends State<ChatView> {
+  ScrollController scrollController = ScrollController();
+  final ImagePicker _picker = ImagePicker();
+  TextEditingController message;
   @override
   void initState() {
     super.initState();
+    message = TextEditingController();
     BusinessBloc();
+
+    _scrolldown();
+  }
+
+  void _scrolldown() {
+    Future.delayed(Duration(seconds: 2), () {
+      scrollController.animateTo(scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300), curve: Curves.fastOutSlowIn);
+    });
   }
 
   void BusinessBloc() {
     context
         .read<BusinessProfileCubit>()
         .get_Business_Profile(room_id: widget.roomId);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    message.dispose();
+    super.dispose();
   }
 
   @override
@@ -137,6 +158,7 @@ class _ChatViewState extends State<ChatView> {
           children: [
             Expanded(
                 child: CustomScrollView(
+              controller: scrollController,
               slivers: [
                 SliverToBoxAdapter(
                   child: Builder(builder: (context) {
@@ -191,133 +213,141 @@ class _ChatViewState extends State<ChatView> {
                     stream: MessageList(RoomID: widget.roomId),
                     builder: (context, MessageSnapshot) {
                       if (MessageSnapshot.hasData) {
-                        return SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (MessageSnapshot.data[index].sender !=
-                                widget.uid) {
-                              return Align(
-                                alignment: Alignment.centerLeft,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 1.w, vertical: 3.w),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Align(
-                                          alignment: Alignment.topLeft,
-                                          child: StreamBuilder<profile_model>(
-                                              stream: profileInfo(
-                                                  uid: MessageSnapshot
-                                                      .data[index].sender),
-                                              builder: (context, profileimage) {
-                                                if (profileimage.hasData) {
-                                                  if (profileimage.data.imageUrl
-                                                      .contains("https://")) {
-                                                    return CircleAvatar(
-                                                      backgroundImage:
-                                                          NetworkImage(
-                                                              profileimage.data
-                                                                  .imageUrl),
-                                                    );
+                        return SliverPadding(
+                          padding: EdgeInsets.only(bottom: 5.w),
+                          sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              if (MessageSnapshot.data[index].sender !=
+                                  widget.uid) {
+                                return Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 1.w, vertical: 3.w),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Align(
+                                            alignment: Alignment.topLeft,
+                                            child: StreamBuilder<profile_model>(
+                                                stream: profileInfo(
+                                                    uid: MessageSnapshot
+                                                        .data[index].sender),
+                                                builder:
+                                                    (context, profileimage) {
+                                                  if (profileimage.hasData) {
+                                                    if (profileimage
+                                                        .data.imageUrl
+                                                        .contains("https://")) {
+                                                      return CircleAvatar(
+                                                        backgroundImage:
+                                                            NetworkImage(
+                                                                profileimage
+                                                                    .data
+                                                                    .imageUrl),
+                                                      );
+                                                    } else {
+                                                      return ProfilePicture(
+                                                        random: true,
+                                                        count: 2,
+                                                        name: profileimage
+                                                            .data.imageUrl,
+                                                      );
+                                                    }
                                                   } else {
-                                                    return ProfilePicture(
-                                                      random: true,
-                                                      count: 2,
-                                                      name: profileimage
-                                                          .data.imageUrl,
-                                                    );
+                                                    return const GFShimmer(
+                                                        child: CircleAvatar());
                                                   }
-                                                } else {
-                                                  return const GFShimmer(
-                                                      child: CircleAvatar());
-                                                }
-                                              })),
-                                      SizedBox(
-                                        width: 5.sp,
-                                      ),
+                                                })),
+                                        SizedBox(
+                                          width: 5.sp,
+                                        ),
 
-                                      ////Text Message Container
+                                        ////Text Message Container
 
-                                      if (MessageSnapshot
-                                              .data[index].messageType ==
-                                          'text') ...[
-                                        if (MessageSnapshot.data[index].message
-                                            .contains("https://")) ...[
-                                          Linkpreview(
+                                        if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            'text') ...[
+                                          if (MessageSnapshot
+                                              .data[index].message
+                                              .contains("https://")) ...[
+                                            Linkpreview(
+                                                MessageSnapshot, index, context,
+                                                is_sender: false)
+                                          ] else ...[
+                                            TextMessage(
+                                                MessageSnapshot, index, context,
+                                                is_sender: false),
+                                          ]
+                                        ] else if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            "image") ...[
+                                          // Image Message Section
+                                          Imagecontainer(
                                               MessageSnapshot, index, context,
                                               is_sender: false)
-                                        ] else ...[
-                                          TextMessage(
+                                        ] else if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            "voice") ...[
+                                          Voice_Message(
                                               MessageSnapshot, index, context,
                                               is_sender: false),
-                                        ]
-                                      ] else if (MessageSnapshot
-                                              .data[index].messageType ==
-                                          "image") ...[
-                                        // Image Message Section
-                                        Imagecontainer(
-                                            MessageSnapshot, index, context,
-                                            is_sender: false)
-                                      ] else if (MessageSnapshot
-                                              .data[index].messageType ==
-                                          "voice") ...[
-                                        Voice_Message(
-                                            MessageSnapshot, index, context,
-                                            is_sender: false),
+                                        ],
                                       ],
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            } else {
-                              return Align(
-                                alignment: Alignment.centerRight,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 1.w, vertical: 3.w),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      if (MessageSnapshot
-                                              .data[index].messageType ==
-                                          'text') ...[
-                                        if (MessageSnapshot.data[index].message
-                                            .contains("https://")) ...[
-                                          Linkpreview(
+                                );
+                              } else {
+                                return Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 1.w, vertical: 3.w),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            'text') ...[
+                                          if (MessageSnapshot
+                                              .data[index].message
+                                              .contains("https://")) ...[
+                                            Linkpreview(
+                                                MessageSnapshot, index, context,
+                                                is_sender: true)
+                                          ] else ...[
+                                            TextMessage(
+                                                MessageSnapshot, index, context,
+                                                is_sender: true),
+                                          ]
+                                        ] else if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            "image") ...[
+                                          // Image Message Section
+                                          Imagecontainer(
                                               MessageSnapshot, index, context,
                                               is_sender: true)
-                                        ] else ...[
-                                          TextMessage(
+                                        ] else if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            "voice") ...[
+                                          Voice_Message(
                                               MessageSnapshot, index, context,
                                               is_sender: true),
-                                        ]
-                                      ] else if (MessageSnapshot
-                                              .data[index].messageType ==
-                                          "image") ...[
-                                        // Image Message Section
-                                        Imagecontainer(
-                                            MessageSnapshot, index, context,
-                                            is_sender: true)
-                                      ] else if (MessageSnapshot
-                                              .data[index].messageType ==
-                                          "voice") ...[
-                                        Voice_Message(
-                                            MessageSnapshot, index, context,
-                                            is_sender: true),
+                                        ],
                                       ],
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-                          },
-                          childCount: MessageSnapshot.data.length,
-                        ));
+                                );
+                              }
+                            },
+                            childCount: MessageSnapshot.data.length,
+                          )),
+                        );
                       } else {
                         return SliverList(
                           delegate: SliverChildBuilderDelegate(
@@ -404,10 +434,10 @@ class _ChatViewState extends State<ChatView> {
                     topRight: Radius.circular(10.sp)),
             boxShadow: [
               BoxShadow(
-                  spreadRadius: .5,
-                  blurRadius: .5,
-                  color: Theme.of(context).iconTheme.color.withOpacity(0.4),
-                  offset: const Offset(0, .5))
+                  spreadRadius: .1,
+                  blurRadius: 2,
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.2),
+                  offset: const Offset(0, 1))
             ],
           ),
           child: ClipRRect(
@@ -464,7 +494,7 @@ class _ChatViewState extends State<ChatView> {
                             fontSize: 12.sp,
                             color: is_sender
                                 ? Theme.of(context).iconTheme.color
-                                : Colors.white),
+                                : Colors.grey),
                       ),
                       if (is_sender) ...[
                         SizedBox(
@@ -475,10 +505,16 @@ class _ChatViewState extends State<ChatView> {
                             SvgPicture.asset(
                               "assets/Business_status_icon/unsee.svg",
                               width: 11.sp,
+                              color: MessageSnapshot.data[index].read
+                                  ? HexColor.fromHex("#2D7CFE")
+                                  : Colors.grey,
                             ),
                             SvgPicture.asset(
                               "assets/Business_status_icon/unsee.svg",
                               width: 11.sp,
+                              color: MessageSnapshot.data[index].read
+                                  ? HexColor.fromHex("#2D7CFE")
+                                  : Colors.grey,
                             )
                           ],
                         )
@@ -660,10 +696,10 @@ class _ChatViewState extends State<ChatView> {
                     topRight: Radius.circular(10.sp)),
             boxShadow: [
               BoxShadow(
-                  spreadRadius: .5,
-                  blurRadius: .5,
-                  color: Theme.of(context).iconTheme.color.withOpacity(0.4),
-                  offset: const Offset(0, .5))
+                  spreadRadius: .1,
+                  blurRadius: 2,
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.2),
+                  offset: const Offset(0, 1))
             ],
           ),
           child: Column(
@@ -695,8 +731,9 @@ class _ChatViewState extends State<ChatView> {
               VoiceMessage(
                 audioSrc: MessageSnapshot.data[index].message,
                 me: is_sender ? false : true,
+                played: true,
                 meBgColor: HexColor.fromHex("#2D7CFE"),
-                contactFgColor: Theme.of(context).iconTheme.color,
+                contactFgColor: HexColor.fromHex("#2D7CFE"),
                 contactPlayIconColor: Theme.of(context).secondaryHeaderColor,
                 contactBgColor: is_sender
                     ? isDarkMode
@@ -715,7 +752,7 @@ class _ChatViewState extends State<ChatView> {
                           fontSize: 12.sp,
                           color: is_sender
                               ? Theme.of(context).iconTheme.color
-                              : Colors.white),
+                              : Colors.grey),
                     ),
                     if (is_sender) ...[
                       SizedBox(
@@ -726,10 +763,16 @@ class _ChatViewState extends State<ChatView> {
                           SvgPicture.asset(
                             "assets/Business_status_icon/unsee.svg",
                             width: 11.sp,
+                            color: MessageSnapshot.data[index].read
+                                ? HexColor.fromHex("#2D7CFE")
+                                : Colors.grey,
                           ),
                           SvgPicture.asset(
                             "assets/Business_status_icon/unsee.svg",
                             width: 11.sp,
+                            color: MessageSnapshot.data[index].read
+                                ? HexColor.fromHex("#2D7CFE")
+                                : Colors.grey,
                           )
                         ],
                       )
@@ -867,13 +910,29 @@ class _ChatViewState extends State<ChatView> {
       clipBehavior: Clip.none,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.only(
-              bottomRight: Radius.circular(10.sp),
-              bottomLeft: Radius.circular(10.sp),
-              topRight: Radius.circular(10.sp)),
-          child: CachedNetworkImage(
-            imageUrl: MessageSnapshot.data[index].message,
-            width: 80.w,
+          borderRadius: is_sender
+              ? BorderRadius.only(
+                  bottomRight: Radius.circular(10.sp),
+                  bottomLeft: Radius.circular(10.sp),
+                  topLeft: Radius.circular(10.sp))
+              : BorderRadius.only(
+                  bottomRight: Radius.circular(10.sp),
+                  bottomLeft: Radius.circular(10.sp),
+                  topLeft: Radius.circular(10.sp)),
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    spreadRadius: .1,
+                    blurRadius: 2,
+                    color: Theme.of(context).iconTheme.color.withOpacity(0.2),
+                    offset: const Offset(0, 1))
+              ],
+            ),
+            child: CachedNetworkImage(
+              imageUrl: MessageSnapshot.data[index].message,
+              width: 80.w,
+            ),
           ),
         ),
         Positioned(
@@ -918,10 +977,16 @@ class _ChatViewState extends State<ChatView> {
                     SvgPicture.asset(
                       "assets/Business_status_icon/unsee.svg",
                       width: 11.sp,
+                      color: MessageSnapshot.data[index].read
+                          ? HexColor.fromHex("#2D7CFE")
+                          : Colors.white,
                     ),
                     SvgPicture.asset(
                       "assets/Business_status_icon/unsee.svg",
                       width: 11.sp,
+                      color: MessageSnapshot.data[index].read
+                          ? HexColor.fromHex("#2D7CFE")
+                          : Colors.white,
                     )
                   ],
                 )
@@ -1081,10 +1146,10 @@ class _ChatViewState extends State<ChatView> {
                   topRight: Radius.circular(10.sp)),
           boxShadow: [
             BoxShadow(
-                spreadRadius: .5,
-                blurRadius: .5,
-                color: Theme.of(context).iconTheme.color.withOpacity(0.4),
-                offset: const Offset(0, .5))
+                spreadRadius: .1,
+                blurRadius: 2,
+                color: Theme.of(context).iconTheme.color.withOpacity(0.2),
+                offset: const Offset(0, 1))
           ],
         ),
         child: Stack(
@@ -1147,7 +1212,7 @@ class _ChatViewState extends State<ChatView> {
                             fontSize: 12.sp,
                             color: is_sender
                                 ? Theme.of(context).iconTheme.color
-                                : Colors.white),
+                                : Colors.grey),
                       ),
                       if (is_sender) ...[
                         SizedBox(
@@ -1158,10 +1223,16 @@ class _ChatViewState extends State<ChatView> {
                             SvgPicture.asset(
                               "assets/Business_status_icon/unsee.svg",
                               width: 11.sp,
+                              color: MessageSnapshot.data[index].read
+                                  ? HexColor.fromHex("#2D7CFE")
+                                  : Colors.grey,
                             ),
                             SvgPicture.asset(
                               "assets/Business_status_icon/unsee.svg",
                               width: 11.sp,
+                              color: MessageSnapshot.data[index].read
+                                  ? HexColor.fromHex("#2D7CFE")
+                                  : Colors.grey,
                             )
                           ],
                         )
@@ -1321,41 +1392,54 @@ class _ChatViewState extends State<ChatView> {
           ]),
       child: Row(
         children: [
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: SvgPicture.asset("assets/svg/add_message.svg"),
-            onPressed: () async {
-              final result = await FilePicker.platform.pickFiles(
-                  allowMultiple: false,
-                  type: FileType.custom,
-                  allowedExtensions: ['png', 'jpg', 'gif']);
+          Builder(builder: (context) {
+            final customer = context.watch<BusinessProfileCubit>().state;
+            if (customer is HasData_Business_Profile) {
+              return CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: SvgPicture.asset("assets/svg/add_message.svg"),
+                onPressed: () async {
+                  // final result = await FilePicke.platform.pickFiles(
+                  //     allowMultiple: false,
+                  //     type: FileType.image,
+                  //     allowedExtensions: ['png', 'jpg', 'gif']);
+                  final XFile result =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  if (result != null) {
+                    final path = result.path;
+                    final name = result.name;
+                    context
+                        .read<PhotouploadCubit>()
+                        .updateData(path, name, name)
+                        .then(
+                      (value) async {
+                        String imagurl = await firebase_storage
+                            .FirebaseStorage.instance
+                            .ref('userimage//')
+                            .getDownloadURL();
 
-              if (result != null) {
-                final path = result.files.single.path;
-                final name = result.files.single.name;
-                context
-                    .read<PhotouploadCubit>()
-                    .updateData(path, name, name)
-                    .then(
-                  (value) async {
-                    String imagurl = await firebase_storage
-                        .FirebaseStorage.instance
-                        .ref('userimage//')
-                        .getDownloadURL();
-
-                    if (imagurl != null) {
-                      setState(() {
-                        // messagesend(
-                        //     message: imagurl,
-                        //     message_type:
-                        //         'image');
-                      });
-                    }
-                  },
-                );
-              }
-            },
-          ),
+                        if (imagurl != null) {
+                          setState(() {
+                            context.read<SendMessageCubit>().send_message(
+                                  RoomID: widget.roomId,
+                                  message: imagurl,
+                                  sender: widget.uid,
+                                  message_type: 'image',
+                                  type: 'business',
+                                  users: customer.business.customer,
+                                );
+                            _scrolldown();
+                          });
+                        }
+                      },
+                    );
+                  }
+                },
+              );
+            } else {
+              return Container();
+            }
+          }),
 
           ///
           ///
@@ -1369,48 +1453,63 @@ class _ChatViewState extends State<ChatView> {
           Expanded(
             child: Theme(
               data: ThemeData(),
-              child: ChatComposer(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                onReceiveText: (str) {
-                  setState(() {
-                    // messagesend(
-                    //     message: str,
-                    //     message_type: "text");
-
-                    // WidgetsBinding.instance
-                    //     .addPostFrameCallback(
-                    //         (_) =>
-                    //             _scrollDown());
-                    // messaage.clear();
-                  });
-                },
-                onRecordEnd: (String path) {
-                  String name = path.split('/').last;
-
-                  context
-                      .read<PhotouploadCubit>()
-                      .updateData(path, name, name)
-                      .then((value) async {
-                    String voiceurl = await firebase_storage
-                        .FirebaseStorage.instance
-                        .ref('userimage//')
-                        .getDownloadURL();
-
-                    if (voiceurl != null) {
+              child: Builder(builder: (context) {
+                final customer = context.watch<BusinessProfileCubit>().state;
+                if (customer is HasData_Business_Profile) {
+                  return ChatComposer(
+                    controller: message,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    onReceiveText: (str) {
                       setState(() {
-                        // messagesend(
-                        //     message: voiceurl,
-                        //     message_type:
-                        //         'voice');
+                        context.read<SendMessageCubit>().send_message(
+                              RoomID: widget.roomId,
+                              message: str,
+                              sender: widget.uid,
+                              message_type: 'text',
+                              type: 'business',
+                              users: customer.business.customer,
+                            );
+
+                        _scrolldown();
+                        message.clear();
                       });
-                    }
-                  });
-                },
-                recordIconColor: Theme.of(context).iconTheme.color,
-                sendButtonColor: Theme.of(context).iconTheme.color,
-                backgroundColor: Colors.transparent,
-                sendButtonBackgroundColor: Colors.transparent,
-              ),
+                    },
+                    onRecordEnd: (String path) {
+                      String name = path.split('/').last;
+
+                      context
+                          .read<PhotouploadCubit>()
+                          .updateData(path, name, name)
+                          .then((value) async {
+                        String voiceurl = await firebase_storage
+                            .FirebaseStorage.instance
+                            .ref('userimage/${name}/${name}')
+                            .getDownloadURL();
+
+                        if (voiceurl != null) {
+                          setState(() {
+                            context.read<SendMessageCubit>().send_message(
+                                  RoomID: widget.roomId,
+                                  message: voiceurl,
+                                  sender: widget.uid,
+                                  message_type: 'voice',
+                                  type: 'business',
+                                  users: customer.business.customer,
+                                );
+                            _scrolldown();
+                          });
+                        }
+                      });
+                    },
+                    recordIconColor: Theme.of(context).iconTheme.color,
+                    sendButtonColor: Theme.of(context).iconTheme.color,
+                    backgroundColor: Colors.transparent,
+                    sendButtonBackgroundColor: Colors.transparent,
+                  );
+                } else {
+                  return Container();
+                }
+              }),
             ),
           ),
 
