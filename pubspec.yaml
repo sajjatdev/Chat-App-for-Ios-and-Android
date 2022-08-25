@@ -89,6 +89,7 @@ dependencies:
   phone_form_field: ^7.0.0
   google_fonts: ^3.0.1
   swipe_to: ^1.0.2
+  flutter_chat_bubble: ^2.0.0
 
 
  

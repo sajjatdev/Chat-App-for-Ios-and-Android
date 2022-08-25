@@ -1,5 +1,6 @@
 import 'package:chatting/Loading_page.dart';
 import 'package:chatting/view/Screen/auth/loading_view.dart';
+import 'package:chatting/view/Screen/business/Comment/Comment_chat.dart';
 import 'package:chatting/view/Screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:yelp_fusion_client/models/business_endpoints/business_details.dart';
@@ -57,6 +58,10 @@ class Routers {
         return OTP.route(number: settings.arguments as String);
       case Message_contact.routeName:
         return Message_contact.route();
+      case Comment_chat.routeName:
+        return Comment_chat.route(
+            CommentData: settings.arguments as Map<String, dynamic>,
+            );
       default:
         return errorRoute();
     }
