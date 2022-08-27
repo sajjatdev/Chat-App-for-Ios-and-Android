@@ -419,9 +419,7 @@ class _ChatViewState extends State<ChatView> {
           height: 62.w,
           decoration: BoxDecoration(
             color: is_sender
-                ? isDarkMode
-                    ? HexColor.fromHex("#2C3333")
-                    : HexColor.fromHex("#FEFEFE")
+                ? Theme.of(context).scaffoldBackgroundColor
                 : HexColor.fromHex("#2D7CFE"),
             borderRadius: is_sender
                 ? BorderRadius.only(
@@ -471,9 +469,7 @@ class _ChatViewState extends State<ChatView> {
                           : Colors.white,
                       fontSize: 8.sp),
                   backgroundColor: is_sender
-                      ? isDarkMode
-                          ? HexColor.fromHex("#2C3333")
-                          : HexColor.fromHex("#FEFEFE")
+                      ? Theme.of(context).scaffoldBackgroundColor
                       : HexColor.fromHex("#2D7CFE"),
 
                   removeElevation: true,
@@ -681,9 +677,7 @@ class _ChatViewState extends State<ChatView> {
           width: 55.w,
           decoration: BoxDecoration(
             color: is_sender
-                ? isDarkMode
-                    ? HexColor.fromHex("#2C3333")
-                    : HexColor.fromHex("#FEFEFE")
+                ? Theme.of(context).scaffoldBackgroundColor
                 : HexColor.fromHex("#2D7CFE"),
             borderRadius: is_sender
                 ? BorderRadius.only(
@@ -736,9 +730,7 @@ class _ChatViewState extends State<ChatView> {
                 contactFgColor: HexColor.fromHex("#2D7CFE"),
                 contactPlayIconColor: Theme.of(context).secondaryHeaderColor,
                 contactBgColor: is_sender
-                    ? isDarkMode
-                        ? HexColor.fromHex("#2C3333")
-                        : HexColor.fromHex("#FEFEFE")
+                    ? Theme.of(context).scaffoldBackgroundColor
                     : HexColor.fromHex("#2D7CFE"),
               ),
               Padding(
@@ -1131,9 +1123,7 @@ class _ChatViewState extends State<ChatView> {
         ),
         decoration: BoxDecoration(
           color: is_sender
-              ? isDarkMode
-                  ? HexColor.fromHex("#2C3333")
-                  : HexColor.fromHex("#FEFEFE")
+              ? Theme.of(context).scaffoldBackgroundColor
               : HexColor.fromHex("#2D7CFE"),
           borderRadius: is_sender
               ? BorderRadius.only(
