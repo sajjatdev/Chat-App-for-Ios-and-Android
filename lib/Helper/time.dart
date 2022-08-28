@@ -20,7 +20,7 @@ class Time_Chat {
       } else if (diff.inDays >= 1) {
         return DateFormat("HH:mm").format(notification);
       } else if (diff.inMinutes >= 2) {
-        return "${diff.inMinutes} m";
+        return DateFormat("HH:mm a").format(notification);
       } else if (diff.inMinutes >= 1) {
         return "1m";
       } else if (diff.inSeconds >= 3) {

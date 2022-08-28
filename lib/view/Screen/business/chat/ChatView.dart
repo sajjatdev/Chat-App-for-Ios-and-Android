@@ -44,7 +44,7 @@ class _ChatViewState extends State<ChatView> {
     super.initState();
     message = TextEditingController();
     BusinessBloc();
-
+    
     _scrolldown();
   }
 
