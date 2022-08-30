@@ -8,14 +8,18 @@ import 'package:chatting/logic/photo_upload/photoupload_cubit.dart';
 import 'package:chatting/main.dart';
 import 'package:chatting/model/profile_model.dart';
 import 'package:chatting/view/Screen/business/Comment/model/comment_model.dart';
+import 'package:chatting/view/widget/MessageBox/MessageBox.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:getwidget/components/shimmer/gf_shimmer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
+import 'package:swipe_to/swipe_to.dart';
 import 'package:voice_message_package/voice_message_package.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -40,23 +44,38 @@ class Comment_chat extends StatefulWidget {
   State<Comment_chat> createState() => _Comment_chatState();
 }
 
-class _Comment_chatState extends State<Comment_chat> {
+class _Comment_chatState extends State<Comment_chat>
+    with WidgetsBindingObserver {
   TextEditingController comment = TextEditingController();
+  ScrollController scrollController = ScrollController();
   String id;
   String room;
   String uid;
+  bool reply = false;
+  String reply_ID = '';
   final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Comment_date();
-    MessageStatus();
+    _scrolldown();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      MessageStatus();
+      _scrolldown();
+    }
   }
 
   @override
   void dispose() {
     comment.dispose();
     super.dispose();
+    scrollController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   void Comment_date() {
@@ -67,12 +86,45 @@ class _Comment_chatState extends State<Comment_chat> {
     });
   }
 
-  void MessageStatus()async{
-    
+  void MessageStatus() async {
+    await FirebaseFirestore.instance
+        .collection("chat")
+        .doc(widget.CommentData['Room_Id'])
+        .collection("message")
+        .doc(widget.CommentData['message_id'])
+        .collection('comment')
+        .where("sender", isNotEqualTo: sharedPreferences.getString('uid'))
+        .get()
+        .then((QuerySnapshot snapshot) {
+      setState(() {
+        for (var element in snapshot.docs) {
+          bool read_dara = element['read'];
+          if (read_dara == false) {
+            FirebaseFirestore.instance
+                .collection("chat")
+                .doc(widget.CommentData['Room_Id'])
+                .collection("message")
+                .doc(widget.CommentData['message_id'])
+                .collection('comment')
+                .doc(element.id)
+                .update({"read": true});
+          }
+        }
+      });
+    });
+  }
+
+  void _scrolldown() {
+    Future.delayed(const Duration(seconds: 2), () {
+      scrollController.animateTo(scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.fastOutSlowIn);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // MessageStatus();
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
     return Scaffold(
@@ -81,15 +133,24 @@ class _Comment_chatState extends State<Comment_chat> {
         elevation: .5,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
-        title: Text(
-          "Response",
-          style: TextStyle(color: Theme.of(context).iconTheme.color),
-        ),
+        title: StreamBuilder<List<CommentModel>>(
+            stream: MessageList(RoomID: room, ID: id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                  "${snapshot.data.length} Comments",
+                  style: TextStyle(color: Theme.of(context).iconTheme.color),
+                );
+              } else {
+                return Container();
+              }
+            }),
       ),
       body: Column(
         children: [
           Expanded(
             child: CustomScrollView(
+              controller: scrollController,
               slivers: [
                 // Message Header
                 SliverToBoxAdapter(
@@ -103,46 +164,138 @@ class _Comment_chatState extends State<Comment_chat> {
                         return SliverList(
                           delegate:
                               SliverChildBuilderDelegate((context, index) {
-                            return Align(
-                              alignment: Alignment.centerRight,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 1.w, vertical: 3.w),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (MessageSnapshot
-                                            .data[index].messageType ==
-                                        'text') ...[
-                                      if (MessageSnapshot.data[index].message
-                                          .contains("https://")) ...[
-                                        Linkpreview(
+                            if (MessageSnapshot.data[index].sender == uid) {
+                              return SwipeTo(
+                                onRightSwipe: () {
+                                  setState(() {
+                                    reply = true;
+                                    reply_ID = MessageSnapshot.data[index].id;
+                                  });
+                                },
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 1.w, vertical: 3.w),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Align(
+                                            alignment: Alignment.topLeft,
+                                            child: StreamBuilder<profile_model>(
+                                                stream: profileInfo(
+                                                    uid: MessageSnapshot
+                                                        .data[index].sender),
+                                                builder:
+                                                    (context, profileimage) {
+                                                  if (profileimage.hasData) {
+                                                    if (profileimage
+                                                        .data.imageUrl
+                                                        .contains("https://")) {
+                                                      return CircleAvatar(
+                                                        backgroundImage:
+                                                            NetworkImage(
+                                                                profileimage
+                                                                    .data
+                                                                    .imageUrl),
+                                                      );
+                                                    } else {
+                                                      return ProfilePicture(
+                                                        random: true,
+                                                        count: 2,
+                                                        name: profileimage
+                                                            .data.imageUrl,
+                                                      );
+                                                    }
+                                                  } else {
+                                                    return const GFShimmer(
+                                                        child: CircleAvatar());
+                                                  }
+                                                })),
+                                        SizedBox(
+                                          width: 5.sp,
+                                        ),
+
+                                        ////Text Message Container
+
+                                        if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            'text') ...[
+                                          if (MessageSnapshot
+                                              .data[index].message
+                                              .contains("https://")) ...[
+                                            Linkpreview(
+                                                MessageSnapshot, index, context,
+                                                is_sender: false)
+                                          ] else ...[
+                                            TextMessage(
+                                                MessageSnapshot, index, context,
+                                                is_sender: false),
+                                          ]
+                                        ] else if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            "image") ...[
+                                          // Image Message Section
+                                          Imagecontainer(
+                                              MessageSnapshot, index, context,
+                                              is_sender: false)
+                                        ] else if (MessageSnapshot
+                                                .data[index].messageType ==
+                                            "voice") ...[
+                                          Voice_Message(
+                                              MessageSnapshot, index, context,
+                                              is_sender: false),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1.w, vertical: 3.w),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          'text') ...[
+                                        if (MessageSnapshot.data[index].message
+                                            .contains("https://")) ...[
+                                          Linkpreview(
+                                              MessageSnapshot, index, context,
+                                              is_sender: true)
+                                        ] else ...[
+                                          TextMessage(
+                                              MessageSnapshot, index, context,
+                                              is_sender: true),
+                                        ]
+                                      ] else if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          "image") ...[
+                                        // Image Message Section
+                                        Imagecontainer(
                                             MessageSnapshot, index, context,
                                             is_sender: true)
-                                      ] else ...[
-                                        TextMessage(
+                                      ] else if (MessageSnapshot
+                                              .data[index].messageType ==
+                                          "voice") ...[
+                                        Voice_Message(
                                             MessageSnapshot, index, context,
                                             is_sender: true),
-                                      ]
-                                    ] else if (MessageSnapshot
-                                            .data[index].messageType ==
-                                        "image") ...[
-                                      // Image Message Section
-                                      Imagecontainer(
-                                          MessageSnapshot, index, context,
-                                          is_sender: true)
-                                    ] else if (MessageSnapshot
-                                            .data[index].messageType ==
-                                        "voice") ...[
-                                      Voice_Message(
-                                          MessageSnapshot, index, context,
-                                          is_sender: true),
+                                      ],
                                     ],
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           }, childCount: MessageSnapshot.data.length),
                         );
                       } else {
@@ -155,7 +308,7 @@ class _Comment_chatState extends State<Comment_chat> {
             ),
           ),
           // Message Box Start
-          MessageBox(context)
+          MessageBox()
         ],
       ),
     );
@@ -165,12 +318,10 @@ class _Comment_chatState extends State<Comment_chat> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 2.5.w),
       child: Container(
-        constraints: BoxConstraints(
-          maxWidth: 100.w,
-          minHeight: 20.w,
-        ),
+        width: 100.w,
+        constraints: BoxConstraints(minHeight: 20.w),
         child: Card(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: HexColor.fromHex("#2D7CFE"),
           child: FutureBuilder<Comment_model>(
               future: CommentDataFunction(id: id, room_ID: room),
               builder: (context, snapshot) {
@@ -185,13 +336,12 @@ class _Comment_chatState extends State<Comment_chat> {
                         bodyMaxLines: 5,
                         bodyTextOverflow: TextOverflow.ellipsis,
                         titleStyle: TextStyle(
-                          color: Theme.of(context).iconTheme.color,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12.sp,
                         ),
-                        bodyStyle: TextStyle(
-                            color: Theme.of(context).iconTheme.color,
-                            fontSize: 8.sp),
+                        bodyStyle:
+                            TextStyle(color: Colors.white, fontSize: 8.sp),
                         backgroundColor: Colors.transparent,
                         removeElevation: true,
                         borderRadius: 0,
@@ -204,7 +354,8 @@ class _Comment_chatState extends State<Comment_chat> {
                         child: Text(
                           snapshot.data.message ?? "",
                           textAlign: TextAlign.start,
-                          style: TextStyle(fontSize: 15.sp),
+                          style:
+                              TextStyle(fontSize: 15.sp, color: Colors.white),
                         ),
                       );
                     }
@@ -217,12 +368,11 @@ class _Comment_chatState extends State<Comment_chat> {
                   } else if (snapshot.data.messageType == "voice") {
                     return VoiceMessage(
                       audioSrc: snapshot.data.message,
-                      me: false,
+                      me: true,
                       played: true,
-                      contactBgColor: Theme.of(context).scaffoldBackgroundColor,
-                      contactFgColor: Theme.of(context).iconTheme.color,
-                      contactPlayIconColor:
-                          Theme.of(context).secondaryHeaderColor,
+                      meBgColor: HexColor.fromHex("#2D7CFE"),
+                      meFgColor: Colors.white,
+                      mePlayIconColor: Colors.black,
                     );
                   } else {
                     return Text(
@@ -249,140 +399,6 @@ class _Comment_chatState extends State<Comment_chat> {
         .doc(id)
         .get();
     return Comment_model.fromJson(response.data());
-  }
-
-  Widget MessageBox(BuildContext context) {
-    return Container(
-      height: 20.w,
-      decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-                color: Theme.of(context).iconTheme.color.withOpacity(0.5),
-                blurRadius: 2,
-                offset: Offset(0, 0))
-          ]),
-      child: Row(
-        children: [
-          Builder(builder: (context) {
-            final customer = context.watch<BusinessProfileCubit>().state;
-            if (customer is HasData_Business_Profile) {
-              return CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: SvgPicture.asset("assets/svg/add_message.svg"),
-                onPressed: () async {
-                  // final result = await FilePicke.platform.pickFiles(
-                  //     allowMultiple: false,
-                  //     type: FileType.image,
-                  //     allowedExtensions: ['png', 'jpg', 'gif']);
-                  final XFile result =
-                      await _picker.pickImage(source: ImageSource.gallery);
-                  if (result != null) {
-                    final path = result.path;
-                    final name = result.name;
-                    String imagurl = await firebase_storage
-                        .FirebaseStorage.instance
-                        .ref('userimage/${uid}/${name}')
-                        .getDownloadURL();
-
-                    if (imagurl != null) {
-                      setState(() {
-                        MessageSend(
-                          message: imagurl,
-                          message_id: id,
-                          type: "image",
-                          sendUID: uid,
-                          roomId: room,
-                        );
-                      });
-                    }
-                  }
-                },
-              );
-            } else {
-              return Container();
-            }
-          }),
-
-          ///
-          ///
-          ///
-          ///
-          ///
-          ///Text Input Bar Start
-          ///
-          ///
-          ///
-          Expanded(
-            child: Theme(
-              data: ThemeData(),
-              child: Builder(builder: (context) {
-                final customer = context.watch<BusinessProfileCubit>().state;
-                if (customer is HasData_Business_Profile) {
-                  return ChatComposer(
-                    controller: comment,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    onReceiveText: (str) {
-                      print("Text Sent");
-                      MessageSend(
-                        message: str,
-                        message_id: id,
-                        type: "text",
-                        sendUID: uid,
-                        roomId: room,
-                      );
-                      comment.clear();
-                    },
-                    onRecordEnd: (String path) {
-                      String name = path.split('/').last;
-
-                      context
-                          .read<PhotouploadCubit>()
-                          .updateData(path, name, name)
-                          .then((value) async {
-                        String voiceurl = await firebase_storage
-                            .FirebaseStorage.instance
-                            .ref('userimage/${name}/${name}')
-                            .getDownloadURL();
-
-                        if (voiceurl != null) {
-                          setState(() {
-                            MessageSend(
-                              message: voiceurl,
-                              message_id: id,
-                              type: "voice",
-                              sendUID: uid,
-                              roomId: room,
-                            );
-                            comment.clear();
-                          });
-                        }
-                      });
-                    },
-                    recordIconColor: Theme.of(context).iconTheme.color,
-                    sendButtonColor: Theme.of(context).iconTheme.color,
-                    backgroundColor: Colors.transparent,
-                    sendButtonBackgroundColor: Colors.transparent,
-                  );
-                } else {
-                  return Container();
-                }
-              }),
-            ),
-          ),
-
-          ///
-          ///
-          ///
-          ///
-          ///END
-          ///
-          ///
-          ///
-          ///
-        ],
-      ),
-    );
   }
 
   Stack Linkpreview(AsyncSnapshot<List<CommentModel>> MessageSnapshot,
@@ -469,7 +485,7 @@ class _Comment_chatState extends State<Comment_chat> {
                             fontSize: 12.sp,
                             color: is_sender
                                 ? Theme.of(context).iconTheme.color
-                                : Colors.grey),
+                                : Colors.white),
                       ),
                       if (is_sender) ...[
                         SizedBox(
@@ -670,7 +686,7 @@ class _Comment_chatState extends State<Comment_chat> {
                           fontSize: 12.sp,
                           color: is_sender
                               ? Theme.of(context).iconTheme.color
-                              : Colors.grey),
+                              : Colors.white),
                     ),
                     if (is_sender) ...[
                       SizedBox(
@@ -1018,7 +1034,7 @@ class _Comment_chatState extends State<Comment_chat> {
                             fontSize: 12.sp,
                             color: is_sender
                                 ? Theme.of(context).iconTheme.color
-                                : Colors.grey),
+                                : Colors.white),
                       ),
                       if (is_sender) ...[
                         SizedBox(
@@ -1156,13 +1172,25 @@ class _Comment_chatState extends State<Comment_chat> {
         .toList());
   }
 
+  Future<CommentModel> reply_message(
+      {String message_id, String room, String id}) async {
+    final response = await FirebaseFirestore.instance
+        .collection("chat")
+        .doc(room)
+        .collection("message")
+        .doc(message_id)
+        .collection("comment")
+        .doc(id)
+        .get();
+    return CommentModel.fromJson(response.data());
+  }
+
   void MessageSend(
       {String message,
       String message_id,
       String type,
       String sendUID,
       String roomId}) async {
-    print("Send message");
     FirebaseFirestore.instance
         .collection("chat")
         .doc(roomId)
