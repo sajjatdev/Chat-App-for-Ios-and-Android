@@ -14,7 +14,8 @@ import '../../model/get_message_list.dart';
 class Message_user_list extends StatelessWidget {
   const Message_user_list({
     Key key,
-    @required this.data, this.uid,
+    @required this.data,
+    this.uid,
   }) : super(key: key);
 
   final Get_message_list data;

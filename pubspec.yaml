@@ -92,6 +92,7 @@ dependencies:
   flutter_chat_bubble: ^2.0.0
   audio_waveforms: ^0.1.4
   popover: ^0.2.6+3
+  flutter_staggered_animations: ^1.1.1
 
 
  
